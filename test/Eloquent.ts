@@ -6,13 +6,14 @@ import { Eloquent } from '../index';
 
 /**
  * Setup
+ * http://dummy.restapiexample.com/api/v1/employees
  */
 
-class ModelFoo extends Eloquent
+class ModelDummyEmployees extends Eloquent
 {
-    public endpoint: string = 'foo';
-    public limit: number = 50;
-    protected baseUrl: string = 'https://api.google.com';
+    public endpoint: string = 'employees';
+    public limit: number = 10;
+    protected baseUrl: string = 'http://dummy.restapiexample.com/api/v1';
 }
 
 
@@ -84,28 +85,27 @@ describe('Eloquent Tests', () => {
 });
 
 
-
 /**
  * Tests
  */
-describe('ModelFoo example Tests', () => {
+describe('ModelDummyEmployees example Tests', () => {
 
     it('should have foo as endpoint', () => {
-        var model = new ModelFoo();
+        var model = new ModelDummyEmployees();
 
-        expect(model.endpoint).to.equal('foo');
+        expect(model.endpoint).to.equal('employees');
     });
 
-    it('should have limit of 50', () => {
-        var model = new ModelFoo();
+    it('should have limit of 10', () => {
+        var model = new ModelDummyEmployees();
 
-        expect(model.limit).to.equal(50);
+        expect(model.limit).to.equal(10);
     });
 
     it('should have api.google endpoint', () => {
-        var model = new ModelFoo();
+        var model = new ModelDummyEmployees();
 
-        expect(model.requestUrl()).to.have.string('https://api.google.com/foo');
+        expect(model.requestUrl()).to.have.string('http://dummy.restapiexample.com/api/v1');
     });
 
 });
