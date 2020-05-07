@@ -1,0 +1,28 @@
+{
+    "name": "eloquent-js",
+    "version": "0.1.0",
+    "description": "Laravel mock of Eloquet for Javascript",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "test": "mocha index.ts --require ts-node/register test/**/*.ts"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/mattkenefick/dispatcher.git"
+    },
+    "author": "Polymer Mallard LLC",
+    "license": "ISC",
+    "dependencies": {},
+    "devDependencies": {
+        "@types/chai": "^4.2.11",
+        "@types/mocha": "^7.0.2",
+        "@types/node": "^13.13.5",
+        "chai": "^4.2.0",
+        "dispatcher": "file:../dispatcher",
+        "mocha": "^7.1.2",
+        "ts-node": "^8.10.1",
+        "typescript": "^3.8.3"
+    }
+}
