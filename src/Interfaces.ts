@@ -1,5 +1,15 @@
 
 /**
+ * Attributes
+ *
+ * @type interface
+ */
+export interface IAttributes
+{
+    [key: string]: any;
+}
+
+/**
  * Model Request Options
  *
  * @type interface

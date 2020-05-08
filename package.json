@@ -6,7 +6,7 @@
     "types": "dist/index.d.ts",
     "scripts": {
         "build": "tsc",
-        "test": "mocha index.ts --require ts-node/register test/**/*.ts"
+        "test": "NODE_NO_WARNINGS=1 NODE_TLS_REJECT_UNAUTHORIZED=0 mocha index.ts --require ts-node/register test/**/*.spec.ts"
     },
     "repository": {
         "type": "git",
@@ -14,14 +14,18 @@
     },
     "author": "Polymer Mallard LLC",
     "license": "ISC",
-    "dependencies": {},
+    "dependencies": {
+        "@types/node-fetch": "^2.5.7"
+    },
     "devDependencies": {
         "@types/chai": "^4.2.11",
         "@types/mocha": "^7.0.2",
         "@types/node": "^13.13.5",
         "chai": "^4.2.0",
         "dispatcher": "file:../dispatcher",
+        "https": "^1.0.0",
         "mocha": "^7.1.2",
+        "node-fetch": "^2.6.0",
         "ts-node": "^8.10.1",
         "typescript": "^3.8.3"
     }

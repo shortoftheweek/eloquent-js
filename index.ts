@@ -1,6 +1,10 @@
 
-import Eloquent from './src/Eloquent';
+import ActiveRecord from './src/ActiveRecord';
+import Collection from './src/Collection';
+import Model from './src/Model';
 
 export {
-    Eloquent,
+    ActiveRecord,
+    Collection,
+    Model,
 };

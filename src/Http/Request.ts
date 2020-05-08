@@ -1,5 +1,9 @@
 
-import Core from './Core';
+import Core from '../Core';
+import fetch from 'node-fetch';
+import {
+    IAttributes,
+} from '../Interfaces';
 
 /**
  * Request
@@ -14,7 +18,7 @@ export default class Request extends Core
      *
      * @type {object}
      */
-    public data?: object;
+    public data: IAttributes = { };
 
     /**
      * Where to find the data
@@ -29,6 +33,13 @@ export default class Request extends Core
      * @type {Promise<Repsonse>}
      */
     public request?: Promise<Request | Response>;
+
+    /**
+     * Response from fetch
+     *
+     * @type Response
+     */
+    public response?: Response;
 
     /**
      * @type {string}
@@ -49,23 +60,25 @@ export default class Request extends Core
     /**
      * Actually fetch the data
      */
-    public async fetch()
+    public fetch(): Promise<Request>
     {
         this.dispatch('fetch: before');
 
-        return this.request = fetch(this.url, {
+        var response = fetch(this.url, {
             // body: null,
             // headers: {
             //     'Content-Type': 'application/json',
             // },
             // method: 'GET',
             // mode: 'cors',
-            // redirect: 'follow',
-        })
-        .then(this.beforeParse.bind(this))
-        .then(this.parse.bind(this))
-        .then(this.afterParse.bind(this))
-        .then(this.afterFetch.bind(this));
+            redirect: 'follow',
+        });
+
+        return response
+            .then(this.beforeParse.bind(this))
+            .then(this.parse.bind(this))
+            .then(this.afterParse.bind(this))
+            .then(this.afterFetch.bind(this));
     }
 
     /**
@@ -76,12 +89,15 @@ export default class Request extends Core
      *
      * @param {any} x [description]
      */
-    private beforeParse(response: Response) : Response
+    private beforeParse(response: any): Request
     {
         // Trigger
         this.dispatch('parse:before');
 
-        return response;
+        // Save
+        this.response = response;
+
+        return this;
     }
 
     /**
@@ -89,18 +105,20 @@ export default class Request extends Core
      *
      * @param {any} x [description]
      */
-    private async parse(response: Response)
+    private async parse(request: Request)
     {
         // Trigger
         this.dispatch('parse:parsing');
 
         // Set data
-        this.data = await response.json();
+        if (request.response) {
+            this.data = await request.response.json();
+        }
 
         // Trigger
         this.dispatch('parse', this.data);
 
-        return response;
+        return request;
     }
 
     /**
@@ -108,12 +126,12 @@ export default class Request extends Core
      *
      * @param {any} x [description]
      */
-    private afterParse(response: Response) : Response
+    private afterParse(request: Request): Request
     {
         // Trigger
         this.dispatch('parse:after');
 
-        return response;
+        return request;
     }
 
     /**
@@ -121,15 +139,15 @@ export default class Request extends Core
      *
      * @param {any} x [description]
      */
-    private afterFetch(response: Response) : Request
+    private afterFetch(request: Request) : Request
     {
         // Trigger
-        this.dispatch('fetch', this.data);
+        this.dispatch('fetch', request.data);
 
         // Trigger
         this.dispatch('fetch:after');
 
-        return this;
+        return request;
     }
 
 }
