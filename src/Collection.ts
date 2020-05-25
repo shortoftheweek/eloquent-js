@@ -16,6 +16,7 @@ export default class Collection extends ActiveRecord
      *
      * @type {any}
      */
+    // @ts-ignore Because webpack attempts to autoload this
     public model: any = Model;
 
     /**
