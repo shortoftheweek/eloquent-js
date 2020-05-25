@@ -8,7 +8,6 @@
 ![Last version](https://img.shields.io/github/tag/mattkenefick/eloquentjs.svg?style=flat-square)
 [![Dependency status](https://img.shields.io/david/mattkenefick/eloquentjs.svg?style=flat-square)](https://david-dm.org/mattkenefick/eloquentjs)
 [![Dev Dependencies Status](https://img.shields.io/david/dev/mattkenefick/eloquentjs.svg?style=flat-square)](https://david-dm.org/mattkenefick/eloquentjs#info=devDependencies)
-[![NPM Status](https://img.shields.io/npm/dm/eloquentjs.svg?style=flat-square)](https://www.npmjs.org/package/eloquentjs)
 [![Donate](https://img.shields.io/badge/donate-paypal-blue.svg?style=flat-square)](https://paypal.me/polymermallard)
 
 <a href="https://twitter.com/intent/follow?screen_name=mattkenefick">
