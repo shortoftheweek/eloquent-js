@@ -1,10 +1,32 @@
 {
     "compilerOptions": {
-        "target": "es6",
-        "module": "commonjs",
-        "declaration": true,
-        "outDir": "./dist",
-        "strict": false
+        "target": "esnext",
+        "module": "esnext",
+        "strict": false,
+        "jsx": "preserve",
+        "importHelpers": true,
+        "moduleResolution": "node",
+        "experimentalDecorators": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "sourceMap": true,
+        "outputDir": "./dist",
+        "baseUrl": ".",
+        "types": [
+            "webpack-env"
+        ],
+        "paths": {
+            "*": ["types/*"],
+            "@/*": [
+                "resources/*"
+            ]
+        },
+        "lib": [
+            "esnext",
+            "dom",
+            "dom.iterable",
+            "scripthost"
+        ]
     },
     "include": [
         "src"
