@@ -112,7 +112,7 @@ export default class ActiveRecord extends Core
         // Set options on class
         Object.assign(this, options);
 
-        // Setup
+        // Setup URL builder
         this.builder = new Builder(this);
     }
 
@@ -147,6 +147,8 @@ export default class ActiveRecord extends Core
     /**
      * Unset attribute
      *
+     * Attribute will be `undefined` after unsetting
+     *
      * @param  string key
      *
      * @return ActiveRecord
@@ -165,7 +167,8 @@ export default class ActiveRecord extends Core
      */
     public toJSON(): object
     {
-        return JSON.parse(JSON.stringify(this.attributes));
+        // @ts-ignore
+        return Object.fromEntries(this.attributes.entries());
     }
 
 
@@ -188,12 +191,13 @@ export default class ActiveRecord extends Core
         return await this.fetch();
     }
 
-    public async get(): Promise<void | Request | Response>
-    {
-        return await this.fetch({
+    // @todo rename this.We can do something else
+    // public async get(): Promise<void | Request | Response>
+    // {
+    //     return await this.fetch({
 
-        });
-    }
+    //     });
+    // }
 
     public save(): void
     {

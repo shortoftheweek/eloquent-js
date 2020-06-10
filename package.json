@@ -1,27 +1,45 @@
 {
     "name": "eloquent-js",
-    "version": "0.1.4",
+    "version": "0.1.7",
     "description": "Laravel mock of Eloquet for Javascript",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "main": "lib/index.js",
+    "types": "lib/index.d.ts",
+    "type": "module",
     "scripts": {
         "build": "tsc",
-        "test": "NODE_NO_WARNINGS=1 NODE_TLS_REJECT_UNAUTHORIZED=0 mocha index.ts --require ts-node/register test/**/*.spec.ts"
+        "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+        "lint": "tslint -p tsconfig.json",
+        "prepare": "npm run build",
+        "prepublishOnly": "npm test && npm run lint",
+        "preversion": "npm run lint",
+        "version": "npm run format && git add -A src",
+        "postversion": "git push && git push --tags",
+        "test": "ts-mocha -p tsconfig.json test/**/*.spec.ts"
     },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/mattkenefick/eloquentjs.git"
+    },
+    "files": [
+        "lib/**/*"
+    ],
     "author": "Polymer Mallard LLC",
     "license": "ISC",
     "dependencies": {
         "@types/chai": "^4.2.11",
-        "@types/mocha": "^7.0.2",
         "@types/node": "^13.13.9",
         "@types/node-fetch": "^2.5.7",
         "chai": "^4.2.0",
-        "dispatcher": "git+https://github.com/mattkenefick/dispatcher.git",
+        "dispatcher": "file:../dispatcher",
         "https": "^1.0.0",
         "mocha": "^7.2.0",
         "node-fetch": "^2.6.0",
-        "ts-node": "^8.10.1",
+        "ts-node": "^8.10.2",
         "typescript": "^3.9.3"
     },
-    "devDependencies": {}
+    "devDependencies": {
+        "@types/expect": "^24.3.0",
+        "@types/mocha": "^7.0.2",
+        "ts-mocha": "^7.0.0"
+    }
 }

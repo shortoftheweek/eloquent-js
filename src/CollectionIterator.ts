@@ -5,7 +5,7 @@ import Model from './Model';
 /**
  * Collection Iterator
  */
-export class CollectionIterator
+export default class CollectionIterator
 {
     public static ITERATOR_VALUES = 0;
     public static ITERATOR_KEYS = 1;
@@ -65,7 +65,7 @@ export class CollectionIterator
                     value = model;
                 }
                 else {
-                    var id = this.collection.modelId(model.attributes);
+                    var id = this.collection.modelId;
 
                     if (this.kind === CollectionIterator.ITERATOR_KEYS) {
                         value = id;

@@ -52,7 +52,7 @@ export default class Model extends ActiveRecord
      *
      * @type {string}
      */
-    protected idAttribute: string = 'id';
+    public idAttribute: string = 'id';
 
     /**
      * The key that collection data exists on, e.g.
@@ -66,7 +66,6 @@ export default class Model extends ActiveRecord
     protected dataKey: string | undefined = undefined;
 
 
-
     constructor(attributes: object = {}, options: object = {})
     {
         super(options);
@@ -78,7 +77,6 @@ export default class Model extends ActiveRecord
         // Set attributes
         this.set(attributes);
     }
-
 
     public save(): void
     {
