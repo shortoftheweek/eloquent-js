@@ -3,14 +3,23 @@ import CollectionIterator from './CollectionIterator';
 import ActiveRecord from './ActiveRecord';
 import Model from './Model';
 
-
 /**
  * [Collection description]
  *
  * @type {[type]}
  */
-export default class Collection extends ActiveRecord
+export default class Collection extends ActiveRecord implements Iterable<Model>
 {
+
+    //public static hydrate<T>(models: Model[] = [], options: object = {}): any
+    public static hydrate<T>(models: Model[] = [], options: object = {}): any
+    {
+        // Instantiate collection
+        const collection = new this(options);
+        collection.add(models);
+
+        return collection;
+    }
 
     /**
      * Return count of models
@@ -37,7 +46,7 @@ export default class Collection extends ActiveRecord
      * @type {any}
      */
     // @ts-ignore Because webpack attempts to autoload this
-    public model: any = Model;
+    public model: Model = Model;
 
     /**
      * The key that collection data exists on, e.g.
@@ -55,7 +64,7 @@ export default class Collection extends ActiveRecord
      *
      * @type {Model[]}
      */
-    private models: Model[] = [];
+    private models: any[] = [];
 
     /**
      * Constructor
@@ -63,15 +72,12 @@ export default class Collection extends ActiveRecord
      * @param {any = []} models
      * @param {object = {}} options
      */
-    constructor(models: Model[] = [], options: object = {})
+    constructor(options: object = {})
     {
         super(options);
 
         // Set defaults
         this.cid = this.cidPrefix + Math.random().toString(36).substr(2, 5);
-
-        // Set attributes
-        this.add(models, options);
     }
 
     /**
@@ -112,7 +118,9 @@ export default class Collection extends ActiveRecord
 
         // Iterate through models
         models.forEach((model: any) => {
+            // Data supplied is an object that must be instantiated
             if (!(model instanceof Model)) {
+                // @ts-ignore
                 model = new this.model(model);
             }
 
@@ -150,6 +158,16 @@ export default class Collection extends ActiveRecord
         this.models = [];
 
         return this;
+    }
+
+    /**
+     * Clear
+     *
+     * Alias for Reset
+     */
+    public clear(): Collection
+    {
+        return this.reset();
     }
 
     /**
@@ -360,6 +378,13 @@ export default class Collection extends ActiveRecord
     private _onModelEvent(attributes: object = {}): any
     {
         // Not implemented
+    }
+
+    /**
+     * Iterator
+     */
+    [Symbol.iterator](): Iterator<Model> {
+        return new CollectionIterator(this, CollectionIterator.ITERATOR_VALUES);
     }
 
 }
