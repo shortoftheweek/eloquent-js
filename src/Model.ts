@@ -65,7 +65,14 @@ export default class Model extends ActiveRecord
      */
     protected dataKey: string | undefined = undefined;
 
+    /**
+     * Instance cache for relationships
+     */
+    private relationshipCache = {};
 
+    /**
+     * Constructor
+     */
     constructor(attributes: object = {}, options: object = {})
     {
         super(options);
@@ -87,6 +94,35 @@ export default class Model extends ActiveRecord
     {
 
     }
+
+
+    // Relationships
+    // ------------------------------------------------------------------------
+
+    public hasOne(relationshipName: string, relationshipClass: any): any
+    {
+        if (this.relationshipCache[relationshipName]) {
+            return this.relationshipCache[relationshipName];
+        }
+
+        var content = this.attr(relationshipName) || {};
+        var model = new relationshipClass(content);
+
+        return this.relationshipCache[relationshipName] = model;
+    }
+
+    public hasMany(relationshipName: string, relationshipClass: any): any
+    {
+        if (this.relationshipCache[relationshipName]) {
+            return this.relationshipCache[relationshipName];
+        }
+
+        var content = this.attr(relationshipName) || {};
+        var collection = relationshipClass.hydrate(content);
+
+        return this.relationshipCache[relationshipName] = collection;
+    }
+
 
     /**
      * Validates data

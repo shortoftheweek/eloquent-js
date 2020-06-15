@@ -2,11 +2,31 @@
 import CollectionIterator from './CollectionIterator';
 import ActiveRecord from './ActiveRecord';
 import Model from './Model';
+import * as _ from 'lodash';
+import {
+    IAttributes,
+    ICollectionMeta,
+    IPagination,
+    ISortOptions,
+} from './Interfaces';
+
 
 /**
  * [Collection description]
  *
- * @type {[type]}
+ * "meta": {
+ *     "pagination": {
+ *         "total": 1938,
+ *         "count": 15,
+ *         "per_page": 15,
+ *         "current_page": 1,
+ *         "total_pages": 130,
+ *         "links": {
+ *             "next": "http://api.sotw.com/v1/film?page=2"
+ *         }
+ *     }
+ * }
+ *
  */
 export default class Collection extends ActiveRecord implements Iterable<Model>
 {
@@ -16,7 +36,12 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
     {
         // Instantiate collection
         const collection = new this(options);
+
+        // Add models to collection
         collection.add(models);
+
+        // Add options to collection
+        collection.options(options);
 
         return collection;
     }
@@ -49,6 +74,16 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
     public model: Model = Model;
 
     /**
+     * Pagination
+     *
+     * @return IPagination
+     */
+    public get pagination(): IPagination
+    {
+        return this.meta.pagination;
+    }
+
+    /**
      * The key that collection data exists on, e.g.
      *
      * {
@@ -60,11 +95,36 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
     protected dataKey: string | undefined = 'data';
 
     /**
+     * Change key we sort on
+     *
+     * @type {string}
+     */
+    protected sortKey: string = 'id';
+
+    /**
+     * Meta data associated with collection
+     *
+     * @type {object}
+     */
+    protected meta: ICollectionMeta = {
+        pagination: {
+            total: 0,
+            count: 15,
+            per_page: 15,
+            current_page: 1,
+            total_pages: 1,
+            links: {
+
+            },
+        },
+    };
+
+    /**
      * List of models
      *
      * @type {Model[]}
      */
-    private models: any[] = [];
+    protected models: any[] = [];
 
     /**
      * Constructor
@@ -135,16 +195,70 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
         return this;
     }
 
-    public remove(models: Model[] | Model | object, options: object = {}): Collection
+    /**
+     * Apply an object to change options and set meta
+     *
+     * @param  {any} options
+     * @return {Collection}
+     */
+    public options(options: any): Collection
     {
-        // Not implemented
+        // Set metadata
+        if (options.meta) {
+            this.meta = options.meta;
+        }
 
         return this;
     }
 
-    public set(models: Array<object>, options: object = {}): any
+    /**
+     * Remove a model, a set of models, or an object
+     *
+     * @param  {Model[] | Model | object} model
+     * @param  {object = {}} options
+     * @return {Collection}
+     */
+    public remove(model: Model[] | Model | object, options: any = {}): Collection
     {
-        // Not implemented
+        let i: number = 0;
+        let ii: number = 0;
+        const items: any = Array.isArray(model)
+            ? model
+            : [model];
+
+        // Take the first model in our list and iterate through our local
+        // models. If we are successful, call recursive
+        for (ii = 0; ii < items.length; ii++) {
+            i = 0;
+            while (i < this.models.length) {
+                if (this.models[i] === items[ii]) {
+                    // Remove from collection
+                    this.models.splice(i, 1);
+                }
+                else {
+                    ++i;
+                }
+            }
+        }
+
+        return this;
+    }
+
+    /**
+     * Reset and add new models
+     *
+     * @todo Review this
+     *
+     * @param  {Model[] | Model | object} model
+     * @param  {any = {}} options
+     * @return {Collection}
+     */
+    public set(model: Model[] | Model | object, options: any = {}): Collection
+    {
+        this.reset();
+        this.add(model);
+
+        return this;
     }
 
     /**
@@ -275,24 +389,102 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
         return this.models[index];
     }
 
-    public where(attributes: object = {}, first: boolean = false): any
+    /**
+     * Get first item
+     *
+     * @return {Model}
+     */
+    public first(): Model
     {
-        // Not implemented
+        return this.at(0);
     }
 
-    public findWhere(attributes: object = {}): any
+    /**
+     * Get last item
+     *
+     * @return {Model}
+     */
+    public last(): Model
     {
-        // Not implemented
+        return this.at(this.length - 1);
     }
 
-    public sort(options: object = {}): any
+    /**
+     * Comparing hard object attributes to model attr
+     *
+     * @param  {any = {}} attributes
+     * @param  {boolean = false} first
+     * @return {any}
+     */
+    public where(attributes: any = {}, first: boolean = false): any /* Self */
     {
-        // Not implemented
+        // @ts-ignore
+        const collection = new this.constructor();
+
+        // @todo, this code sucks but I'm not spending all day here
+        _.map(this.models, model => {
+            if (_.find(model, attributes)) {
+                collection.add(model);
+            }
+        });
+
+        return first
+            ? collection.first()
+            : collection;
     }
 
-    public pluck(attributes: object = {}): any
+    /**
+     * First where
+     * @param  {object = {}} attributes
+     * @return Model
+     */
+    public findWhere(attributes: object = {}): Model
     {
-        // Not implemented
+        return this.where(attributes, true);
+    }
+
+    /**
+     * Sorting models by key or in reverse
+     *
+     * We have a basic `sortKey` defined on the collection, but
+     * can also pass in an object with `key` and `reverse` on it
+     *
+     * @param  {ISortOptions|null = null} options
+     * @return {Collection}
+     */
+    public sort(options: ISortOptions|null = null): Collection
+    {
+        let key: string = this.sortKey;
+
+        // Sort options
+        if (options !== null) {
+            key = options.key;
+        }
+
+        // Sort
+        this.models = this.models.sort((a: any, b: any) => {
+            return options && options.reverse
+                ? (a.attr(key) - b.attr(key)) * -1
+                : (a.attr(key) - b.attr(key)) * 1;
+        });
+
+        return this;
+    }
+
+    /**
+     * Pull out an attribute from our models
+     *
+     * Example:
+     *     collection.pluck('name');
+     *
+     *     ['Ashley', 'Briana', 'Chloe', ...]
+     *
+     * @param  {string} attribute
+     * @return {any}
+     */
+    public pluck(attribute: string): any
+    {
+        return this.models.map(model => model.attr(attribute));
     }
 
     // public fetch(options: object = {}): any
@@ -310,9 +502,19 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
         // Not implemented
     }
 
-    public clone(attributes: object = {}): any
+    /**
+     * Clone current object
+     *
+     * @param {object = {}} attributes
+     * @return Collection
+     */
+    public clone(attributes: object = {})
     {
-        // Not implemented
+        // @ts-ignore
+        const instance = new this.constructor();
+        instance.add(this.toJSON());
+
+        return instance;
     }
 
     /**
@@ -345,39 +547,15 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
         return new CollectionIterator(this, CollectionIterator.ITERATOR_KEYSVALUES);
     }
 
-    private _reset(): void
+    /**
+     * Determine if an object is infact a model
+     *
+     * @param  {any} model
+     * @return {boolean}
+     */
+    private _isModel(model: any): boolean
     {
-        // Not implemented
-    }
-
-    private _prepareModel(attributes: object = {}): any
-    {
-        // Not implemented
-    }
-
-    private _removeModels(attributes: object = {}): any
-    {
-        // Not implemented
-    }
-
-    private _isModel(attributes: object = {}): any
-    {
-        // Not implemented
-    }
-
-    private _addReference(attributes: object = {}): any
-    {
-        // Not implemented
-    }
-
-    private _removeReference(attributes: object = {}): any
-    {
-        // Not implemented
-    }
-
-    private _onModelEvent(attributes: object = {}): any
-    {
-        // Not implemented
+        return model instanceof Model;
     }
 
     /**

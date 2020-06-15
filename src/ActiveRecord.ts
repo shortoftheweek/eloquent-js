@@ -21,7 +21,8 @@ export default class ActiveRecord extends Core
      *
      * @type object
      */
-    public attributes: Map<string, any> = new Map();
+    // public attributes: Map<string, any> = new Map();
+    public attributes: any = new Object();
 
     /**
      * Base Url for the API
@@ -125,7 +126,7 @@ export default class ActiveRecord extends Core
      */
     public attr(key: string): string | number | null
     {
-        return this.attributes.get(key);
+        return this.attributes[key];
     }
 
     /**
@@ -138,7 +139,7 @@ export default class ActiveRecord extends Core
     public set(hash: IAttributes = {}) : ActiveRecord
     {
         for (let key in hash) {
-            this.attributes.set(key, hash[key]);
+            this.attributes[key] = hash[key];
         }
 
         return this;
@@ -155,7 +156,7 @@ export default class ActiveRecord extends Core
      */
     public unset(key: string) : ActiveRecord
     {
-        this.attributes.delete(key);
+        delete this.attributes[key];
 
         return this;
     }
@@ -167,8 +168,9 @@ export default class ActiveRecord extends Core
      */
     public toJSON(): object
     {
-        // @ts-ignore
-        return Object.fromEntries(this.attributes.entries());
+        return this.attributes;
+        // // @ts-ignore
+        // return Object.fromEntries(this.attributes.entries());
     }
 
 
@@ -212,7 +214,6 @@ export default class ActiveRecord extends Core
         for (let key in queryParams) {
             this.builder.qp(key, queryParams[key]);
         }
-
         // Query params
         const url: string = this.builder
             .qp('limit', this.limit)
