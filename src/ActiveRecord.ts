@@ -193,6 +193,11 @@ export default class ActiveRecord extends Core
         return await this.fetch();
     }
 
+    private async fetch(options: IModelRequestOptions | null = {}, queryParams: IModelRequestQueryParams = {}): Promise<void | Request | Response>
+    {
+        return await this._fetch(options, queryParams);
+    }
+
     // @todo rename this.We can do something else
     // public async get(): Promise<void | Request | Response>
     // {
@@ -208,7 +213,7 @@ export default class ActiveRecord extends Core
 
     // #endregion Actions
 
-    private fetch(options: IModelRequestOptions | null = {}, queryParams: IModelRequestQueryParams = {}): Promise<void | Request | Response>
+    private _fetch(options: IModelRequestOptions | null = {}, queryParams: IModelRequestQueryParams = {}): Promise<void | Request | Response>
     {
         // Check for query params
         for (let key in queryParams) {
