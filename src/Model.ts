@@ -2,6 +2,8 @@
 import ActiveRecord from './ActiveRecord';
 import {
     IAttributes,
+    IModelRequestOptions,
+    IModelRequestQueryParams
 } from './Interfaces';
 
 /**
@@ -11,7 +13,6 @@ import {
  */
 export default class Model extends ActiveRecord
 {
-
     /**
      * Hash of attributes whos current + previous value differ
      *
@@ -85,6 +86,11 @@ export default class Model extends ActiveRecord
         this.set(attributes);
     }
 
+    // public async fetch(options: IModelRequestOptions | null = {}, queryParams: IModelRequestQueryParams = {}): Promise<void | Request | Response>
+    // {
+    //     return await this._fetch(options, queryParams);
+    // }
+
     public save(): void
     {
 
@@ -117,8 +123,8 @@ export default class Model extends ActiveRecord
             return this.relationshipCache[relationshipName];
         }
 
-        var content = this.attr(relationshipName) || {};
-        var collection = relationshipClass.hydrate(content);
+        const content: any = this.attr(relationshipName) || { data: [] };
+        const collection: any = relationshipClass.hydrate(content.data || content);
 
         return this.relationshipCache[relationshipName] = collection;
     }

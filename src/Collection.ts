@@ -30,7 +30,6 @@ import {
  */
 export default class Collection extends ActiveRecord implements Iterable<Model>
 {
-
     //public static hydrate<T>(models: Model[] = [], options: object = {}): any
     public static hydrate<T>(models: Model[] = [], options: object = {}): any
     {
@@ -55,6 +54,24 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
     {
         return this.models.length;
     }
+
+    /**
+     * Meta data associated with collection
+     *
+     * @type {object}
+     */
+    public meta: ICollectionMeta = {
+        pagination: {
+            total: 0,
+            count: 15,
+            per_page: 15,
+            current_page: 1,
+            total_pages: 1,
+            links: {
+
+            },
+        },
+    };
 
     /**
      * @todo Replace this based on Model
@@ -100,24 +117,6 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @type {string}
      */
     protected sortKey: string = 'id';
-
-    /**
-     * Meta data associated with collection
-     *
-     * @type {object}
-     */
-    protected meta: ICollectionMeta = {
-        pagination: {
-            total: 0,
-            count: 15,
-            per_page: 15,
-            current_page: 1,
-            total_pages: 1,
-            links: {
-
-            },
-        },
-    };
 
     /**
      * List of models
@@ -191,22 +190,6 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
                 this.models.push(model);
             }
         });
-
-        return this;
-    }
-
-    /**
-     * Apply an object to change options and set meta
-     *
-     * @param  {any} options
-     * @return {Collection}
-     */
-    public options(options: any): Collection
-    {
-        // Set metadata
-        if (options.meta) {
-            this.meta = options.meta;
-        }
 
         return this;
     }

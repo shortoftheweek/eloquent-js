@@ -48,7 +48,7 @@ export default class Builder
      *
      * @type object
      */
-    public queryParams: Map<string, any> = new Map<string, any>();
+    public queryParams: any = {};
 
     /**
      * Reference to ActiveRecord we're building for
@@ -77,7 +77,9 @@ export default class Builder
         let str: string = '';
 
         // Combine query params
-        for (let [key, value] of this.queryParams) {
+        // for (let [key, value] of this.queryParams) {
+        for (let key in this.queryParams) {
+            let value = this.queryParams[key];
             str += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value);
         }
 
@@ -123,7 +125,7 @@ export default class Builder
      * @param  number id
      * @return Builder
      */
-    public identifier(id: number) : Builder
+    public identifier(id: string | number): Builder
     {
         this.id = id.toString();
         return this;
@@ -135,7 +137,7 @@ export default class Builder
      * @param  string  $value
      * @return Builder
      */
-    public include(value: string) : Builder
+    public include(value: string): Builder
     {
         this.includes.push(value);
         return this;
@@ -148,10 +150,9 @@ export default class Builder
      * @param  string  value
      * @return Builder
      */
-    public queryParam(key: string, value: string | number) : Builder
+    public queryParam(key: string, value: string | number): Builder
     {
-        this.queryParams.set(key, value);
-
+        this.queryParams[key] = value;
         return this;
     }
 
@@ -162,7 +163,7 @@ export default class Builder
      * @param  string | number value
      * @return Builder
      */
-    public qp(key: string, value: string | number) : Builder
+    public qp(key: string, value: string | number): Builder
     {
         return this.queryParam(key, value);
     }

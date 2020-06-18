@@ -15,7 +15,6 @@ import {
  */
 export default class ActiveRecord extends Core
 {
-
     /**
      * Data set by the request
      *
@@ -48,11 +47,27 @@ export default class ActiveRecord extends Core
     public endpoint: string = '';
 
     /**
+     * Unique key for directly fetching
+     *
+     * https://api.sotw.com/v1/{endpoint}
+     *
+     * @type string
+     */
+    public id: string = '';
+
+    /**
      * Limit
      *
      * @type number
      */
     public limit: number = 15;
+
+    /**
+     * Meta
+     *
+     * @type object
+     */
+    public meta: any = {};
 
     /**
      * Page
@@ -136,7 +151,7 @@ export default class ActiveRecord extends Core
      *
      * @return ActiveRecord
      */
-    public set(hash: IAttributes = {}) : ActiveRecord
+    public set(hash: IAttributes = {}): any
     {
         for (let key in hash) {
             this.attributes[key] = hash[key];
@@ -154,9 +169,25 @@ export default class ActiveRecord extends Core
      *
      * @return ActiveRecord
      */
-    public unset(key: string) : ActiveRecord
+    public unset(key: string): any
     {
         delete this.attributes[key];
+
+        return this;
+    }
+
+    /**
+     * Apply an object to change options and set meta
+     *
+     * @param  {any} options
+     * @return {ActiveRecord}
+     */
+    public options(options: any): any
+    {
+        // Set metadata
+        if (options.meta) {
+            this.meta = options.meta;
+        }
 
         return this;
     }
@@ -186,14 +217,31 @@ export default class ActiveRecord extends Core
         // Not implemented
     }
 
-    public async find(id: number): Promise<void | Request | Response>
+    /**
+     * Used to get an individual item in a model
+     *
+     * Can pass either an ID #XX or a slug
+     *
+     * @param  {string | number} id
+     * @return {Promise}
+     */
+    public async find(id: string | number): Promise<void | Request | Response>
     {
         this.builder.identifier(id);
 
         return await this.fetch();
     }
 
-    private async fetch(options: IModelRequestOptions | null = {}, queryParams: IModelRequestQueryParams = {}): Promise<void | Request | Response>
+    /**
+     * Public generic fetch method
+     *
+     * NOTE: It is favored to use other methods
+     *
+     * @param  {IModelRequestOptions | null = {}} options
+     * @param  {IModelRequestQueryParams = {}} queryParams
+     * @return {Promise}
+     */
+    public async fetch(options: IModelRequestOptions | null = {}, queryParams: IModelRequestQueryParams = {}): Promise<void | Request | Response>
     {
         return await this._fetch(options, queryParams);
     }
@@ -213,22 +261,28 @@ export default class ActiveRecord extends Core
 
     // #endregion Actions
 
+
     private _fetch(options: IModelRequestOptions | null = {}, queryParams: IModelRequestQueryParams = {}): Promise<void | Request | Response>
     {
+        this.builder
+            .qp('limit', this.limit)
+            .qp('page', this.page)
+
         // Check for query params
         for (let key in queryParams) {
             this.builder.qp(key, queryParams[key]);
         }
+
         // Query params
-        const url: string = this.builder
-            .qp('limit', this.limit)
-            .qp('page', this.page)
-            .url;
+        const url: string = this.builder.url;
 
         // Setup request
         this.request = new Request(url, {
             dataKey: this.dataKey,
         });
+
+        // Events
+        this.dispatch('fetching', this);
 
         // Request
         return this.request
@@ -236,26 +290,31 @@ export default class ActiveRecord extends Core
 
             // Save data
             .then((request: Request) => {
-                console.log("Sup request", request);
-                console.log("Sup data", request.data);
-
-                this.attributes = this.dataKey !== undefined
+                // Set data
+                this.set(this.dataKey !== undefined
                     ? request.data[this.dataKey]
-                    : request.data;
+                    : request.data);
+
+                // Set options
+                this.options({
+                    meta: request.data.meta,
+                });
+
+                // Events
+                this.dispatch('fetched', this);
 
                 return this;
             })
 
-            // Parse to collection
-            .then((self: any) => {
-                // console.log('fuckin data', self);
-                return this;
-            })
+            // // Parse to collection
+            // .then((self: any) => {
+            //     // console.log('fuckin data', self);
+            //     return this;
+            // })
 
             // Trigger events
             .then(() => {
                 this.dispatch('complete', this);
             });
     }
-
 }
