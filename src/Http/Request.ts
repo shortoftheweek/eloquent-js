@@ -28,6 +28,24 @@ export default class Request extends Core
     public dataKey: string = '';
 
     /**
+     * Headers
+     *
+     * @type {string}
+     */
+    public headers: any = {
+        // 'Content-Type': 'application/json',
+    };
+
+    /**
+     * Methods
+     *
+     * Example: 'cors'
+     *
+     * @type {string}
+     */
+    public mode: string = '';
+
+    /**
      * Last fetch
      *
      * @type {Promise<Repsonse>}
@@ -60,25 +78,57 @@ export default class Request extends Core
     /**
      * Actually fetch the data
      */
-    public fetch(): Promise<Request>
+    public fetch(method: string = 'GET', body: any = null, headers: any = {}): Promise<Request>
     {
         this.dispatch('fetch: before');
 
-        var response = fetch(this.url, {
-            // body: null,
-            // headers: {
-            //     'Content-Type': 'application/json',
-            // },
-            // method: 'GET',
-            // mode: 'cors',
-            redirect: 'follow',
-        });
+        // Combine headers
+        var headers = Object.assign(this.headers, headers);
+
+        // Fetch params
+        var params: any = {};
+
+        params.headers = headers;
+        params.method = method;
+        params.redirect = 'follow';
+
+        if (body) {
+            params.body = typeof(body) == 'object' ? JSON.stringify(body) : body;
+        }
+
+        // Create request
+        var response = fetch(this.url, params);
 
         return response
             .then(this.beforeParse.bind(this))
             .then(this.parse.bind(this))
             .then(this.afterParse.bind(this))
             .then(this.afterFetch.bind(this));
+    }
+
+    /**
+     * Set specific header
+     *
+     * @param  {string} header
+     * @param  {string} value
+     * @return {any}
+     */
+    public setHeader(header: string, value: string): any
+    {
+        this.headers[header] = value;
+
+        return this;
+    }
+
+    /**
+     * Override and set headers
+     *
+     * @param  {any} headers
+     * @return {any}
+     */
+    public setHeaders(headers: any): any
+    {
+        this.headers = headers;
     }
 
     /**

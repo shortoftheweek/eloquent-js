@@ -56,6 +56,25 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
     }
 
     /**
+     * @todo Replace this based on Model
+     * @return {string}
+     */
+    public get modelId(): string
+    {
+        return 'id';
+    }
+
+    /**
+     * Pagination
+     *
+     * @return IPagination
+     */
+    public get pagination(): IPagination
+    {
+        return this.meta.pagination;
+    }
+
+    /**
      * Meta data associated with collection
      *
      * @type {object}
@@ -74,31 +93,12 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
     };
 
     /**
-     * @todo Replace this based on Model
-     * @return {string}
-     */
-    public get modelId(): string
-    {
-        return 'id';
-    }
-
-    /**
      * Model object instantiated by this collection
      *
      * @type {any}
      */
     // @ts-ignore Because webpack attempts to autoload this
     public model: Model = Model;
-
-    /**
-     * Pagination
-     *
-     * @return IPagination
-     */
-    public get pagination(): IPagination
-    {
-        return this.meta.pagination;
-    }
 
     /**
      * The key that collection data exists on, e.g.
@@ -239,7 +239,26 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
     public set(model: Model[] | Model | object, options: any = {}): Collection
     {
         this.reset();
-        this.add(model);
+
+        // Check for `meta` on set, this sometimes happens
+        // if we assign an entire bootstrapped JSON object
+        // to the collection
+        if (model.hasOwnProperty('meta')) {
+            // @ts-ignore
+            this.meta = model.meta;
+        }
+
+        // Check for `meta` on set, this sometimes happens
+        // if we assign an entire bootstrapped JSON object
+        // to the collection
+        if (model.hasOwnProperty('data')) {
+            // @ts-ignore
+            this.add(model.data);
+        }
+        else {
+            // @ts-ignore
+            this.add(model);
+        }
 
         return this;
     }
@@ -424,6 +443,36 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
     public findWhere(attributes: object = {}): Model
     {
         return this.where(attributes, true);
+    }
+
+    /**
+     * Search by CID
+     * @param  {string} cid
+     * @return {Model}
+     */
+    public findByCid(cid: string): Model
+    {
+        return _.find(this.models, { cid });
+    }
+
+    /**
+     * Search by CID
+     * @param  {string} cid
+     * @return {Model}
+     */
+    public filter(predicate: any): any
+    {
+        return _.filter(this.models, predicate);
+    }
+
+    /**
+     * Search by CID
+     * @param  {string} cid
+     * @return {Model}
+     */
+    public find(predicate: any): any
+    {
+        return _.find(this.models, predicate);
     }
 
     /**

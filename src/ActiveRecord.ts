@@ -56,6 +56,13 @@ export default class ActiveRecord extends Core
     public id: string = '';
 
     /**
+     * List of headers
+     *
+     * @type {any}
+     */
+    public headers: any = {};
+
+    /**
      * Limit
      *
      * @type number
@@ -157,6 +164,14 @@ export default class ActiveRecord extends Core
             this.attributes[key] = hash[key];
         }
 
+        // Check for ID
+        if (hash['id']) {
+            this.id = hash.id;
+        }
+
+        // Trigger
+        this.dispatch('set');
+
         return this;
     }
 
@@ -225,11 +240,11 @@ export default class ActiveRecord extends Core
      * @param  {string | number} id
      * @return {Promise}
      */
-    public async find(id: string | number): Promise<void | Request | Response>
+    public async find(id: string | number, queryParams: IModelRequestQueryParams = {}): Promise<void | Request | Response>
     {
         this.builder.identifier(id);
 
-        return await this.fetch();
+        return await this.fetch(null, queryParams);
     }
 
     /**
@@ -254,9 +269,54 @@ export default class ActiveRecord extends Core
     //     });
     // }
 
-    public save(): void
+    // public save(): void
+    // {
+    //     const attributes: any = this.attributes;
+
+    //     // Save
+    //     this.fetch({
+    //         id: 5
+    //     });
+    // }
+
+    /**
+     * Set specific header
+     *
+     * @param  {string} header
+     * @param  {string} value
+     * @return {any}
+     */
+    public setHeader(header: string, value: string): any
     {
-        // Not implemented
+        this.headers[header] = value;
+
+        return this;
+    }
+
+    /**
+     * Override and set headers
+     *
+     * @param  {any} headers
+     * @return {any}
+     */
+    public setHeaders(headers: any): any
+    {
+        this.headers = headers;
+
+        return this;
+    }
+
+    /**
+     * Override and set headers
+     *
+     * @param  {string} token
+     * @return {any}
+     */
+    public setToken(token: string): any
+    {
+        this.setHeader('Authorization', 'Bearer ' + token);
+
+        return this;
     }
 
     // #endregion Actions
