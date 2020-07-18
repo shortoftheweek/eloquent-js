@@ -101,6 +101,13 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
     public model: Model = Model;
 
     /**
+     * List of models
+     *
+     * @type {Model[]}
+     */
+    public models: any[] = [];
+
+    /**
      * The key that collection data exists on, e.g.
      *
      * {
@@ -117,13 +124,6 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @type {string}
      */
     protected sortKey: string = 'id';
-
-    /**
-     * List of models
-     *
-     * @type {Model[]}
-     */
-    protected models: any[] = [];
 
     /**
      * Constructor

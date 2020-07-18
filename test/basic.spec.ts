@@ -72,6 +72,112 @@ describe('Basic Tests', () => {
         expect(result).to.be.undefined;
     });
 
+    it('should set header', () => {
+        const model: Model = new Model;
+
+        // Set header
+        model.setHeader('foo', 'bar');
+
+        // Get header
+        const result: string = <string> model.headers.foo;
+
+        expect(result).to.equal('bar');
+    });
+
+    it('should set multiple headers', () => {
+        const model: Model = new Model;
+
+        // Set header
+        model.setHeaders({
+            foo: 'bar',
+            x: 10,
+        });
+
+        // Get header
+        const resultA: string = <string> model.headers.foo;
+        const resultB: number = <number> model.headers.x;
+
+        expect(resultA).to.equal('bar');
+        expect(resultB).to.equal(10);
+    });
+
+    it('should set query param', () => {
+        const model: Model = new Model;
+
+        // Set query param
+        model.setQueryParam('foo', 'bar');
+
+        // Get query param
+        const result: string = <string> model.b.queryParams.foo;
+
+        expect(result).to.equal('bar');
+    });
+
+    it('should set multiple query params', () => {
+        const model: Model = new Model;
+
+        // Set query param
+        model.setQueryParams({
+            foo: 'bar',
+            x: 10,
+        });
+
+        // Get query param
+        const resultA: string = <string> model.b.queryParams.foo;
+        const resultB: number = <number> model.b.queryParams.x;
+
+        expect(resultA).to.equal('bar');
+        expect(resultB).to.equal(10);
+    });
+
+    it('should set query params by constructor (as params)', () => {
+        const model: Model = new Model(null, {
+            params: {
+                foo: 'bar',
+                x: 10,
+            }
+        });
+
+        // Get query param
+        const resultA: string = <string> model.b.queryParams.foo;
+        const resultB: number = <number> model.b.queryParams.x;
+
+        expect(resultA).to.equal('bar');
+        expect(resultB).to.equal(10);
+    });
+
+    it('should set query params by constructor (as queryParams)', () => {
+        const model: Model = new Model(null, {
+            queryParams: {
+                foo: 'bar',
+                x: 10,
+            }
+        });
+
+        // Get query param
+        const resultA: string = <string> model.b.queryParams.foo;
+        const resultB: number = <number> model.b.queryParams.x;
+
+        expect(resultA).to.equal('bar');
+        expect(resultB).to.equal(10);
+    });
+
+    it('should set query params by constructor (as qp)', () => {
+        const model: Model = new Model(null, {
+            qp: {
+                foo: 'bar',
+                x: 10,
+            }
+        });
+
+        // Get query param
+        const resultA: string = <string> model.b.queryParams.foo;
+        const resultB: number = <number> model.b.queryParams.x;
+
+        expect(resultA).to.equal('bar');
+        expect(resultB).to.equal(10);
+    });
+
     it('should return JSON object', () => {
         const model: Model = new Model;
         const obj: object = {
@@ -79,7 +185,7 @@ describe('Basic Tests', () => {
             x: 10,
         };
 
-        // Set attribute
+        // Set attributes
         model.set(obj);
 
         // Get attribute

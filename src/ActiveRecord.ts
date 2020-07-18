@@ -47,6 +47,13 @@ export default class ActiveRecord extends Core
     public endpoint: string = '';
 
     /**
+     * List of headers
+     *
+     * @type {any}
+     */
+    public headers: any = {};
+
+    /**
      * Unique key for directly fetching
      *
      * https://api.sotw.com/v1/{endpoint}
@@ -54,13 +61,6 @@ export default class ActiveRecord extends Core
      * @type string
      */
     public id: string = '';
-
-    /**
-     * List of headers
-     *
-     * @type {any}
-     */
-    public headers: any = {};
 
     /**
      * Limit
@@ -116,6 +116,16 @@ export default class ActiveRecord extends Core
     protected dataKey: string | undefined = 'data';
 
     /**
+     * Get builder reference
+     *
+     * @return Builder
+     */
+    public get b(): Builder
+    {
+        return this.builder;
+    }
+
+    /**
      * Model if we provide a specific identifier
      *
      * @return boolean
@@ -128,7 +138,7 @@ export default class ActiveRecord extends Core
     /**
      * Constructor
      */
-    constructor(options: object = {})
+    constructor(options: any = {})
     {
         super(options);
 
@@ -137,6 +147,9 @@ export default class ActiveRecord extends Core
 
         // Setup URL builder
         this.builder = new Builder(this);
+
+        // Options
+        this.options(options);
     }
 
     /**
@@ -165,7 +178,7 @@ export default class ActiveRecord extends Core
         }
 
         // Check for ID
-        if (hash['id']) {
+        if (hash && hash['id']) {
             this.id = hash.id;
         }
 
@@ -197,11 +210,21 @@ export default class ActiveRecord extends Core
      * @param  {any} options
      * @return {ActiveRecord}
      */
-    public options(options: any): any
+    public options(options: any = { }): any
     {
+        // Check options for headers
+        if (options.headers) {
+            this.setHeaders(options.headers);
+        }
+
         // Set metadata
         if (options.meta) {
             this.meta = options.meta;
+        }
+
+        // Check options for params
+        if (options.params || options.qp || options.queryParams) {
+            this.setQueryParams(options.queryParams || options.qp || options.params);
         }
 
         return this;
@@ -301,7 +324,64 @@ export default class ActiveRecord extends Core
      */
     public setHeaders(headers: any): any
     {
-        this.headers = headers;
+        for (var k in headers) {
+            this.setHeader(k, headers[k]);
+        }
+
+        return this;
+    }
+
+    /**
+     * Override and set headers
+     *
+     * @param  {any} headers
+     * @return {any}
+     */
+    public unsetHeader(header: string): any
+    {
+        delete this.headers[header];
+
+        return this;
+    }
+
+    /**
+     * Set specific query param
+     *
+     * @param  {string} key
+     * @param  {string} value
+     * @return {any}
+     */
+    public setQueryParam(key: string, value: string): any
+    {
+        this.builder.qp(key, value);
+
+        return this;
+    }
+
+    /**
+     * Override and set query params
+     *
+     * @param  {any} params
+     * @return {any}
+     */
+    public setQueryParams(params: any): any
+    {
+        for (var k in params) {
+            this.setQueryParam(k, params[k]);
+        }
+
+        return this;
+    }
+
+    /**
+     * Override and set query param
+     *
+     * @param  {any} headers
+     * @return {any}
+     */
+    public unsetQueryParam(param: string): any
+    {
+        delete this.builder.queryParams[param];
 
         return this;
     }

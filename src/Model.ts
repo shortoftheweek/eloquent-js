@@ -70,12 +70,12 @@ export default class Model extends ActiveRecord
     /**
      * Instance cache for relationships
      */
-    private relationshipCache = {};
+    private relationshipCache = { };
 
     /**
      * Constructor
      */
-    constructor(attributes: object = {}, options: object = {})
+    constructor(attributes: any = { }, options: any = { })
     {
         super(options);
 
@@ -141,10 +141,12 @@ export default class Model extends ActiveRecord
             .url;
 
         // Attributes
-        const body: any = attributes;
-        // const body: any = this.attributes;
-        const headers: any = {};
+        const body: any = attributes || this.attributes;
+        const headers: any = {
+            "Content-Type": "application/json; charset=utf-8",
+        };
         const method: string = 'PUT';
+
 
         // Setup request
         var request = new Request(url);
