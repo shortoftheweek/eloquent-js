@@ -15,6 +15,25 @@ import {
 export default class Model extends ActiveRecord
 {
     /**
+     * Hydrate
+     *
+     * @type {any}
+     */
+    public static hydrate<T>(attributes: any = {}, options: object = {}): any
+    {
+        // Instantiate collection
+        const collection = new this(options);
+
+        // Add models to collection
+        collection.set(attributes);
+
+        // Add options to collection
+        collection.options(options);
+
+        return collection;
+    }
+
+    /**
      * Hash of attributes whos current + previous value differ
      *
      * @type {object}

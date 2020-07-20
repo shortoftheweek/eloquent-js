@@ -30,7 +30,11 @@ import {
  */
 export default class Collection extends ActiveRecord implements Iterable<Model>
 {
-    //public static hydrate<T>(models: Model[] = [], options: object = {}): any
+    /**
+     * Hydrate
+     *
+     * @type {Model[]}
+     */
     public static hydrate<T>(models: Model[] = [], options: object = {}): any
     {
         // Instantiate collection
@@ -128,10 +132,13 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
     /**
      * Constructor
      *
+     * We specifically don't set models here because the model doesn't exist
+     * until constructor is done. We must use hydrate for that. Don't add data.
+     *
      * @param {any = []} models
      * @param {object = {}} options
      */
-    constructor(options: object = {})
+    constructor(options: any = {})
     {
         super(options);
 

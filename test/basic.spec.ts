@@ -178,6 +178,20 @@ describe('Basic Tests', () => {
         expect(resultB).to.equal(10);
     });
 
+    it('should remove empty query params from url', () => {
+        const model: Model = new Model(null, {
+            qp: {
+                foo: 'bar',
+                moderation: '',
+            }
+        });
+
+        // Get query param
+        const resultA: string = <string> model.b.queryParamsAsString;
+
+        expect(resultA).to.equal('&foo=bar');
+    });
+
     it('should return JSON object', () => {
         const model: Model = new Model;
         const obj: object = {

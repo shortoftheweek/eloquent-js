@@ -80,7 +80,10 @@ export default class Builder
         // for (let [key, value] of this.queryParams) {
         for (let key in this.queryParams) {
             let value = this.queryParams[key];
-            str += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value);
+
+            if (value != null && value != '') {
+                str += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value);
+            }
         }
 
         // Add includes
