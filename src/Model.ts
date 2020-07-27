@@ -120,12 +120,19 @@ export default class Model extends ActiveRecord
     {
         // This forces a reset of relationship caches
         for (let key in hash) {
+            // @ts-ignore
             if (this.relationshipCache[key]) {
+                // @ts-ignore
                 delete this.relationshipCache[key];
             }
         }
 
         super.set(hash);
+
+        // Check attributes if everything looks ok
+        if (this.attributes.data && this.attributes.data.length) {
+            console.warn('This model is incorrectly getting collection data.', this);
+        }
 
         // Update any relationship caches that exist
         // Don't delete them, as to save references
@@ -137,11 +144,6 @@ export default class Model extends ActiveRecord
 
         return this;
     }
-
-    // public async fetch(options: IModelRequestOptions | null = {}, queryParams: IModelRequestQueryParams = {}): Promise<void | Request | Response>
-    // {
-    //     return await this._fetch(options, queryParams);
-    // }
 
     /**
      * Save model
@@ -159,13 +161,13 @@ export default class Model extends ActiveRecord
             .identifier(this.id)
             .url;
 
+        // Headers
+        this.setHeader('Content-Type', 'application/json; charset=utf-8');
+
         // Attributes
         const body: any = attributes || this.attributes;
-        const headers: any = {
-            "Content-Type": "application/json; charset=utf-8",
-        };
-        const method: string = 'PUT';
-
+        const headers: any = this.headers;
+        const method: string = this.id ? 'PUT' : 'POST';
 
         // Setup request
         var request = new Request(url);
@@ -205,6 +207,27 @@ export default class Model extends ActiveRecord
     }
 
     /**
+     * Public generic fetch method
+     *
+     * @param  {IModelRequestOptions | null = {}} options
+     * @param  {IModelRequestQueryParams = {}} queryParams
+     * @return {Promise}
+     */
+    public async fetch(options: IModelRequestOptions | null = {}, queryParams: IModelRequestQueryParams = {}) // Promise<void | Request | Response>
+    {
+        // Query params
+        this.builder.identifier(this.id);
+
+        // Check if ID exists
+        if (!this.id) {
+            console.warn('Fetching model without ID is likely incorrect behavior.');
+        }
+
+        // Fetch
+        return await super.fetch(options, queryParams);
+    }
+
+    /**
      * Delete Model
      *
      * @todo There's a ton to do here too
@@ -216,12 +239,35 @@ export default class Model extends ActiveRecord
             .identifier(this.id)
             .url;
 
+        // Headers
+        this.setHeader('Content-Type', 'application/json; charset=utf-8');
+
+        // Attributes
+        const body: any = null;
+        const headers: any = this.headers;
+        const method: string = 'DELETE';
+
         // Setup request
         var request = new Request(url);
 
-        // Request
+        // Request (method, body headers)
         return request
-            .fetch('DELETE', {}, null);
+            .fetch(method, body, headers)
+
+            // Save data
+            .then((request: Request) => {
+                return this;
+            })
+
+            // Trigger events
+            .then(() => {
+                this.dispatch('complete', this);
+            })
+
+            // Error
+            .catch((e) => {
+                console.log('We failed to delete', e);
+            });
     }
 
 

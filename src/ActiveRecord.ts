@@ -31,6 +31,13 @@ export default class ActiveRecord extends Core
     public baseUrl: string = '/v1';
 
     /**
+     * Body for POST
+     *
+     * @type object
+     */
+    public body: any = null;
+
+    /**
      * Local custom key
      *
      * @type {string}
@@ -212,6 +219,11 @@ export default class ActiveRecord extends Core
      */
     public options(options: any = { }): any
     {
+        // Override endpoint
+        if (options.endpoint) {
+            this.endpoint = options.endpoint;
+        }
+
         // Check options for headers
         if (options.headers) {
             this.setHeaders(options.headers);
@@ -265,9 +277,72 @@ export default class ActiveRecord extends Core
      */
     public async find(id: string | number, queryParams: IModelRequestQueryParams = {}): Promise<void | Request | Response>
     {
-        this.builder.identifier(id);
+        return await this.fetch({
+            id: id,
+        }, queryParams);
+    }
 
-        return await this.fetch(null, queryParams);
+    /**
+     * Upload file
+     *
+     * @param  {string} name
+     * @param  {any} file
+     * @return {any}
+     */
+    public file(name: string, file: HTMLInputElement | FileList | File): Promise<void | Request | Response> | null
+    {
+        // Query params
+        const url: string = this.builder
+            .identifier(this.id)
+            .url;
+
+        // const files = event.target.files
+        const formData = new FormData();
+
+        // Get file
+        if (file instanceof HTMLInputElement) {
+            file = (<FileList> file.files)[0];
+        }
+        else if (file instanceof FileList) {
+            file = file[0];
+        }
+        else if (file instanceof File) {
+            // Good
+        }
+        else {
+            console.warn('File provided unacceptable type.');
+            return null;
+        }
+
+        // Add files
+        formData.append(name, file);
+
+        // Attributes
+        const headers: any = this.headers;
+        const method: string = 'POST';
+        const body: any = formData;
+
+        // Setup request
+        var request = new Request(url);
+
+        // Request (method, body headers)
+        return request
+            .fetch(method, body, headers)
+
+            // Save data
+            .then((request: Request) => {
+                return this;
+            })
+
+            // Trigger events
+            .then(() => {
+                this.dispatch('complete', this);
+            })
+
+            // Error
+            .catch(error => {
+                console.error(error)
+            });
     }
 
     /**
@@ -284,23 +359,18 @@ export default class ActiveRecord extends Core
         return await this._fetch(options, queryParams);
     }
 
-    // @todo rename this.We can do something else
-    // public async get(): Promise<void | Request | Response>
-    // {
-    //     return await this.fetch({
+    /**
+     * Set specific boy
+     *
+     * @param  {string} value
+     * @return {any}
+     */
+    public setBody(value: any): any
+    {
+        this.body = value;
 
-    //     });
-    // }
-
-    // public save(): void
-    // {
-    //     const attributes: any = this.attributes;
-
-    //     // Save
-    //     this.fetch({
-    //         id: 5
-    //     });
-    // }
+        return this;
+    }
 
     /**
      * Set specific header
@@ -401,8 +471,8 @@ export default class ActiveRecord extends Core
 
     // #endregion Actions
 
-
-    private _fetch(options: IModelRequestOptions | null = {}, queryParams: IModelRequestQueryParams = {}): Promise<void | Request | Response>
+    // @todo Update return
+    private _fetch(options: IModelRequestOptions | null = {}, queryParams: IModelRequestQueryParams = {}): any // Promise<void | Request | Response>
     {
         this.builder
             .qp('limit', this.limit)
@@ -411,6 +481,11 @@ export default class ActiveRecord extends Core
         // Check for query params
         for (let key in queryParams) {
             this.builder.qp(key, queryParams[key]);
+        }
+
+        // Check for ID
+        if (options && options.id) {
+            this.builder.identifier(options.id);
         }
 
         // Query params
@@ -426,7 +501,7 @@ export default class ActiveRecord extends Core
 
         // Request
         return this.request
-            .fetch()
+            .fetch(null, null, this.headers)
 
             // Save data
             .then((request: Request) => {
@@ -446,15 +521,11 @@ export default class ActiveRecord extends Core
                 return this;
             })
 
-            // // Parse to collection
-            // .then((self: any) => {
-            //     // console.log('fuckin data', self);
-            //     return this;
-            // })
-
             // Trigger events
             .then(() => {
                 this.dispatch('complete', this);
+
+                return this;
             });
     }
 }

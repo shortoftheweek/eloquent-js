@@ -78,7 +78,7 @@ export default class Request extends Core
     /**
      * Actually fetch the data
      */
-    public fetch(method: string = 'GET', body: any = null, headers: any = {}): Promise<Request>
+    public fetch(method: string | null = 'GET', body: any = null, headers: any = {}): Promise<Request>
     {
         this.dispatch('fetch: before');
 
@@ -89,11 +89,16 @@ export default class Request extends Core
         var params: any = {};
 
         params.headers = headers;
-        params.method = method;
+        params.method = method || 'GET';
         params.redirect = 'follow';
 
         if (body) {
-            params.body = typeof(body) == 'object' ? JSON.stringify(body) : body;
+            params.body =
+                body instanceof FormData
+                ? body
+                : (typeof(body) == 'object'
+                    ? JSON.stringify(body)
+                    : body);
         }
 
         // Create request

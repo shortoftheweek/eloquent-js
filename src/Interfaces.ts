@@ -26,7 +26,7 @@ export interface ICollectionMeta
  */
 export interface IModelRequestOptions
 {
-    id?: number;
+    id?: number | string;
     includes?: string[];
 }
 
