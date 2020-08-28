@@ -41,13 +41,6 @@ export default class Model extends ActiveRecord
     public changed: object = { };
 
     /**
-     * Default JSON ID attribute
-     *
-     * @type {string}
-     */
-    public idAttribute: string = 'id';
-
-    /**
      * List of fields available
      *
      * @type string[]
@@ -102,6 +95,9 @@ export default class Model extends ActiveRecord
         this.changed = { };
         this.cid = this.cidPrefix + Math.random().toString(36).substr(2, 5);
 
+        // Set default content type header
+        this.setHeader('Content-Type', 'application/json; charset=utf8');
+
         // Set attributes
         this.set(attributes);
     }
@@ -118,16 +114,21 @@ export default class Model extends ActiveRecord
      */
     public set(hash: IAttributes = {}): any
     {
-        // This forces a reset of relationship caches
-        for (let key in hash) {
-            // @ts-ignore
-            if (this.relationshipCache[key]) {
-                // @ts-ignore
-                delete this.relationshipCache[key];
-            }
-        }
+        // mk: 29, we disabled this because it breaks references
+        // but we had previously enabled it for some reason.
+        // What would that reason be?
 
-        super.set(hash);
+        // This forces a reset of relationship caches
+        // for (let key in hash) {
+        //     // @ts-ignore
+        //     if (this.relationshipCache[key]) {
+        //         // @ts-ignore
+        //         delete this.relationshipCache[key];
+        //     }
+        // }
+
+        // Don't trigger event
+        super.set(hash, false);
 
         // Check attributes if everything looks ok
         if (this.attributes.data && this.attributes.data.length) {
@@ -136,75 +137,59 @@ export default class Model extends ActiveRecord
 
         // Update any relationship caches that exist
         // Don't delete them, as to save references
-        // for (let key in hash) {
-        //     if (this.relationshipCache[key]) {
-        //         this.relationshipCache[key].set(hash[key]);
-        //     }
-        // }
+        for (let key in hash) {
+            if (this.relationshipCache[key]) {
+                this.relationshipCache[key].set(hash[key]);
+            }
+        }
+
+        // Trigger event
+        this.dispatch('set');
 
         return this;
     }
 
-    /**
-     * Save model
-     *
-     * @todo There so much to do to fix this
-     *
-     * @param  {any = {}} options
-     * @param  {any = {}} queryParams
-     * @return {any}
-     */
-    public save(attributes: any): any
-    {
-        // Query params
-        const url: string = this.builder
-            .identifier(this.id)
-            .url;
+    // /**
+    //  * Save model
+    //  *
+    //  * @todo There so much to do to fix this
+    //  *
+    //  * @param  {any = {}} options
+    //  * @param  {any = {}} queryParams
+    //  * @return {any}
+    //  */
+    // public save(attributes: any): any
+    // {
+    //     // Query params
+    //     const url: string = this.builder
+    //         .identifier(this.id)
+    //         .url;
 
-        // Headers
-        this.setHeader('Content-Type', 'application/json; charset=utf-8');
+    //     // Attributes
+    //     const body: any = attributes || this.attributes;
+    //     const headers: any = this.headers;
+    //     const method: string = this.id ? 'PUT' : 'POST';
 
-        // Attributes
-        const body: any = attributes || this.attributes;
-        const headers: any = this.headers;
-        const method: string = this.id ? 'PUT' : 'POST';
+    //     return this._fetch(null, {}, method, body, headers);
+    // }
 
-        // Setup request
-        var request = new Request(url);
+    // /**
+    //  * Used to get an individual item in a model
+    //  *
+    //  * Can pass either an ID #XX or a slug
+    //  *
+    //  * @param  {string | number} id
+    //  * @return {Promise}
+    //  */
+    // public async find(id: string | number, queryParams: IModelRequestQueryParams = {}): Promise<any>
+    // {
+    //     var self: any = this;
 
-        // Request (method, body headers)
-        return request
-            .fetch(method, body, headers)
-
-            // Save data
-            .then((request: Request) => {
-                // Set data
-                // this.set(this.dataKey !== undefined
-                //     ? request.data[this.dataKey]
-                //     : request.data);
-
-                // // Set options
-                // this.options({
-                //     meta: request.data.meta,
-                // });
-
-                // // Events
-                // this.dispatch('fetched', this);
-
-                return this;
-            })
-
-            // // Parse to collection
-            // .then((self: any) => {
-            //     // console.log('fuckin data', self);
-            //     return this;
-            // })
-
-            // Trigger events
-            .then(() => {
-                this.dispatch('complete', this);
-            });
-    }
+    //     return await super.find(id, queryParams)
+    //         .then((request: any) => {
+    //             return this;
+    //         });
+    // }
 
     /**
      * Public generic fetch method
@@ -216,64 +201,44 @@ export default class Model extends ActiveRecord
     public async fetch(options: IModelRequestOptions | null = {}, queryParams: IModelRequestQueryParams = {}) // Promise<void | Request | Response>
     {
         // Query params
-        this.builder.identifier(this.id);
+        this.builder.identifier(options && options.id ? options.id : this.id);
 
         // Check if ID exists
-        if (!this.id) {
-            console.warn('Fetching model without ID is likely incorrect behavior.');
+        if (!(options && options.id) && !this.id) {
+            console.warn('Fetching model without ID is likely incorrect behavior.', this, this.id, this.toJSON());
         }
 
         // Fetch
         return await super.fetch(options, queryParams);
     }
 
-    /**
-     * Delete Model
-     *
-     * @todo There's a ton to do here too
-     */
-    public delete(): any
-    {
-        // Query params
-        const url: string = this.builder
-            .identifier(this.id)
-            .url;
+    // /**
+    //  * Delete Model
+    //  *
+    //  * @todo There's a ton to do here too
+    //  */
+    // public delete(): any
+    // {
+    //     // Query params
+    //     const url: string = this.builder
+    //         .identifier(this.id)
+    //         .url;
 
-        // Headers
-        this.setHeader('Content-Type', 'application/json; charset=utf-8');
-
-        // Attributes
-        const body: any = null;
-        const headers: any = this.headers;
-        const method: string = 'DELETE';
-
-        // Setup request
-        var request = new Request(url);
-
-        // Request (method, body headers)
-        return request
-            .fetch(method, body, headers)
-
-            // Save data
-            .then((request: Request) => {
-                return this;
-            })
-
-            // Trigger events
-            .then(() => {
-                this.dispatch('complete', this);
-            })
-
-            // Error
-            .catch((e) => {
-                console.log('We failed to delete', e);
-            });
-    }
+    //     // Set fetch
+    //     return this._fetch(null, {}, 'DELETE');
+    // }
 
 
     // Relationships
     // ------------------------------------------------------------------------
 
+    /**
+     * Return singular instance of related contnet
+     *
+     * @param  {string} relationshipName
+     * @param  {any} relationshipClass
+     * @return {any}
+     */
     public hasOne(relationshipName: string, relationshipClass: any): any
     {
         if (this.relationshipCache[relationshipName]) {
@@ -286,6 +251,13 @@ export default class Model extends ActiveRecord
         return this.relationshipCache[relationshipName] = model;
     }
 
+    /**
+     * Return multiple instances of related content
+     *
+     * @param  {string} relationshipName
+     * @param  {any} relationshipClass
+     * @return {any}
+     */
     public hasMany(relationshipName: string, relationshipClass: any): any
     {
         if (this.relationshipCache[relationshipName]) {

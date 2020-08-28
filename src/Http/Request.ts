@@ -6,6 +6,24 @@ import {
 } from '../Interfaces';
 
 /**
+ * Request Error
+ */
+class RequestError extends Error
+{
+
+    public status: number;
+    public text: string;
+
+    constructor(status: number, text: string)
+    {
+        super(text);
+
+        this.status = status;
+        this.text = text;
+    }
+}
+
+/**
  * Request
  *
  * @todo
@@ -30,11 +48,19 @@ export default class Request extends Core
     /**
      * Headers
      *
+     * Do not set the 'Content-Type' here because it wont be
+     * overridden; which will break file uploads.
+     *
      * @type {string}
      */
-    public headers: any = {
-        // 'Content-Type': 'application/json',
-    };
+    public headers: any = { };
+
+    /**
+     * If this request is currently loading
+     *
+     * @type {boolean}
+     */
+    public loading: boolean = false;
 
     /**
      * Methods
@@ -71,8 +97,13 @@ export default class Request extends Core
     {
         super();
 
+        //
         this.dataKey = params.dataKey;
         this.url = url;
+
+        // Fix URL
+        this.url = this.url.replace(/\?$/, '');
+        this.url = this.url.replace(/\?&/, '?');
     }
 
     /**
@@ -80,7 +111,7 @@ export default class Request extends Core
      */
     public fetch(method: string | null = 'GET', body: any = null, headers: any = {}): Promise<Request>
     {
-        this.dispatch('fetch: before');
+        this.dispatch('fetch:before');
 
         // Combine headers
         var headers = Object.assign(this.headers, headers);
@@ -101,14 +132,156 @@ export default class Request extends Core
                     : body);
         }
 
+        // Is File?
+        var isFile = !params.headers['Content-Type'] && params.method === 'POST';
+
+        // Loading
+        this.loading = true;
+
+        // Events
+        this.dispatch('requesting', this);
+
+        // Log
+        // console.log('Making request as follows:', params);
+
         // Create request
-        var response = fetch(this.url, params);
+        var response = isFile
+            ? this.xhrFetch(this.url, params)
+            : fetch(this.url, params);
 
         return response
             .then(this.beforeParse.bind(this))
             .then(this.parse.bind(this))
             .then(this.afterParse.bind(this))
-            .then(this.afterFetch.bind(this));
+            .then(this.afterFetch.bind(this))
+            .then(this.afterAll.bind(this))
+    }
+
+    /**
+     * XHR Fetch
+     *
+     * Specifically for file uploaders
+     *
+     * XMLHttpRequest
+     *     onabort: null
+     *     onerror: ƒ ()
+     *     onload: ƒ ()
+     *     onloadend: ƒ (e)
+     *     onloadstart: null
+     *     onprogress: ƒ (e)
+     *     onreadystatechange: null
+     *     ontimeout: null
+     *     readyState: 4
+     *     response: "{"id":262,"url":"https:\/\/static.sotw.com\/media\/film\/154\/5f2d54d1c26dc.jpg",
+     *     responseText: "{"id":262,"url":"https:\/\/static.sotw.com\/media\/film\/154\/5f2d54d1c26dc.jpg",
+     *     responseType: ""
+     *     responseURL: "https://api.sotw.com/v1/film/154/media?&mediaType=1&imageType=4&videoType=4&limit=15&page=1"
+     *     responseXML: null
+     *     send: ƒ ()
+     *     status: 200
+     *     statusText: "OK"
+     *     timeout: 0
+     *     upload: XMLHttpRequestUpload {onloadstart: null, onprogress: null, onabort: null, onerror: null, onload: null, …}
+     *     withCredentials: false
+     *
+     * Response
+     *     body: (...)
+     *     bodyUsed: false
+     *     headers: Headers {}
+     *     ok: true
+     *     redirected: false
+     *     status: 200
+     *     statusText: ""
+     *     type: "default"
+     *     url: ""
+     *
+     * @param  {string} url
+     * @param  {any} params
+     * @return {any}
+     */
+    public xhrFetch(url: string, params: any): any
+    {
+        var self = this;
+        var xhr = new XMLHttpRequest();
+
+        // Open Request
+        xhr.open(params.method, url);
+
+        // Set Headers
+        for (var key in params.headers) {
+            xhr.setRequestHeader(key, params.headers[key]);
+        }
+
+        // Copy old `send`
+        const xhrSend = xhr.send;
+
+        // Create new `send`
+        xhr.send = function() {
+            const xhrArguments = arguments;
+
+            return new Promise(function (resolve, reject) {
+                xhr.upload.onprogress = function(e) {
+                    if (e.lengthComputable) {
+                        self.dispatch('progress', {
+                            loaded: e.loaded,
+                            ratio: e.loaded / e.total,
+                            total: e.total,
+                        });
+                    }
+                    else {
+                        self.dispatch('progress', {
+                            loaded: e.loaded,
+                            ratio: 1,
+                            total: e.total,
+                        });
+                    }
+                }
+
+                // xhr.onloadend = function(e: ProgressEvent) {
+                //     const xhr: XMLHttpRequest = <XMLHttpRequest> e.currentTarget;
+                //     var status = xhr.status;
+                //     var json = JSON.parse(xhr.response);
+
+                //     // Error
+                //     if (status >= 400) {
+                //         reject({
+                //             status: status,
+                //             statusText: json.status,
+                //         });
+                //         // throw new RequestError(status, json.status);
+                //     }
+                // }
+
+                xhr.onload = function () {
+                    var blob = new Blob([xhr.response], { type : 'application/json' });
+                    var init = {
+                        status: xhr.status,
+                        statusText: xhr.statusText,
+                    };
+                    var response = new Response(blob, init);
+
+                    // Resolved
+                    resolve(response);
+
+                    // if (xhr.status < 200 || xhr.status >= 300) {
+                    //     reject({ response });
+                    // }
+                    // else {
+                    //     resolve(response);
+                    // }
+                };
+
+                xhr.onerror = function () {
+                    reject({
+                        request: xhr
+                    });
+                };
+
+                xhrSend.apply(xhr, xhrArguments);
+            });
+        }
+
+        return xhr.send(params.body);
     }
 
     /**
@@ -167,7 +340,11 @@ export default class Request extends Core
 
         // Set data
         if (request.response) {
-            this.data = await request.response.json();
+            // Data on 200 OK
+            // if (request.response.status == 200) {
+            if (request.response.status != 204) {
+                this.data = await request.response.json();
+            }
         }
 
         // Trigger
@@ -183,6 +360,11 @@ export default class Request extends Core
      */
     private afterParse(request: Request): Request
     {
+        if (request && request.response && request.response.status >= 400 && this.data.status) {
+        // if (this.data && this.data.code >= 400) {
+            throw new RequestError(request.response.status, this.data.status);
+        }
+
         // Trigger
         this.dispatch('parse:after');
 
@@ -201,6 +383,29 @@ export default class Request extends Core
 
         // Trigger
         this.dispatch('fetch:after');
+
+        // Not loading
+        this.loading = false;
+
+        return request;
+    }
+
+    /**
+     * After all
+     *
+     * @param {any} x [description]
+     */
+    private afterAll(request: Request) : Request
+    {
+        // Check request
+        if (request && request.response && request.response.ok) {
+            this.dispatch('complete', this);
+        }
+        else {
+            this.dispatch('error');
+
+            throw new Error('Failed response, after all');
+        }
 
         return request;
     }

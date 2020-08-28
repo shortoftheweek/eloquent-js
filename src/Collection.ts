@@ -31,7 +31,7 @@ import {
 export default class Collection extends ActiveRecord implements Iterable<Model>
 {
     /**
-     * Hydrate
+     * Hydrate a collection full of models
      *
      * @type {Model[]}
      */
@@ -51,6 +51,8 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
 
     /**
      * Return count of models
+     *
+     * @todo Make sure this isn't caching
      *
      * @return number
      */
@@ -81,7 +83,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
     /**
      * Meta data associated with collection
      *
-     * @type {object}
+     * @type {ICollectionMeta}
      */
     public meta: ICollectionMeta = {
         pagination: {
@@ -90,14 +92,13 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
             per_page: 15,
             current_page: 1,
             total_pages: 1,
-            links: {
-
-            },
+            links: { },
         },
     };
 
     /**
      * Model object instantiated by this collection
+     * This should be replaced by subclass
      *
      * @type {any}
      */
@@ -109,7 +110,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      *
      * @type {Model[]}
      */
-    public models: any[] = [];
+    public models: Model[] = [];
 
     /**
      * The key that collection data exists on, e.g.
@@ -132,18 +133,24 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
     /**
      * Constructor
      *
-     * We specifically don't set models here because the model doesn't exist
+     * We specifically don't set models here because the Model doesn't exist
      * until constructor is done. We must use hydrate for that. Don't add data.
      *
-     * @param {any = []} models
+     * If we do it early, we won't get FilmModels, we'll get Models.
+     *
      * @param {object = {}} options
      */
     constructor(options: any = {})
     {
         super(options);
 
+        // Set default content type header
+        this.setHeader('Content-Type', 'application/json; charset=utf8');
+
         // Set defaults
-        this.cid = this.cidPrefix + Math.random().toString(36).substr(2, 5);
+        this.cid = this.cidPrefix + Math.random()
+            .toString(36)
+            .substr(2, 5);
     }
 
     /**
@@ -178,6 +185,10 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      */
     public add(model: Model[] | Model | object, options: any = {}): Collection
     {
+        if (model == undefined) {
+            return this;
+        }
+
         const models: any = Array.isArray(model)
             ? model
             : [model];
@@ -197,6 +208,9 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
                 this.models.push(model);
             }
         });
+
+        // Event for add
+        this.dispatch('add');
 
         return this;
     }
@@ -221,8 +235,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
         for (ii = 0; ii < items.length; ii++) {
             i = 0;
             while (i < this.models.length) {
-                if (this.models[i] === items[ii]) {
-                    // Remove from collection
+                if (this.models[i] == items[ii]) {
                     this.models.splice(i, 1);
                 }
                 else {
@@ -230,6 +243,9 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
                 }
             }
         }
+
+        // Event for add
+        this.dispatch('remove');
 
         return this;
     }
@@ -250,7 +266,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
         // Check for `meta` on set, this sometimes happens
         // if we assign an entire bootstrapped JSON object
         // to the collection
-        if (model.hasOwnProperty('meta')) {
+        if (model && model.hasOwnProperty('meta')) {
             // @ts-ignore
             this.meta = model.meta;
         }
@@ -258,7 +274,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
         // Check for `meta` on set, this sometimes happens
         // if we assign an entire bootstrapped JSON object
         // to the collection
-        if (model.hasOwnProperty('data')) {
+        if (model && model.hasOwnProperty('data')) {
             // @ts-ignore
             this.add(model.data);
         }
@@ -266,6 +282,9 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
             // @ts-ignore
             this.add(model);
         }
+
+        // Event for add
+        this.dispatch('set');
 
         return this;
     }
@@ -279,6 +298,9 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
     public reset(): Collection
     {
         this.models = [];
+
+        // Event for add
+        this.dispatch('reset');
 
         return this;
     }
@@ -368,7 +390,9 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
         }
 
         return this.where({
-            [this.modelId]: query instanceof Model ? query.cid : query,
+            [this.modelId]: query instanceof Model
+                ? query.cid
+                : query,
         }, true);
     }
 
@@ -457,9 +481,19 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  {string} cid
      * @return {Model}
      */
-    public findByCid(cid: string): Model
+    public findByCid(cid: string): Model | undefined
     {
         return _.find(this.models, { cid });
+    }
+
+    /**
+     * Each
+     * @param  {string} cid
+     * @return {Model}
+     */
+    public each(predicate: any): any
+    {
+        return _.each(this.models, predicate);
     }
 
     /**
@@ -526,21 +560,6 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
         return this.models.map(model => model.attr(attribute));
     }
 
-    // public fetch(options: object = {}): any
-    // {
-    //     // Not implemented
-    // }
-
-    public create(model: object = {}, options: object = {}): any
-    {
-        // Not implemented
-    }
-
-    public parse(response: Response, options: object = {}): any
-    {
-        // Not implemented
-    }
-
     /**
      * Clone current object
      *
@@ -600,7 +619,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
     /**
      * Iterator
      */
-    [Symbol.iterator](): Iterator<Model> {
+    [Symbol.iterator](): Iterator<any> {
         return new CollectionIterator(this, CollectionIterator.ITERATOR_VALUES);
     }
 

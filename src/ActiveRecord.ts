@@ -16,6 +16,26 @@ import {
 export default class ActiveRecord extends Core
 {
     /**
+     * Get builder reference
+     *
+     * @return Builder
+     */
+    public get b(): Builder
+    {
+        return this.builder;
+    }
+
+    /**
+     * Model if we provide a specific identifier
+     *
+     * @return boolean
+     */
+    protected get isModel(): boolean
+    {
+        return this.builder.identifier !== undefined;
+    }
+
+    /**
      * Data set by the request
      *
      * @type object
@@ -36,6 +56,13 @@ export default class ActiveRecord extends Core
      * @type object
      */
     public body: any = null;
+
+    /**
+     * If this request is allowed to be cached
+     *
+     * @type {boolean}
+     */
+    public cacheable: boolean = true;
 
     /**
      * Local custom key
@@ -77,11 +104,24 @@ export default class ActiveRecord extends Core
     public limit: number = 15;
 
     /**
+     * If the request is currently loading
+     *
+     * @type {boolean}
+     */
+    public loading: boolean = false;
+
+    /**
      * Meta
      *
      * @type object
      */
     public meta: any = {};
+
+    /**
+     * Modified endpoint takes precedence
+     * @type {string}
+     */
+    public modifiedEndpoint: string | null = null;
 
     /**
      * Page
@@ -96,6 +136,11 @@ export default class ActiveRecord extends Core
      * @type Request
      */
     public request?: Request;
+
+    /**
+     * Last Request Time
+     */
+    public requestTime: number;
 
     /**
      * API Query Builder
@@ -123,24 +168,11 @@ export default class ActiveRecord extends Core
     protected dataKey: string | undefined = 'data';
 
     /**
-     * Get builder reference
+     * Save options of last _fetch
      *
-     * @return Builder
+     * @type {Object}
      */
-    public get b(): Builder
-    {
-        return this.builder;
-    }
-
-    /**
-     * Model if we provide a specific identifier
-     *
-     * @return boolean
-     */
-    protected get isModel(): boolean
-    {
-        return this.builder.identifier !== undefined;
-    }
+    protected lastRequest: any
 
     /**
      * Constructor
@@ -152,11 +184,17 @@ export default class ActiveRecord extends Core
         // Set options on class
         Object.assign(this, options);
 
+        // Setup default last request
+        this.lastRequest = {};
+
         // Setup URL builder
         this.builder = new Builder(this);
 
         // Options
         this.options(options);
+
+        // Mark creation as the rquest
+        this.requestTime = Date.now();
     }
 
     /**
@@ -178,10 +216,19 @@ export default class ActiveRecord extends Core
      *
      * @return ActiveRecord
      */
-    public set(hash: IAttributes = {}): any
+    public set(hash: IAttributes = {}, trigger: boolean = true): any
     {
+        // @ts-ignore
+        var possibleSetters = Object.getOwnPropertyDescriptors(this.__proto__);
+
         for (let key in hash) {
             this.attributes[key] = hash[key];
+
+            // Check for setters
+            if (possibleSetters && possibleSetters[key] && possibleSetters[key].set) {
+                // @ts-ignore
+                this[key] = hash[key];
+            }
         }
 
         // Check for ID
@@ -190,7 +237,9 @@ export default class ActiveRecord extends Core
         }
 
         // Trigger
-        this.dispatch('set');
+        if (trigger) {
+            this.dispatch('set');
+        }
 
         return this;
     }
@@ -221,7 +270,7 @@ export default class ActiveRecord extends Core
     {
         // Override endpoint
         if (options.endpoint) {
-            this.endpoint = options.endpoint;
+            this.setEndpoint(options.endpoint);
         }
 
         // Check options for headers
@@ -249,22 +298,139 @@ export default class ActiveRecord extends Core
      */
     public toJSON(): object
     {
-        return this.attributes;
-        // // @ts-ignore
-        // return Object.fromEntries(this.attributes.entries());
+        let json: any = this.attributes;
+
+        // @todo is this code copasetic?
+        // @ts-ignore
+        var possibleGetters = Object.getOwnPropertyNames(this.__proto__);
+
+        // Convert toJSON on subobjects so they stay in sync
+        for (var key of possibleGetters) {
+            // @ts-ignore
+            if (json[key] && this[key] && this[key].toJSON) {
+                // @ts-ignore
+                json[key] = this[key].toJSON();
+            }
+        }
+
+        return json;
     }
 
 
-    // #region Actions
+// region Actions
 
-    public delete(): void
+    /**
+     * Create Model
+     *
+     * @todo There's a ton to do here too
+     */
+    public create(attributes: any)
     {
-        // Not implemented
+        return this.post(attributes);
     }
 
-    public create(): void
+    /**
+     * Delete Model
+     *
+     * @todo There's a ton to do here too
+     */
+    public delete(attributes: any = null)
     {
-        // Not implemented
+        // Query params
+        const url: string = this.builder
+            .identifier(this.id || (attributes ? attributes.id : ''))
+            .url;
+
+        // Check for identifier
+        if (this.builder.id) {
+            var model = this.find(attributes);
+            this.remove(model);
+        }
+
+        // Attributes
+        const body: any = null;
+        const headers: any = this.headers;
+        const method: string = 'DELETE';
+
+        return this._fetch(null, {}, method, body, headers);
+    }
+
+    /**
+     * POST Model
+     */
+    public post(attributes: any = null)
+    {
+        // Query params
+        const url: string = this.builder.url;
+
+        // Attributes
+        const body: any = attributes || this.attributes;
+        const headers: any = this.headers;
+        const method: string = 'POST';
+
+        return this._fetch(null, {}, method, body, headers);
+    }
+
+    /**
+     * PUT model
+     *
+     * @param  {any = {}} options
+     * @param  {any = {}} queryParams
+     * @return {any}
+     */
+    public put(attributes: any): any
+    {
+        // Query params
+        const url: string = this.builder.url;
+
+        // Attributes
+        const body: any = attributes || this.attributes;
+        const headers: any = this.headers;
+        const method: string = 'PUT';
+
+        return this._fetch(null, {}, method, body, headers);
+    }
+
+    /**
+     * Save model
+     *
+     * @todo There so much to do to fix this
+     *
+     * @param  {any = {}} options
+     * @param  {any = {}} queryParams
+     * @return {any}
+     */
+    public save(attributes: any = null): any
+    {
+        // Query params
+        const url: string = this.builder
+            .identifier(this.id || (attributes ? attributes.id : ''))
+            .url;
+
+        // Attributes
+        const body: any = attributes || this.attributes;
+        const headers: any = this.headers;
+        const method: string = this.id ? 'PUT' : 'POST';
+
+        return this._fetch(null, {}, method, body, headers);
+    }
+
+    /**
+     * Interface for Collection
+     */
+    public add(x: any) { }
+
+    /**
+     * Interface for Collection
+     */
+    public remove(x: any) { }
+
+    /**
+     * Empty attributes
+     */
+    public reset()
+    {
+        this.attributes = {};
     }
 
     /**
@@ -275,11 +441,12 @@ export default class ActiveRecord extends Core
      * @param  {string | number} id
      * @return {Promise}
      */
-    public async find(id: string | number, queryParams: IModelRequestQueryParams = {}): Promise<void | Request | Response>
+    public async find(id: string | number, queryParams: IModelRequestQueryParams = {}): Promise<any> // Promise<void | Request | Response>
     {
-        return await this.fetch({
-            id: id,
-        }, queryParams);
+        return await this.fetch({ id }, queryParams)
+            .then(request => {
+                return this;
+            });
     }
 
     /**
@@ -289,7 +456,7 @@ export default class ActiveRecord extends Core
      * @param  {any} file
      * @return {any}
      */
-    public file(name: string, file: HTMLInputElement | FileList | File): Promise<void | Request | Response> | null
+    public file(name: string, file: HTMLInputElement | FileList | File): Promise<void | Request | Response>
     {
         // Query params
         const url: string = this.builder
@@ -311,37 +478,23 @@ export default class ActiveRecord extends Core
         }
         else {
             console.warn('File provided unacceptable type.');
-            return null;
         }
+
+        // Set header
+        this.unsetHeader('Content-Type');
 
         // Add files
         formData.append(name, file);
 
-        // Attributes
-        const headers: any = this.headers;
-        const method: string = 'POST';
-        const body: any = formData;
+        // Set fetch
+        return this._fetch(null, {}, 'POST', formData)
+            .then((request: any) => {
+                this.dispatch('file:complete', this);
 
-        // Setup request
-        var request = new Request(url);
+                // @note This was duplicating our images
+                // this.add(request.data);
 
-        // Request (method, body headers)
-        return request
-            .fetch(method, body, headers)
-
-            // Save data
-            .then((request: Request) => {
-                return this;
-            })
-
-            // Trigger events
-            .then(() => {
-                this.dispatch('complete', this);
-            })
-
-            // Error
-            .catch(error => {
-                console.error(error)
+                return request;
             });
     }
 
@@ -360,6 +513,57 @@ export default class ActiveRecord extends Core
     }
 
     /**
+     * Alias for `file`
+     *
+     * @param  {string} name
+     * @param  {HTMLInputElement | FileList | File} file
+     * @return {Promise}
+     */
+    public upload(name: string, file: HTMLInputElement | FileList | File): Promise<void | Request | Response>
+    {
+        return this.file(name, file);
+    }
+
+    /**
+     * Run last query
+     * @return {any}
+     */
+    public runLast(): any
+    {
+        return this._fetch(
+            this.lastRequest.options,
+            this.lastRequest.queryParams,
+            this.lastRequest.method,
+            this.lastRequest.body,
+            this.lastRequest.headers,
+        );
+    }
+
+// endregion Actions
+
+
+// region Set Params
+
+    /**
+     * Set specific endpoint override
+     *
+     * @param  {string} endpoint
+     * @return {any}
+     */
+    public useModifiedEndpoint(activeRecord: ActiveRecord): any
+    {
+        // @todo, we shouldn't actually mutate this
+        // we should turn the endpoint that we actually use into a getter
+        // then have a way of modifying that so we maintain the original class endpoint
+        // this.setEndpoint(activeRecord.endpoint + '/' + activeRecord.id + '/' + this.endpoint);
+
+        // Set modified endpoint
+        this.modifiedEndpoint = activeRecord.endpoint + '/' + activeRecord.id + '/' + this.endpoint;
+
+        return this;
+    }
+
+    /**
      * Set specific boy
      *
      * @param  {string} value
@@ -373,13 +577,27 @@ export default class ActiveRecord extends Core
     }
 
     /**
+     * Set specific endpoint override
+     *
+     * @param  {string} endpoint
+     * @return {any}
+     */
+    public setEndpoint(endpoint: string): any
+    {
+        this.modifiedEndpoint = null;
+        this.endpoint = endpoint;
+
+        return this;
+    }
+
+    /**
      * Set specific header
      *
      * @param  {string} header
      * @param  {string} value
      * @return {any}
      */
-    public setHeader(header: string, value: string): any
+    public setHeader(header: string, value: string | null): any
     {
         this.headers[header] = value;
 
@@ -402,6 +620,32 @@ export default class ActiveRecord extends Core
     }
 
     /**
+     * Override and set id
+     *
+     * @param  {any} id
+     * @return {any}
+     */
+    public setId(id: any): any
+    {
+        this.id = id;
+
+        return this;
+    }
+
+    /**
+     * Unset id
+     *
+     * @param  {any} id
+     * @return {any}
+     */
+    public unsetId(): any
+    {
+        this.id = '';
+
+        return this;
+    }
+
+    /**
      * Override and set headers
      *
      * @param  {any} headers
@@ -409,6 +653,7 @@ export default class ActiveRecord extends Core
      */
     public unsetHeader(header: string): any
     {
+        this.setHeader(header, null);
         delete this.headers[header];
 
         return this;
@@ -469,14 +714,34 @@ export default class ActiveRecord extends Core
         return this;
     }
 
-    // #endregion Actions
+// endregion Set Params
+
 
     // @todo Update return
-    private _fetch(options: IModelRequestOptions | null = {}, queryParams: IModelRequestQueryParams = {}): any // Promise<void | Request | Response>
+    protected _fetch(
+        options: IModelRequestOptions | null = {},
+        queryParams: IModelRequestQueryParams = {},
+        method: any = null,
+        body: any = null,
+        headers: any = null,
+    ): any // Promise<void | Request | Response>
     {
-        this.builder
-            .qp('limit', this.limit)
-            .qp('page', this.page)
+        // Save request params
+        this.lastRequest = {
+            options,
+            queryParams,
+            method,
+            body,
+            headers,
+        }
+
+        // Set last request time
+        this.requestTime = Date.now();
+
+        // Check cacheable
+        if (!this.cacheable) {
+            this.builder.qp('cb', Date.now());
+        }
 
         // Check for query params
         for (let key in queryParams) {
@@ -491,41 +756,62 @@ export default class ActiveRecord extends Core
         // Query params
         const url: string = this.builder.url;
 
+        // Events
+        this.dispatch('requesting', this);
+
+        // Set loading
+        this.loading = true;
+
         // Setup request
-        this.request = new Request(url, {
+        var request = this.request = new Request(url, {
             dataKey: this.dataKey,
         });
 
-        // Events
-        this.dispatch('fetching', this);
+        // After parse
+        request.on('parse:after', e => {
+            method = method || 'get';
 
-        // Request
-        return this.request
-            .fetch(null, null, this.headers)
-
-            // Save data
-            .then((request: Request) => {
-                // Set data
+            // Add model
+            if (method.toLowerCase() === 'post') {
+                this.add(request.data);
+            }
+            else if (method.toLowerCase() === 'delete') {
+                // Intentionally empty
+            }
+            else {
                 this.set(this.dataKey !== undefined
                     ? request.data[this.dataKey]
                     : request.data);
+            }
 
-                // Set options
-                this.options({
-                    meta: request.data.meta,
-                });
-
-                // Events
-                this.dispatch('fetched', this);
-
-                return this;
-            })
-
-            // Trigger events
-            .then(() => {
-                this.dispatch('complete', this);
-
-                return this;
+            // Set options
+            this.options({
+                meta: request.data.meta,
             });
+
+            // Events
+            this.dispatch('fetched', this);
+        });
+
+        // Bubble `progress` event
+        request.on('progress', e => {
+            this.dispatch('progress', e.data);
+        });
+
+        // Bubble `complete` event
+        request.on('complete', e => {
+            // Set loading
+            this.loading = false;
+
+            // Bubble
+            this.dispatch('complete');
+        });
+
+        // Request (method, body headers)
+        return request.fetch(
+            method,
+            body || this.body,
+            headers || this.headers,
+        );
     }
 }

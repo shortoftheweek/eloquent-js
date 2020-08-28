@@ -26,7 +26,7 @@ export default class Builder
      */
     public get endpoint(): string
     {
-        return this.activeRecord.endpoint;
+        return this.activeRecord.modifiedEndpoint || this.activeRecord.endpoint;
     }
 
     /**
@@ -109,7 +109,7 @@ export default class Builder
 
         // Root API URI
         urlBuilder += baseUrl;
-        urlBuilder += '/' + endpoint;
+        urlBuilder += endpoint[0] === '/' ? endpoint : '/' + endpoint;
 
         // Check for ID
         if (this.id !== '') {
