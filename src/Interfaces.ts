@@ -67,3 +67,13 @@ export interface ISortOptions
     key: string;
     reverse?: boolean;
 }
+
+
+export interface IDispatcher
+{
+    // events: any;
+    trigger: (eventName: string, data?: any) => any;
+    dispatch: (eventName: string, data?: any) => any;
+    on: (eventName: string, callback: (data?: any) => void) => any;
+    off: (eventName: string, callback?: any) => any;
+}
