@@ -82,7 +82,7 @@ export default class Model extends ActiveRecord
     /**
      * Instance cache for relationships
      */
-    private relationshipCache = { };
+    private relationshipCache: IAttributes = { };
 
     /**
      * Constructor
@@ -137,7 +137,8 @@ export default class Model extends ActiveRecord
 
         // Update any relationship caches that exist
         // Don't delete them, as to save references
-        for (let key in hash) {
+        let key: string;
+        for (key in hash) {
             if (this.relationshipCache[key]) {
                 this.relationshipCache[key].set(hash[key]);
             }

@@ -217,7 +217,7 @@ export default class Request extends Core
 
         // Create new `send`
         xhr.send = function() {
-            const xhrArguments = arguments;
+            const xhrArguments: any = arguments;
 
             return new Promise(function (resolve, reject) {
                 xhr.upload.onprogress = function(e) {
