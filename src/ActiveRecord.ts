@@ -1,5 +1,5 @@
 
-import Builder from './Builder';
+import Builder from './Http/Builder';
 import Core from './Core';
 import Request from './Http/Request';
 import {
