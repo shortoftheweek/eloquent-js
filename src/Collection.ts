@@ -2,7 +2,6 @@
 import CollectionIterator from './CollectionIterator';
 import ActiveRecord from './ActiveRecord';
 import Model from './Model';
-import * as _ from 'lodash';
 import {
     IAttributes,
     ICollectionMeta,
@@ -10,6 +9,9 @@ import {
     ISortOptions,
 } from './Interfaces';
 
+// Try `npm install @types/lodash` if it exists or add a new declaration (.d.ts) file containing `declare module 'lodash';`
+// @ts-ignore
+import * as _ from 'lodash';
 
 /**
  * [Collection description]
@@ -455,7 +457,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
         const collection = new this.constructor();
 
         // @todo, this code sucks but I'm not spending all day here
-        _.map(this.models, model => {
+        _.map(this.models, (model: any) => {
             if (_.find(model, attributes)) {
                 collection.add(model);
             }

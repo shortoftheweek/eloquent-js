@@ -9,4 +9,4 @@ export {
     Collection,
     Model,
     Request,
-};
+}

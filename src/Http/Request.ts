@@ -1,6 +1,7 @@
 
-import Core from '../Core';
+// @ts-ignore
 import fetch from 'node-fetch';
+import Core from '../Core';
 import {
     IAttributes,
 } from '../Interfaces';
