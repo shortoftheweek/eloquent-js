@@ -1,9 +1,9 @@
 {
     "name": "eloquent-js",
-    "version": "0.2.7",
+    "version": "0.3.0",
     "description": "Laravel mock of Eloquet for Javascript",
-    "main": "dist/js/index.js",
-    "types": "dist/js/index.d.ts",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "type": "module",
     "scripts": {
         "build": "tsc --skipLibCheck",
