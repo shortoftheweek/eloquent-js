@@ -1,5 +1,8 @@
 
-import { Model } from '../../index';
+import FilmCollection from '../collections/FilmCollection';
+import UserCollection from '../collections/UserCollection';
+import UserModel from '../models/UserModel';
+import { Model } from '../../src/index';
 
 /**
  * Film Model
@@ -34,4 +37,18 @@ export default class FilmModel extends Model
         'publicity_type',
         'is_external',
     ];
+
+
+    // Relationships
+    // -------------------------------------------------------------------------
+
+    public get firstUser(): UserModel
+    {
+        return this.hasOne('firstUser', UserModel);
+    }
+
+    public get user(): UserCollection
+    {
+        return this.hasMany('user', UserCollection);
+    }
 }

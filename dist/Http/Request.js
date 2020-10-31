@@ -13,33 +13,33 @@ class Request extends Core_1.default {
     constructor(url, params = {}) {
         super();
         this.data = {};
-        this.dataKey = '';
+        this.dataKey = "";
         this.headers = {};
         this.loading = false;
-        this.mode = '';
+        this.mode = "";
         this.dataKey = params.dataKey;
         this.url = url;
-        this.url = this.url.replace(/\?$/, '');
-        this.url = this.url.replace(/\?&/, '?');
+        this.url = this.url.replace(/\?$/, "");
+        this.url = this.url.replace(/\?&/, "?");
     }
-    fetch(method = 'GET', body = null, headers = {}) {
-        this.dispatch('fetch:before');
+    fetch(method = "GET", body = null, headers = {}) {
+        this.dispatch("fetch:before");
         var headers = Object.assign(this.headers, headers);
         var params = {};
         params.headers = headers;
-        params.method = method || 'GET';
-        params.redirect = 'follow';
+        params.method = method || "GET";
+        params.redirect = "follow";
         if (body) {
             params.body =
                 body instanceof FormData
                     ? body
-                    : (typeof (body) == 'object'
+                    : typeof body == "object"
                         ? JSON.stringify(body)
-                        : body);
+                        : body;
         }
-        var isFile = !params.headers['Content-Type'] && params.method === 'POST';
+        var isFile = !params.headers["Content-Type"] && params.method === "POST";
         this.loading = true;
-        this.dispatch('requesting', this);
+        this.dispatch("requesting", this);
         var response = isFile
             ? this.xhrFetch(this.url, params)
             : node_fetch_1.default(this.url, params);
@@ -63,14 +63,14 @@ class Request extends Core_1.default {
             return new Promise(function (resolve, reject) {
                 xhr.upload.onprogress = function (e) {
                     if (e.lengthComputable) {
-                        self.dispatch('progress', {
+                        self.dispatch("progress", {
                             loaded: e.loaded,
                             ratio: e.loaded / e.total,
                             total: e.total,
                         });
                     }
                     else {
-                        self.dispatch('progress', {
+                        self.dispatch("progress", {
                             loaded: e.loaded,
                             ratio: 1,
                             total: e.total,
@@ -78,7 +78,7 @@ class Request extends Core_1.default {
                     }
                 };
                 xhr.onload = function () {
-                    var blob = new Blob([xhr.response], { type: 'application/json' });
+                    var blob = new Blob([xhr.response], { type: "application/json" });
                     var init = {
                         status: xhr.status,
                         statusText: xhr.statusText,
@@ -88,7 +88,7 @@ class Request extends Core_1.default {
                 };
                 xhr.onerror = function () {
                     reject({
-                        request: xhr
+                        request: xhr,
                     });
                 };
                 xhrSend.apply(xhr, xhrArguments);
@@ -104,40 +104,43 @@ class Request extends Core_1.default {
         this.headers = headers;
     }
     beforeParse(response) {
-        this.dispatch('parse:before');
+        this.dispatch("parse:before");
         this.response = response;
         return this;
     }
     async parse(request) {
-        this.dispatch('parse:parsing');
+        this.dispatch("parse:parsing");
         if (request.response) {
             if (request.response.status != 204) {
                 this.data = await request.response.json();
             }
         }
-        this.dispatch('parse', this.data);
+        this.dispatch("parse", this.data);
         return request;
     }
     afterParse(request) {
-        if (request && request.response && request.response.status >= 400 && this.data.status) {
+        if (request &&
+            request.response &&
+            request.response.status >= 400 &&
+            this.data.status) {
             throw new RequestError(request.response.status, this.data.status);
         }
-        this.dispatch('parse:after');
+        this.dispatch("parse:after");
         return request;
     }
     afterFetch(request) {
-        this.dispatch('fetch', request.data);
-        this.dispatch('fetch:after');
+        this.dispatch("fetch", request.data);
+        this.dispatch("fetch:after");
         this.loading = false;
         return request;
     }
     afterAll(request) {
         if (request && request.response && request.response.ok) {
-            this.dispatch('complete', this);
+            this.dispatch("complete", this);
         }
         else {
-            this.dispatch('error');
-            throw new Error('Failed response, after all');
+            this.dispatch("error");
+            throw new Error("Failed response, after all");
         }
         return request;
     }

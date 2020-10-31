@@ -1,13 +1,13 @@
 
-import FilmModel from '../models/FilmModel';
+import UserModel from '../models/UserModel';
 import { Collection } from '../../src/index';
 
 /**
- * Film Collection
+ * User Collection
  *
  * @type Collection
  */
-export default class FilmCollection extends Collection
+export default class UserCollection extends Collection
 {
     /**
      * Endpoint key
@@ -16,13 +16,13 @@ export default class FilmCollection extends Collection
      *
      * @type string
      */
-    public endpoint: string = 'film';
+    public endpoint: string = 'user';
 
     /**
      * Model object instantiated by this collection
      *
-     * @type FilmModel
+     * @type UserModel
      */
     // @ts-ignore Because webpack attempts to autoload this
-    public model: FilmModel = FilmModel;
+    public model: UserModel = UserModel;
 }

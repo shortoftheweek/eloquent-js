@@ -1,5 +1,5 @@
-import Core from '../Core';
-import { IAttributes } from '../Interfaces';
+import Core from "../Core";
+import { IAttributes } from "../Interfaces";
 export default class Request extends Core {
     data: IAttributes;
     dataKey: string;

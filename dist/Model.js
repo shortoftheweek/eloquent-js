@@ -13,7 +13,7 @@ class Model extends ActiveRecord_1.default {
         this.relationshipCache = {};
         this.changed = {};
         this.cid = this.cidPrefix + Math.random().toString(36).substr(2, 5);
-        this.setHeader('Content-Type', 'application/json; charset=utf8');
+        this.setHeader("Content-Type", "application/json; charset=utf8");
         this.set(attributes);
     }
     static hydrate(attributes = {}, options = {}) {
@@ -25,7 +25,7 @@ class Model extends ActiveRecord_1.default {
     set(hash = {}) {
         super.set(hash, false);
         if (this.attributes.data && this.attributes.data.length) {
-            console.warn('This model is incorrectly getting collection data.', this);
+            console.warn("This model is incorrectly getting collection data.", this);
         }
         let key;
         for (key in hash) {
@@ -33,13 +33,13 @@ class Model extends ActiveRecord_1.default {
                 this.relationshipCache[key].set(hash[key]);
             }
         }
-        this.dispatch('set');
+        this.dispatch("set");
         return this;
     }
     async fetch(options = {}, queryParams = {}) {
         this.builder.identifier(options && options.id ? options.id : this.id);
         if (!(options && options.id) && !this.id) {
-            console.warn('Fetching model without ID is likely incorrect behavior.', this, this.id, this.toJSON());
+            console.warn("Fetching model without ID is likely incorrect behavior.", this, this.id, this.toJSON());
         }
         return await super.fetch(options, queryParams);
     }
@@ -49,7 +49,7 @@ class Model extends ActiveRecord_1.default {
         }
         var content = this.attr(relationshipName) || {};
         var model = new relationshipClass(content);
-        return this.relationshipCache[relationshipName] = model;
+        return (this.relationshipCache[relationshipName] = model);
     }
     hasMany(relationshipName, relationshipClass) {
         if (this.relationshipCache[relationshipName]) {
@@ -57,7 +57,7 @@ class Model extends ActiveRecord_1.default {
         }
         const content = this.attr(relationshipName) || { data: [] };
         const collection = relationshipClass.hydrate(content.data || content);
-        return this.relationshipCache[relationshipName] = collection;
+        return (this.relationshipCache[relationshipName] = collection);
     }
     validate(attributes, options = {}) {
         if (!this.validate || !options.validate) {

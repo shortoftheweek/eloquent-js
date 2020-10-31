@@ -1,7 +1,7 @@
-import CollectionIterator from './CollectionIterator';
-import ActiveRecord from './ActiveRecord';
-import Model from './Model';
-import { ICollectionMeta, IPagination, ISortOptions } from './Interfaces';
+import CollectionIterator from "./CollectionIterator";
+import ActiveRecord from "./ActiveRecord";
+import Model from "./Model";
+import { ICollectionMeta, IPagination, ISortOptions } from "./Interfaces";
 export default class Collection extends ActiveRecord implements Iterable<Model> {
     static hydrate<T>(models?: Model[], options?: object): any;
     get length(): number;

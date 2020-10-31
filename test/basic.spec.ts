@@ -1,4 +1,3 @@
-'use strict';
 
 import { expect } from 'chai';
 import FilmModel from './models/FilmModel';
@@ -7,7 +6,7 @@ import {
     ActiveRecord,
     Collection,
     Model,
-} from '../index';
+} from '../src/index';
 
 /**
  * Tests Model / ActiveRecord

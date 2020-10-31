@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 class Builder {
     constructor(activeRecord) {
-        this.id = '';
+        this.id = "";
         this.includes = [];
         this.queryParams = {};
         this.activeRecord = activeRecord;
@@ -14,15 +14,15 @@ class Builder {
         return this.activeRecord.modifiedEndpoint || this.activeRecord.endpoint;
     }
     get queryParamsAsString() {
-        let str = '';
+        let str = "";
         for (let key in this.queryParams) {
             let value = this.queryParams[key];
-            if (value != null && value != '') {
-                str += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value);
+            if (value != null && value != "") {
+                str += "&" + encodeURIComponent(key) + "=" + encodeURIComponent(value);
             }
         }
         if (this.includes.length) {
-            str += '&include=' + this.includes.join(',');
+            str += "&include=" + this.includes.join(",");
         }
         return str;
     }
@@ -30,13 +30,13 @@ class Builder {
         const baseUrl = this.baseUrl;
         const endpoint = this.endpoint;
         const queryParamStr = this.queryParamsAsString;
-        let urlBuilder = '';
+        let urlBuilder = "";
         urlBuilder += baseUrl;
-        urlBuilder += endpoint[0] === '/' ? endpoint : '/' + endpoint;
-        if (this.id !== '') {
-            urlBuilder += '/' + this.id;
+        urlBuilder += endpoint[0] === "/" ? endpoint : "/" + endpoint;
+        if (this.id !== "") {
+            urlBuilder += "/" + this.id;
         }
-        urlBuilder += '?' + queryParamStr;
+        urlBuilder += "?" + queryParamStr;
         return urlBuilder;
     }
     identifier(id) {

@@ -1,7 +1,7 @@
-import Builder from './Http/Builder';
-import Core from './Core';
-import Request from './Http/Request';
-import { IAttributes, IModelRequestOptions, IModelRequestQueryParams } from './Interfaces';
+import Builder from "./Http/Builder";
+import Core from "./Core";
+import Request from "./Http/Request";
+import { IAttributes, IModelRequestOptions, IModelRequestQueryParams } from "./Interfaces";
 export default class ActiveRecord extends Core {
     get b(): Builder;
     protected get isModel(): boolean;

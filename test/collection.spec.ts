@@ -1,185 +1,185 @@
-'use strict';
+// 'use strict';
 
-import { expect } from 'chai';
-import FilmModel from './models/FilmModel';
-import FilmCollection from './collections/FilmCollection';
-import {
-    ActiveRecord,
-    Collection,
-    Model,
-} from '../index';
-
-
-// -----------------------------------------------------------------------------
+// import { expect } from 'chai';
+// import FilmModel from './models/FilmModel';
+// import FilmCollection from './collections/FilmCollection';
+// import {
+//     ActiveRecord,
+//     Collection,
+//     Model,
+// } from '../src/index';
 
 
-const items: any = [
-    { name: 'Ashley', x: 1 },
-    { name: 'Briana', x: 2 },
-    { name: 'Charlotte', x: 3 },
-    { name: 'Danielle', x: 4 },
-    { name: 'Elizabeth', x: 5 },
-    { name: 'Fallon', x: 6 },
-];
-
-const options = {
-    meta: {
-        pagination: {
-            total: 1938,
-            count: 15,
-            per_page: 15,
-            current_page: 1,
-            total_pages: 130,
-        },
-    },
-};
+// // -----------------------------------------------------------------------------
 
 
-// -----------------------------------------------------------------------------
+// const items: any = [
+//     { name: 'Ashley', x: 1 },
+//     { name: 'Briana', x: 2 },
+//     { name: 'Charlotte', x: 3 },
+//     { name: 'Danielle', x: 4 },
+//     { name: 'Elizabeth', x: 5 },
+//     { name: 'Fallon', x: 6 },
+// ];
+
+// const options = {
+//     meta: {
+//         pagination: {
+//             total: 1938,
+//             count: 15,
+//             per_page: 15,
+//             current_page: 1,
+//             total_pages: 130,
+//         },
+//     },
+// };
 
 
-/**
- * Specific Collection Tests
- */
-describe('Specific Collection Tests', () => {
+// // -----------------------------------------------------------------------------
 
-    it('should hydrate with models by object', () => {
-        const collection: FilmCollection = FilmCollection.hydrate(items, options);
 
-        // Get attribute
-        const resultA: number = collection.length;
-        const resultB: FilmModel = <FilmModel> collection.at(0);
+// /**
+//  * Specific Collection Tests
+//  */
+// describe('Specific Collection Tests', () => {
 
-        expect(resultA).to.be.greaterThan(3);
-        expect(resultB.cid[0]).to.equal('c');
-    });
+//     it('should hydrate with models by object', () => {
+//         const collection: FilmCollection = FilmCollection.hydrate(items, options);
 
-    it('should have metadata', () => {
-        const collection: FilmCollection = FilmCollection.hydrate(items, options);
+//         // Get attribute
+//         const resultA: number = collection.length;
+//         const resultB: FilmModel = <FilmModel> collection.at(0);
 
-        expect(collection.pagination).to.be.a('object');
-        expect(collection.pagination.count).to.equal(15);
-    });
+//         expect(resultA).to.be.greaterThan(3);
+//         expect(resultB.cid[0]).to.equal('c');
+//     });
 
-    it('should remove model on shift', () => {
-        const collection: FilmCollection = FilmCollection.hydrate(items, options);
+//     it('should have metadata', () => {
+//         const collection: FilmCollection = FilmCollection.hydrate(items, options);
 
-        collection.shift();
+//         expect(collection.pagination).to.be.a('object');
+//         expect(collection.pagination.count).to.equal(15);
+//     });
 
-        expect(collection.length).to.equal(5);
-        expect(collection.at(0).attr('name')).to.equal('Briana');
-    });
+//     it('should remove model on shift', () => {
+//         const collection: FilmCollection = FilmCollection.hydrate(items, options);
 
-    it('should remove model on multiple shifts', () => {
-        const collection: FilmCollection = FilmCollection.hydrate(items, options);
+//         collection.shift();
 
-        collection.shift();
-        collection.shift();
-        collection.shift();
+//         expect(collection.length).to.equal(5);
+//         expect(collection.at(0).attr('name')).to.equal('Briana');
+//     });
 
-        expect(collection.length).to.equal(3);
-        expect(collection.at(0).attr('name')).to.equal('Danielle');
-    });
+//     it('should remove model on multiple shifts', () => {
+//         const collection: FilmCollection = FilmCollection.hydrate(items, options);
 
-    it('should remove model by specific item', () => {
-        const collection: FilmCollection = FilmCollection.hydrate(items, options);
-        const model: Model = collection.at(3);
+//         collection.shift();
+//         collection.shift();
+//         collection.shift();
 
-        collection.remove(model);
+//         expect(collection.length).to.equal(3);
+//         expect(collection.at(0).attr('name')).to.equal('Danielle');
+//     });
 
-        expect(collection.length).to.equal(5);
-        expect(collection.at(3).attr('name')).to.equal('Elizabeth');
-    });
+//     it('should remove model by specific item', () => {
+//         const collection: FilmCollection = FilmCollection.hydrate(items, options);
+//         const model: Model = collection.at(3);
 
-    it('should remove set of models by specific items', () => {
-        const collection: FilmCollection = FilmCollection.hydrate(items, options);
-        const itemz: Model[] = [
-            collection.at(2),
-            collection.at(4),
-        ];
+//         collection.remove(model);
 
-        collection.remove(itemz);
+//         expect(collection.length).to.equal(5);
+//         expect(collection.at(3).attr('name')).to.equal('Elizabeth');
+//     });
 
-        expect(collection.length).to.equal(4);
-        expect(collection.at(2).attr('name')).to.equal('Danielle');
-        expect(collection.at(3).attr('name')).to.equal('Fallon');
-    });
+//     it('should remove set of models by specific items', () => {
+//         const collection: FilmCollection = FilmCollection.hydrate(items, options);
+//         const itemz: Model[] = [
+//             collection.at(2),
+//             collection.at(4),
+//         ];
 
-    it('should retrieve first item', () => {
-        const collection: FilmCollection = FilmCollection.hydrate(items, options);
-        const model: Model = collection.first();
+//         collection.remove(itemz);
 
-        expect(model.attr('name')).to.equal('Ashley');
-    });
+//         expect(collection.length).to.equal(4);
+//         expect(collection.at(2).attr('name')).to.equal('Danielle');
+//         expect(collection.at(3).attr('name')).to.equal('Fallon');
+//     });
 
-    it('should retrieve last item', () => {
-        const collection: FilmCollection = FilmCollection.hydrate(items, options);
-        const model: Model = collection.last();
+//     it('should retrieve first item', () => {
+//         const collection: FilmCollection = FilmCollection.hydrate(items, options);
+//         const model: Model = collection.first();
 
-        expect(model.attr('name')).to.equal('Fallon');
-    });
+//         expect(model.attr('name')).to.equal('Ashley');
+//     });
 
-    it('should sort regular by key', () => {
-        const collection: FilmCollection = FilmCollection.hydrate(items, options);
+//     it('should retrieve last item', () => {
+//         const collection: FilmCollection = FilmCollection.hydrate(items, options);
+//         const model: Model = collection.last();
 
-        // sort
-        collection.sort({
-            key: 'x',
-        });
+//         expect(model.attr('name')).to.equal('Fallon');
+//     });
 
-        expect(collection.at(0).attr('name')).to.equal('Ashley');
-    });
+//     it('should sort regular by key', () => {
+//         const collection: FilmCollection = FilmCollection.hydrate(items, options);
 
-    it('should sort reverse by key', () => {
-        const collection: FilmCollection = FilmCollection.hydrate(items, options);
+//         // sort
+//         collection.sort({
+//             key: 'x',
+//         });
 
-        // sort
-        collection.sort({
-            key: 'x',
-            reverse: true,
-        });
+//         expect(collection.at(0).attr('name')).to.equal('Ashley');
+//     });
 
-        expect(collection.at(0).attr('name')).to.equal('Fallon');
-    });
+//     it('should sort reverse by key', () => {
+//         const collection: FilmCollection = FilmCollection.hydrate(items, options);
 
-    it('should clone object, but have different instances', () => {
-        const collection: FilmCollection = FilmCollection.hydrate(items, options);
-        const newCollection: FilmCollection = collection.clone();
+//         // sort
+//         collection.sort({
+//             key: 'x',
+//             reverse: true,
+//         });
 
-        expect(collection.length).to.equal(newCollection.length);
-        expect(collection.at(0).attr('name')).to.equal(newCollection.at(0).attr('name'));
-        expect(collection.at(0).cid).to.not.be.equal(collection.at(1).cid);
-    });
+//         expect(collection.at(0).attr('name')).to.equal('Fallon');
+//     });
 
-    it('should pluck name attributes', () => {
-        const collection: FilmCollection = FilmCollection.hydrate(items, options);
-        var plucked = collection.pluck('name');
+//     it('should clone object, but have different instances', () => {
+//         const collection: FilmCollection = FilmCollection.hydrate(items, options);
+//         const newCollection: FilmCollection = collection.clone();
 
-        expect(plucked[2]).to.equal('Charlotte');
-    });
+//         expect(collection.length).to.equal(newCollection.length);
+//         expect(collection.at(0).attr('name')).to.equal(newCollection.at(0).attr('name'));
+//         expect(collection.at(0).cid).to.not.be.equal(collection.at(1).cid);
+//     });
 
-    it('should find items by where', () => {
-        const collection: FilmCollection = FilmCollection.hydrate(items, options);
+//     it('should pluck name attributes', () => {
+//         const collection: FilmCollection = FilmCollection.hydrate(items, options);
+//         var plucked = collection.pluck('name');
 
-        // sort
-        const newCollection: FilmCollection = collection.where({
-            name: 'Danielle',
-        }).where({
-            x: 4,
-        });
+//         expect(plucked[2]).to.equal('Charlotte');
+//     });
 
-        expect(newCollection.at(0).attr('name')).to.equal('Danielle');
-    });
+//     it('should find items by where', () => {
+//         const collection: FilmCollection = FilmCollection.hydrate(items, options);
 
-    it('should find items by firstWhere', () => {
-        const collection: FilmCollection = FilmCollection.hydrate(items, options);
+//         // sort
+//         const newCollection: FilmCollection = collection.where({
+//             name: 'Danielle',
+//         }).where({
+//             x: 4,
+//         });
 
-        // sort
-        const model: FilmModel = collection.findWhere({
-            name: 'Danielle',
-        });
+//         expect(newCollection.at(0).attr('name')).to.equal('Danielle');
+//     });
 
-        expect(model.attr('name')).to.equal('Danielle');
-    });
+//     it('should find items by firstWhere', () => {
+//         const collection: FilmCollection = FilmCollection.hydrate(items, options);
 
-});
+//         // sort
+//         const model: FilmModel = collection.findWhere({
+//             name: 'Danielle',
+//         });
+
+//         expect(model.attr('name')).to.equal('Danielle');
+//     });
+
+// });

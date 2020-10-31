@@ -19,12 +19,10 @@ class Collection extends ActiveRecord_1.default {
         };
         this.model = Model_1.default;
         this.models = [];
-        this.dataKey = 'data';
-        this.sortKey = 'id';
-        this.setHeader('Content-Type', 'application/json; charset=utf8');
-        this.cid = this.cidPrefix + Math.random()
-            .toString(36)
-            .substr(2, 5);
+        this.dataKey = "data";
+        this.sortKey = "id";
+        this.setHeader("Content-Type", "application/json; charset=utf8");
+        this.cid = this.cidPrefix + Math.random().toString(36).substr(2, 5);
     }
     static hydrate(models = [], options = {}) {
         const collection = new this(options);
@@ -36,7 +34,7 @@ class Collection extends ActiveRecord_1.default {
         return this.models.length;
     }
     get modelId() {
-        return 'id';
+        return "id";
     }
     get pagination() {
         return this.meta.pagination;
@@ -50,9 +48,7 @@ class Collection extends ActiveRecord_1.default {
         if (model == undefined) {
             return this;
         }
-        const models = Array.isArray(model)
-            ? model
-            : [model];
+        const models = Array.isArray(model) ? model : [model];
         models.forEach((model) => {
             if (!(model instanceof Model_1.default)) {
                 model = new this.model(model);
@@ -64,15 +60,13 @@ class Collection extends ActiveRecord_1.default {
                 this.models.push(model);
             }
         });
-        this.dispatch('add');
+        this.dispatch("add");
         return this;
     }
     remove(model, options = {}) {
         let i = 0;
         let ii = 0;
-        const items = Array.isArray(model)
-            ? model
-            : [model];
+        const items = Array.isArray(model) ? model : [model];
         for (ii = 0; ii < items.length; ii++) {
             i = 0;
             while (i < this.models.length) {
@@ -84,26 +78,26 @@ class Collection extends ActiveRecord_1.default {
                 }
             }
         }
-        this.dispatch('remove');
+        this.dispatch("remove");
         return this;
     }
     set(model, options = {}) {
         this.reset();
-        if (model && model.hasOwnProperty('meta')) {
+        if (model && model.hasOwnProperty("meta")) {
             this.meta = model.meta;
         }
-        if (model && model.hasOwnProperty('data')) {
+        if (model && model.hasOwnProperty("data")) {
             this.add(model.data);
         }
         else {
             this.add(model);
         }
-        this.dispatch('set');
+        this.dispatch("set");
         return this;
     }
     reset() {
         this.models = [];
-        this.dispatch('reset');
+        this.dispatch("reset");
         return this;
     }
     clear() {
@@ -132,9 +126,7 @@ class Collection extends ActiveRecord_1.default {
             return void 0;
         }
         return this.where({
-            [this.modelId]: query instanceof Model_1.default
-                ? query.cid
-                : query,
+            [this.modelId]: query instanceof Model_1.default ? query.cid : query,
         }, true);
     }
     has(obj) {
@@ -159,9 +151,7 @@ class Collection extends ActiveRecord_1.default {
                 collection.add(model);
             }
         });
-        return first
-            ? collection.first()
-            : collection;
+        return first ? collection.first() : collection;
     }
     findWhere(attributes = {}) {
         return this.where(attributes, true);
@@ -191,7 +181,7 @@ class Collection extends ActiveRecord_1.default {
         return this;
     }
     pluck(attribute) {
-        return this.models.map(model => model.attr(attribute));
+        return this.models.map((model) => model.attr(attribute));
     }
     clone(attributes = {}) {
         const instance = new this.constructor();

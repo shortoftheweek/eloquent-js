@@ -1,6 +1,6 @@
 {
     "name": "eloquent-js",
-    "version": "0.3.0",
+    "version": "0.3.2",
     "description": "Laravel mock of Eloquet for Javascript",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -13,7 +13,10 @@
         "prepare": "npm run build",
         "prepublishOnly": "npm test && npm run lint",
         "preversion": "npm run lint",
-        "test": "ts-mocha -p tsconfig.json test/**/*.spec.ts",
+        "test_bs": "ts-mocha -p tsconfig.json test/**/*.spec.ts",
+
+        "NOTE_ABOUT_TEST": "THIS HAS TO BE RUN IN LEGACY TERMINAL ON WINDOWS. NOT CMDR. NOT POWERSHELL.",
+        "test": "mocha -r ts-node/register test/**/*.spec.ts",
         "version": "npm run format && git add -A src"
     },
     "repository": {
@@ -36,7 +39,9 @@
         "lodash": "^4.17.15",
         "mocha": "^7.2.0",
         "node-fetch": "^2.6.0",
+        "prettier": "^2.1.2",
         "ts-node": "^8.10.2",
+        "tslint": "^6.1.3",
         "typescript": "^3.9.3"
     },
     "devDependencies": {

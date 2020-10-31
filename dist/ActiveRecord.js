@@ -7,20 +7,20 @@ class ActiveRecord extends Core_1.default {
     constructor(options = {}) {
         super(options);
         this.attributes = new Object();
-        this.baseUrl = '/v1';
+        this.baseUrl = "/v1";
         this.body = null;
         this.cacheable = true;
-        this.cid = '';
-        this.endpoint = '';
+        this.cid = "";
+        this.endpoint = "";
         this.headers = {};
-        this.id = '';
+        this.id = "";
         this.limit = 15;
         this.loading = false;
         this.meta = {};
         this.modifiedEndpoint = null;
         this.page = 1;
-        this.cidPrefix = 'c';
-        this.dataKey = 'data';
+        this.cidPrefix = "c";
+        this.dataKey = "data";
         Object.assign(this, options);
         this.lastRequest = {};
         this.builder = new Builder_1.default(this);
@@ -44,11 +44,11 @@ class ActiveRecord extends Core_1.default {
                 this[key] = hash[key];
             }
         }
-        if (hash && hash['id']) {
+        if (hash && hash["id"]) {
             this.id = hash.id;
         }
         if (trigger) {
-            this.dispatch('set');
+            this.dispatch("set");
         }
         return this;
     }
@@ -85,39 +85,35 @@ class ActiveRecord extends Core_1.default {
         return this.post(attributes);
     }
     delete(attributes = null) {
-        const url = this.builder
-            .identifier(this.id || (attributes ? attributes.id : ''))
-            .url;
+        const url = this.builder.identifier(this.id || (attributes ? attributes.id : "")).url;
         if (this.builder.id) {
             var model = this.find(attributes);
             this.remove(model);
         }
         const body = null;
         const headers = this.headers;
-        const method = 'DELETE';
+        const method = "DELETE";
         return this._fetch(null, {}, method, body, headers);
     }
     post(attributes = null) {
         const url = this.builder.url;
         const body = attributes || this.attributes;
         const headers = this.headers;
-        const method = 'POST';
+        const method = "POST";
         return this._fetch(null, {}, method, body, headers);
     }
     put(attributes) {
         const url = this.builder.url;
         const body = attributes || this.attributes;
         const headers = this.headers;
-        const method = 'PUT';
+        const method = "PUT";
         return this._fetch(null, {}, method, body, headers);
     }
     save(attributes = null) {
-        const url = this.builder
-            .identifier(this.id || (attributes ? attributes.id : ''))
-            .url;
+        const url = this.builder.identifier(this.id || (attributes ? attributes.id : "")).url;
         const body = attributes || this.attributes;
         const headers = this.headers;
-        const method = this.id ? 'PUT' : 'POST';
+        const method = this.id ? "PUT" : "POST";
         return this._fetch(null, {}, method, body, headers);
     }
     add(x) { }
@@ -126,15 +122,12 @@ class ActiveRecord extends Core_1.default {
         this.attributes = {};
     }
     async find(id, queryParams = {}) {
-        return await this.fetch({ id }, queryParams)
-            .then(request => {
+        return await this.fetch({ id }, queryParams).then((request) => {
             return this;
         });
     }
     file(name, file) {
-        const url = this.builder
-            .identifier(this.id)
-            .url;
+        const url = this.builder.identifier(this.id).url;
         const formData = new FormData();
         if (file instanceof HTMLInputElement) {
             file = file.files[0];
@@ -145,13 +138,12 @@ class ActiveRecord extends Core_1.default {
         else if (file instanceof File) {
         }
         else {
-            console.warn('File provided unacceptable type.');
+            console.warn("File provided unacceptable type.");
         }
-        this.unsetHeader('Content-Type');
+        this.unsetHeader("Content-Type");
         formData.append(name, file);
-        return this._fetch(null, {}, 'POST', formData)
-            .then((request) => {
-            this.dispatch('file:complete', this);
+        return this._fetch(null, {}, "POST", formData).then((request) => {
+            this.dispatch("file:complete", this);
             return request;
         });
     }
@@ -165,7 +157,8 @@ class ActiveRecord extends Core_1.default {
         return this._fetch(this.lastRequest.options, this.lastRequest.queryParams, this.lastRequest.method, this.lastRequest.body, this.lastRequest.headers);
     }
     useModifiedEndpoint(activeRecord) {
-        this.modifiedEndpoint = activeRecord.endpoint + '/' + activeRecord.id + '/' + this.endpoint;
+        this.modifiedEndpoint =
+            activeRecord.endpoint + "/" + activeRecord.id + "/" + this.endpoint;
         return this;
     }
     setBody(value) {
@@ -192,7 +185,7 @@ class ActiveRecord extends Core_1.default {
         return this;
     }
     unsetId() {
-        this.id = '';
+        this.id = "";
         return this;
     }
     unsetHeader(header) {
@@ -215,7 +208,7 @@ class ActiveRecord extends Core_1.default {
         return this;
     }
     setToken(token) {
-        this.setHeader('Authorization', 'Bearer ' + token);
+        this.setHeader("Authorization", "Bearer " + token);
         return this;
     }
     _fetch(options = {}, queryParams = {}, method = null, body = null, headers = null) {
@@ -228,7 +221,7 @@ class ActiveRecord extends Core_1.default {
         };
         this.requestTime = Date.now();
         if (!this.cacheable) {
-            this.builder.qp('cb', Date.now());
+            this.builder.qp("cb", Date.now());
         }
         for (let key in queryParams) {
             this.builder.qp(key, queryParams[key]);
@@ -237,34 +230,32 @@ class ActiveRecord extends Core_1.default {
             this.builder.identifier(options.id);
         }
         const url = this.builder.url;
-        this.dispatch('requesting', this);
+        this.dispatch("requesting", this);
         this.loading = true;
-        var request = this.request = new Request_1.default(url, {
+        var request = (this.request = new Request_1.default(url, {
             dataKey: this.dataKey,
-        });
-        request.on('parse:after', e => {
-            method = method || 'get';
-            if (method.toLowerCase() === 'post') {
+        }));
+        request.on("parse:after", (e) => {
+            method = method || "get";
+            if (method.toLowerCase() === "post") {
                 this.add(request.data);
             }
-            else if (method.toLowerCase() === 'delete') {
+            else if (method.toLowerCase() === "delete") {
             }
             else {
-                this.set(this.dataKey !== undefined
-                    ? request.data[this.dataKey]
-                    : request.data);
+                this.set(this.dataKey !== undefined ? request.data[this.dataKey] : request.data);
             }
             this.options({
                 meta: request.data.meta,
             });
-            this.dispatch('fetched', this);
+            this.dispatch("fetched", this);
         });
-        request.on('progress', e => {
-            this.dispatch('progress', e.data);
+        request.on("progress", (e) => {
+            this.dispatch("progress", e.data);
         });
-        request.on('complete', e => {
+        request.on("complete", (e) => {
             this.loading = false;
-            this.dispatch('complete');
+            this.dispatch("complete");
         });
         return request.fetch(method, body || this.body, headers || this.headers);
     }
