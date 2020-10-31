@@ -40,7 +40,9 @@ class ActiveRecord extends Core_1.default {
         var possibleSetters = Object.getOwnPropertyDescriptors(this.__proto__);
         for (let key in hash) {
             this.attributes[key] = hash[key];
-            if (possibleSetters && possibleSetters[key] && possibleSetters[key].set) {
+            if (possibleSetters &&
+                possibleSetters[key] &&
+                possibleSetters[key].set) {
                 this[key] = hash[key];
             }
         }
@@ -156,9 +158,39 @@ class ActiveRecord extends Core_1.default {
     runLast() {
         return this._fetch(this.lastRequest.options, this.lastRequest.queryParams, this.lastRequest.method, this.lastRequest.body, this.lastRequest.headers);
     }
+    getUrlByMethod(method) {
+        let url = '';
+        let originalEndpoint = "";
+        if (method === "delete" && this.delete_endpoint) {
+            originalEndpoint = this.endpoint;
+            this.endpoint = this.delete_endpoint;
+        }
+        else if (method === "put" && this.put_endpoint) {
+            originalEndpoint = this.endpoint;
+            this.endpoint = this.put_endpoint;
+        }
+        else if (method === "post" && this.post_endpoint) {
+            originalEndpoint = this.endpoint;
+            this.endpoint = this.post_endpoint;
+        }
+        if (this.referenceForModifiedEndpoint && this.modifiedEndpoint) {
+            this.useModifiedEndpoint(this.referenceForModifiedEndpoint);
+        }
+        url = this.builder.url;
+        this.endpoint = originalEndpoint;
+        return url;
+    }
     useModifiedEndpoint(activeRecord) {
+        this.referenceForModifiedEndpoint = activeRecord;
+        if (activeRecord.id == null) {
+            console.warn("Modified endpoints usually have an ID signature. Are you sure this is right?");
+        }
         this.modifiedEndpoint =
-            activeRecord.endpoint + "/" + activeRecord.id + "/" + this.endpoint;
+            activeRecord.endpoint +
+                "/" +
+                activeRecord.id +
+                (activeRecord.id ? "/" : "") +
+                this.endpoint;
         return this;
     }
     setBody(value) {
@@ -166,6 +198,7 @@ class ActiveRecord extends Core_1.default {
         return this;
     }
     setEndpoint(endpoint) {
+        this.referenceForModifiedEndpoint = undefined;
         this.modifiedEndpoint = null;
         this.endpoint = endpoint;
         return this;
@@ -212,6 +245,7 @@ class ActiveRecord extends Core_1.default {
         return this;
     }
     _fetch(options = {}, queryParams = {}, method = null, body = null, headers = null) {
+        method = method ? method.toLoweCase() : "get";
         this.lastRequest = {
             options,
             queryParams,
@@ -229,7 +263,7 @@ class ActiveRecord extends Core_1.default {
         if (options && options.id) {
             this.builder.identifier(options.id);
         }
-        const url = this.builder.url;
+        const url = this.getUrlByMethod(method);
         this.dispatch("requesting", this);
         this.loading = true;
         var request = (this.request = new Request_1.default(url, {
@@ -243,7 +277,9 @@ class ActiveRecord extends Core_1.default {
             else if (method.toLowerCase() === "delete") {
             }
             else {
-                this.set(this.dataKey !== undefined ? request.data[this.dataKey] : request.data);
+                this.set(this.dataKey !== undefined
+                    ? request.data[this.dataKey]
+                    : request.data);
             }
             this.options({
                 meta: request.data.meta,

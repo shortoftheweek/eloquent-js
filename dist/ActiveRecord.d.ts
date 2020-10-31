@@ -11,6 +11,9 @@ export default class ActiveRecord extends Core {
     cacheable: boolean;
     cid: string;
     endpoint: string;
+    delete_endpoint: string | undefined;
+    post_endpoint: string | undefined;
+    put_endpoint: string | undefined;
     headers: any;
     id: string;
     limit: number;
@@ -18,12 +21,14 @@ export default class ActiveRecord extends Core {
     meta: any;
     modifiedEndpoint: string | null;
     page: number;
+    parent: any;
     request?: Request;
     requestTime: number;
     protected builder: Builder;
     protected cidPrefix: string;
     protected dataKey: string | undefined;
     protected lastRequest: any;
+    private referenceForModifiedEndpoint;
     constructor(options?: any);
     attr(key: string): string | number | null;
     set(hash?: IAttributes, trigger?: boolean): any;
@@ -43,6 +48,7 @@ export default class ActiveRecord extends Core {
     fetch(options?: IModelRequestOptions | null, queryParams?: IModelRequestQueryParams): Promise<void | Request | Response>;
     upload(name: string, file: HTMLInputElement | FileList | File): Promise<void | Request | Response>;
     runLast(): any;
+    getUrlByMethod(method: string): string;
     useModifiedEndpoint(activeRecord: ActiveRecord): any;
     setBody(value: any): any;
     setEndpoint(endpoint: string): any;

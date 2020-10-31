@@ -47,7 +47,10 @@ describe('Specific Model Tests', () => {
 
         // Get attribute
         // console.log(model.user.parent);
-        console.log(model.user.b.url);
+        // console.log(model.user.post_endpoint);
+        // console.log(model.user.b.url);
+        console.log(model.getUrlByMethod('post'));
+        console.log(model.user.getUrlByMethod('post'));
         // console.log(model.user.at(0).b.url);
         // console.log(model.firstUser.b.url);
 

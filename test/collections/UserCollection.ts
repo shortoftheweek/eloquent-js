@@ -19,6 +19,11 @@ export default class UserCollection extends Collection
     public endpoint: string = 'user';
 
     /**
+     * Test endpoint for POST
+     */
+    public post_endpoint: string = 'user_post';
+
+    /**
      * Model object instantiated by this collection
      *
      * @type UserModel

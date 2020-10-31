@@ -49,6 +49,8 @@ class Model extends ActiveRecord_1.default {
         }
         var content = this.attr(relationshipName) || {};
         var model = new relationshipClass(content);
+        model.parent = this;
+        model.useModifiedEndpoint(this);
         return (this.relationshipCache[relationshipName] = model);
     }
     hasMany(relationshipName, relationshipClass) {
@@ -57,6 +59,8 @@ class Model extends ActiveRecord_1.default {
         }
         const content = this.attr(relationshipName) || { data: [] };
         const collection = relationshipClass.hydrate(content.data || content);
+        collection.parent = this;
+        collection.useModifiedEndpoint(this);
         return (this.relationshipCache[relationshipName] = collection);
     }
     validate(attributes, options = {}) {

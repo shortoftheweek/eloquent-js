@@ -18,7 +18,11 @@ class Builder {
         for (let key in this.queryParams) {
             let value = this.queryParams[key];
             if (value != null && value != "") {
-                str += "&" + encodeURIComponent(key) + "=" + encodeURIComponent(value);
+                str +=
+                    "&" +
+                        encodeURIComponent(key) +
+                        "=" +
+                        encodeURIComponent(value);
             }
         }
         if (this.includes.length) {
