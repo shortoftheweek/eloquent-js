@@ -19,9 +19,9 @@ class Collection extends ActiveRecord_1.default {
         };
         this.model = Model_1.default;
         this.models = [];
-        this.dataKey = "data";
-        this.sortKey = "id";
-        this.setHeader("Content-Type", "application/json; charset=utf8");
+        this.dataKey = 'data';
+        this.sortKey = 'id';
+        this.setHeader('Content-Type', 'application/json; charset=utf8');
         this.cid = this.cidPrefix + Math.random().toString(36).substr(2, 5);
     }
     static hydrate(models = [], options = {}) {
@@ -34,7 +34,7 @@ class Collection extends ActiveRecord_1.default {
         return this.models.length;
     }
     get modelId() {
-        return "id";
+        return 'id';
     }
     get pagination() {
         return this.meta.pagination;
@@ -60,7 +60,7 @@ class Collection extends ActiveRecord_1.default {
                 this.models.push(model);
             }
         });
-        this.dispatch("add");
+        this.dispatch('add');
         return this;
     }
     remove(model, options = {}) {
@@ -78,26 +78,26 @@ class Collection extends ActiveRecord_1.default {
                 }
             }
         }
-        this.dispatch("remove");
+        this.dispatch('remove');
         return this;
     }
     set(model, options = {}) {
         this.reset();
-        if (model && model.hasOwnProperty("meta")) {
+        if (model && model.hasOwnProperty('meta')) {
             this.meta = model.meta;
         }
-        if (model && model.hasOwnProperty("data")) {
+        if (model && model.hasOwnProperty('data')) {
             this.add(model.data);
         }
         else {
             this.add(model);
         }
-        this.dispatch("set");
+        this.dispatch('set');
         return this;
     }
     reset() {
         this.models = [];
-        this.dispatch("reset");
+        this.dispatch('reset');
         return this;
     }
     clear() {

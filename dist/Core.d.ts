@@ -1,5 +1,5 @@
-import { Dispatcher } from "dispatcher";
-import { IDispatcher } from "./Interfaces";
+import { Dispatcher } from 'dispatcher';
+import { IDispatcher } from './Interfaces';
 export default class Core extends Dispatcher implements IDispatcher {
     constructor(options?: object);
     trigger(eventName: string, data?: any): void;

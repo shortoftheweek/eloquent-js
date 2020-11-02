@@ -7,20 +7,20 @@ class ActiveRecord extends Core_1.default {
     constructor(options = {}) {
         super(options);
         this.attributes = new Object();
-        this.baseUrl = "/v1";
+        this.baseUrl = '/v1';
         this.body = null;
         this.cacheable = true;
-        this.cid = "";
-        this.endpoint = "";
+        this.cid = '';
+        this.endpoint = '';
         this.headers = {};
-        this.id = "";
+        this.id = '';
         this.limit = 15;
         this.loading = false;
         this.meta = {};
         this.modifiedEndpoint = null;
         this.page = 1;
-        this.cidPrefix = "c";
-        this.dataKey = "data";
+        this.cidPrefix = 'c';
+        this.dataKey = 'data';
         Object.assign(this, options);
         this.lastRequest = {};
         this.builder = new Builder_1.default(this);
@@ -46,11 +46,11 @@ class ActiveRecord extends Core_1.default {
                 this[key] = hash[key];
             }
         }
-        if (hash && hash["id"]) {
+        if (hash && hash['id']) {
             this.id = hash.id;
         }
         if (trigger) {
-            this.dispatch("set");
+            this.dispatch('set');
         }
         return this;
     }
@@ -87,35 +87,35 @@ class ActiveRecord extends Core_1.default {
         return this.post(attributes);
     }
     delete(attributes = null) {
-        const url = this.builder.identifier(this.id || (attributes ? attributes.id : "")).url;
+        const url = this.builder.identifier(this.id || (attributes ? attributes.id : '')).url;
         if (this.builder.id) {
             var model = this.find(attributes);
             this.remove(model);
         }
         const body = null;
         const headers = this.headers;
-        const method = "DELETE";
+        const method = 'DELETE';
         return this._fetch(null, {}, method, body, headers);
     }
     post(attributes = null) {
         const url = this.builder.url;
         const body = attributes || this.attributes;
         const headers = this.headers;
-        const method = "POST";
+        const method = 'POST';
         return this._fetch(null, {}, method, body, headers);
     }
     put(attributes) {
         const url = this.builder.url;
         const body = attributes || this.attributes;
         const headers = this.headers;
-        const method = "PUT";
+        const method = 'PUT';
         return this._fetch(null, {}, method, body, headers);
     }
     save(attributes = null) {
-        const url = this.builder.identifier(this.id || (attributes ? attributes.id : "")).url;
+        const url = this.builder.identifier(this.id || (attributes ? attributes.id : '')).url;
         const body = attributes || this.attributes;
         const headers = this.headers;
-        const method = this.id ? "PUT" : "POST";
+        const method = this.id ? 'PUT' : 'POST';
         return this._fetch(null, {}, method, body, headers);
     }
     add(x) { }
@@ -140,12 +140,12 @@ class ActiveRecord extends Core_1.default {
         else if (file instanceof File) {
         }
         else {
-            console.warn("File provided unacceptable type.");
+            console.warn('File provided unacceptable type.');
         }
-        this.unsetHeader("Content-Type");
+        this.unsetHeader('Content-Type');
         formData.append(name, file);
-        return this._fetch(null, {}, "POST", formData).then((request) => {
-            this.dispatch("file:complete", this);
+        return this._fetch(null, {}, 'POST', formData).then((request) => {
+            this.dispatch('file:complete', this);
             return request;
         });
     }
@@ -160,16 +160,16 @@ class ActiveRecord extends Core_1.default {
     }
     getUrlByMethod(method) {
         let url = '';
-        let originalEndpoint = "";
-        if (method === "delete" && this.delete_endpoint) {
+        let originalEndpoint = this.endpoint;
+        if (method === 'delete' && this.delete_endpoint) {
             originalEndpoint = this.endpoint;
             this.endpoint = this.delete_endpoint;
         }
-        else if (method === "put" && this.put_endpoint) {
+        else if (method === 'put' && this.put_endpoint) {
             originalEndpoint = this.endpoint;
             this.endpoint = this.put_endpoint;
         }
-        else if (method === "post" && this.post_endpoint) {
+        else if (method === 'post' && this.post_endpoint) {
             originalEndpoint = this.endpoint;
             this.endpoint = this.post_endpoint;
         }
@@ -183,13 +183,13 @@ class ActiveRecord extends Core_1.default {
     useModifiedEndpoint(activeRecord) {
         this.referenceForModifiedEndpoint = activeRecord;
         if (activeRecord.id == null) {
-            console.warn("Modified endpoints usually have an ID signature. Are you sure this is right?");
+            console.warn('Modified endpoints usually have an ID signature. Are you sure this is right?');
         }
         this.modifiedEndpoint =
             activeRecord.endpoint +
-                "/" +
+                '/' +
                 activeRecord.id +
-                (activeRecord.id ? "/" : "") +
+                (activeRecord.id ? '/' : '') +
                 this.endpoint;
         return this;
     }
@@ -218,7 +218,7 @@ class ActiveRecord extends Core_1.default {
         return this;
     }
     unsetId() {
-        this.id = "";
+        this.id = '';
         return this;
     }
     unsetHeader(header) {
@@ -241,11 +241,11 @@ class ActiveRecord extends Core_1.default {
         return this;
     }
     setToken(token) {
-        this.setHeader("Authorization", "Bearer " + token);
+        this.setHeader('Authorization', 'Bearer ' + token);
         return this;
     }
     _fetch(options = {}, queryParams = {}, method = null, body = null, headers = null) {
-        method = method ? method.toLowerCase() : "get";
+        method = method ? method.toLowerCase() : 'get';
         this.lastRequest = {
             options,
             queryParams,
@@ -255,7 +255,7 @@ class ActiveRecord extends Core_1.default {
         };
         this.requestTime = Date.now();
         if (!this.cacheable) {
-            this.builder.qp("cb", Date.now());
+            this.builder.qp('cb', Date.now());
         }
         for (let key in queryParams) {
             this.builder.qp(key, queryParams[key]);
@@ -264,17 +264,17 @@ class ActiveRecord extends Core_1.default {
             this.builder.identifier(options.id);
         }
         const url = this.getUrlByMethod(method);
-        this.dispatch("requesting", this);
+        this.dispatch('requesting', this);
         this.loading = true;
         var request = (this.request = new Request_1.default(url, {
             dataKey: this.dataKey,
         }));
-        request.on("parse:after", (e) => {
-            method = method || "get";
-            if (method.toLowerCase() === "post") {
+        request.on('parse:after', (e) => {
+            method = method || 'get';
+            if (method.toLowerCase() === 'post') {
                 this.add(request.data);
             }
-            else if (method.toLowerCase() === "delete") {
+            else if (method.toLowerCase() === 'delete') {
             }
             else {
                 this.set(this.dataKey !== undefined
@@ -284,14 +284,14 @@ class ActiveRecord extends Core_1.default {
             this.options({
                 meta: request.data.meta,
             });
-            this.dispatch("fetched", this);
+            this.dispatch('fetched', this);
         });
-        request.on("progress", (e) => {
-            this.dispatch("progress", e.data);
+        request.on('progress', (e) => {
+            this.dispatch('progress', e.data);
         });
-        request.on("complete", (e) => {
+        request.on('complete', (e) => {
             this.loading = false;
-            this.dispatch("complete");
+            this.dispatch('complete');
         });
         return request.fetch(method, body || this.body, headers || this.headers);
     }
