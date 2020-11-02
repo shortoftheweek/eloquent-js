@@ -1,10 +1,10 @@
-import ActiveRecord from "./ActiveRecord";
-import Request from "./Http/Request";
+import ActiveRecord from './ActiveRecord';
+import Request from './Http/Request';
 import {
   IAttributes,
   IModelRequestOptions,
   IModelRequestQueryParams,
-} from "./Interfaces";
+} from './Interfaces';
 
 /**
  * [Eloquent description]
@@ -92,7 +92,7 @@ export default class Model extends ActiveRecord {
     this.cid = this.cidPrefix + Math.random().toString(36).substr(2, 5);
 
     // Set default content type header
-    this.setHeader("Content-Type", "application/json; charset=utf8");
+    this.setHeader('Content-Type', 'application/json; charset=utf8');
 
     // Set attributes
     this.set(attributes);
@@ -127,7 +127,7 @@ export default class Model extends ActiveRecord {
 
     // Check attributes if everything looks ok
     if (this.attributes.data && this.attributes.data.length) {
-      console.warn("This model is incorrectly getting collection data.", this);
+      console.warn('This model is incorrectly getting collection data.', this);
     }
 
     // Update any relationship caches that exist
@@ -140,7 +140,7 @@ export default class Model extends ActiveRecord {
     }
 
     // Trigger event
-    this.dispatch("set");
+    this.dispatch('set');
 
     return this;
   }
@@ -204,7 +204,7 @@ export default class Model extends ActiveRecord {
     // Check if ID exists
     if (!(options && options.id) && !this.id) {
       console.warn(
-        "Fetching model without ID is likely incorrect behavior.",
+        'Fetching model without ID is likely incorrect behavior.',
         this,
         this.id,
         this.toJSON()

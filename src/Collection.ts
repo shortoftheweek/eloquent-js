@@ -1,29 +1,29 @@
-import CollectionIterator from "./CollectionIterator";
-import ActiveRecord from "./ActiveRecord";
-import Model from "./Model";
+import CollectionIterator from './CollectionIterator';
+import ActiveRecord from './ActiveRecord';
+import Model from './Model';
 import {
   IAttributes,
   ICollectionMeta,
   IPagination,
   ISortOptions,
-} from "./Interfaces";
+} from './Interfaces';
 
 // Try `npm install @types/lodash` if it exists or add a new declaration (.d.ts) file containing `declare module 'lodash';`
 // @ts-ignore
-import * as _ from "lodash";
+import * as _ from 'lodash';
 
 /**
  * [Collection description]
  *
- * "meta": {
- *     "pagination": {
- *         "total": 1938,
- *         "count": 15,
- *         "per_page": 15,
- *         "current_page": 1,
- *         "total_pages": 130,
- *         "links": {
- *             "next": "http://api.sotw.com/v1/film?page=2"
+ * 'meta': {
+ *     'pagination': {
+ *         'total': 1938,
+ *         'count': 15,
+ *         'per_page': 15,
+ *         'current_page': 1,
+ *         'total_pages': 130,
+ *         'links': {
+ *             'next': 'http://api.sotw.com/v1/film?page=2'
  *         }
  *     }
  * }
@@ -66,7 +66,7 @@ export default class Collection
    * @return {string}
    */
   public get modelId(): string {
-    return "id";
+    return 'id';
   }
 
   /**
@@ -119,14 +119,14 @@ export default class Collection
    *
    * @type string
    */
-  protected dataKey: string | undefined = "data";
+  protected dataKey: string | undefined = 'data';
 
   /**
    * Change key we sort on
    *
    * @type {string}
    */
-  protected sortKey: string = "id";
+  protected sortKey: string = 'id';
 
   /**
    * Constructor
@@ -142,7 +142,7 @@ export default class Collection
     super(options);
 
     // Set default content type header
-    this.setHeader("Content-Type", "application/json; charset=utf8");
+    this.setHeader('Content-Type', 'application/json; charset=utf8');
 
     // Set defaults
     this.cid = this.cidPrefix + Math.random().toString(36).substr(2, 5);
@@ -199,7 +199,7 @@ export default class Collection
     });
 
     // Event for add
-    this.dispatch("add");
+    this.dispatch('add');
 
     return this;
   }
@@ -233,7 +233,7 @@ export default class Collection
     }
 
     // Event for add
-    this.dispatch("remove");
+    this.dispatch('remove');
 
     return this;
   }
@@ -253,7 +253,7 @@ export default class Collection
     // Check for `meta` on set, this sometimes happens
     // if we assign an entire bootstrapped JSON object
     // to the collection
-    if (model && model.hasOwnProperty("meta")) {
+    if (model && model.hasOwnProperty('meta')) {
       // @ts-ignore
       this.meta = model.meta;
     }
@@ -261,7 +261,7 @@ export default class Collection
     // Check for `meta` on set, this sometimes happens
     // if we assign an entire bootstrapped JSON object
     // to the collection
-    if (model && model.hasOwnProperty("data")) {
+    if (model && model.hasOwnProperty('data')) {
       // @ts-ignore
       this.add(model.data);
     } else {
@@ -270,7 +270,7 @@ export default class Collection
     }
 
     // Event for add
-    this.dispatch("set");
+    this.dispatch('set');
 
     return this;
   }
@@ -285,7 +285,7 @@ export default class Collection
     this.models = [];
 
     // Event for add
-    this.dispatch("reset");
+    this.dispatch('reset');
 
     return this;
   }

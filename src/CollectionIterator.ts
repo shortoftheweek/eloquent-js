@@ -1,5 +1,5 @@
-import Collection from "./Collection";
-import Model from "./Model";
+import Collection from './Collection';
+import Model from './Model';
 
 /**
  * Collection Iterator
