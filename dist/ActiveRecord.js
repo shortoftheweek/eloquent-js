@@ -245,7 +245,7 @@ class ActiveRecord extends Core_1.default {
         return this;
     }
     _fetch(options = {}, queryParams = {}, method = null, body = null, headers = null) {
-        method = method ? method.toLoweCase() : "get";
+        method = method ? method.toLowerCase() : "get";
         this.lastRequest = {
             options,
             queryParams,

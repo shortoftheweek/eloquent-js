@@ -799,7 +799,7 @@ export default class ActiveRecord extends Core {
     ): any {
         // Promise<void | Request | Response>
         // Normalize method
-        method = method ? method.toLoweCase() : "get";
+        method = method ? method.toLowerCase() : "get";
 
         // Save request params
         this.lastRequest = {
