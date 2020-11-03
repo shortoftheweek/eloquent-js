@@ -1,12 +1,13 @@
 import CollectionIterator from './CollectionIterator';
 import ActiveRecord from './ActiveRecord';
 import Model from './Model';
-import {
-  IAttributes,
-  ICollectionMeta,
-  IPagination,
-  ISortOptions,
-} from './Interfaces';
+import
+  {
+    IAttributes,
+    ICollectionMeta,
+    IPagination,
+    ISortOptions,
+  } from './Interfaces';
 
 // Try `npm install @types/lodash` if it exists or add a new declaration (.d.ts) file containing `declare module 'lodash';`
 // @ts-ignore
@@ -37,7 +38,8 @@ export default class Collection
    *
    * @type {Model[]}
    */
-  public static hydrate<T>(models: Model[] = [], options: object = {}): any {
+  public static hydrate<T>(models: Model[] = [], options: object = {}): any
+  {
     // Instantiate collection
     const collection = new this(options);
 
@@ -57,7 +59,8 @@ export default class Collection
    *
    * @return number
    */
-  public get length(): number {
+  public get length(): number
+  {
     return this.models.length;
   }
 
@@ -65,7 +68,8 @@ export default class Collection
    * @todo Replace this based on Model
    * @return {string}
    */
-  public get modelId(): string {
+  public get modelId(): string
+  {
     return 'id';
   }
 
@@ -74,7 +78,8 @@ export default class Collection
    *
    * @return IPagination
    */
-  public get pagination(): IPagination {
+  public get pagination(): IPagination
+  {
     return this.meta.pagination;
   }
 
@@ -138,7 +143,8 @@ export default class Collection
    *
    * @param {object = {}} options
    */
-  constructor(options: any = {}) {
+  constructor(options: any = {})
+  {
     super(options);
 
     // Set default content type header
@@ -153,7 +159,8 @@ export default class Collection
    *
    * @return {any}
    */
-  public toJSON(): object {
+  public toJSON(): object
+  {
     return JSON.parse(JSON.stringify(this.models));
   }
 
@@ -164,7 +171,8 @@ export default class Collection
    *
    * @return {any}
    */
-  public sync(): any {
+  public sync(): any
+  {
     // Not implemented
     // call parent
   }
@@ -176,24 +184,30 @@ export default class Collection
    * @param  {any = {}} options
    * @return Collection
    */
-  public add(model: Model[] | Model | object, options: any = {}): Collection {
-    if (model == undefined) {
+  public add(model: Model[] | Model | object, options: any = {}): Collection
+  {
+    if (model == undefined)
+    {
       return this;
     }
 
     const models: any = Array.isArray(model) ? model : [model];
 
     // Iterate through models
-    models.forEach((model: any) => {
+    models.forEach((model: any) =>
+    {
       // Data supplied is an object that must be instantiated
-      if (!(model instanceof Model)) {
+      if (!(model instanceof Model))
+      {
         // @ts-ignore
         model = new this.model(model);
       }
 
-      if (options.prepend) {
+      if (options.prepend)
+      {
         this.models.unshift(model);
-      } else {
+      } else
+      {
         this.models.push(model);
       }
     });
@@ -214,19 +228,24 @@ export default class Collection
   public remove(
     model: Model[] | Model | object,
     options: any = {}
-  ): Collection {
+  ): Collection
+  {
     let i: number = 0;
     let ii: number = 0;
     const items: any = Array.isArray(model) ? model : [model];
 
     // Take the first model in our list and iterate through our local
     // models. If we are successful, call recursive
-    for (ii = 0; ii < items.length; ii++) {
+    for (ii = 0; ii < items.length; ii++)
+    {
       i = 0;
-      while (i < this.models.length) {
-        if (this.models[i] == items[ii]) {
+      while (i < this.models.length)
+      {
+        if (this.models[i] == items[ii])
+        {
           this.models.splice(i, 1);
-        } else {
+        } else
+        {
           ++i;
         }
       }
@@ -247,13 +266,15 @@ export default class Collection
    * @param  {any = {}} options
    * @return {Collection}
    */
-  public set(model: Model[] | Model | object, options: any = {}): Collection {
+  public set(model: Model[] | Model | object, options: any = {}): Collection
+  {
     this.reset();
 
     // Check for `meta` on set, this sometimes happens
     // if we assign an entire bootstrapped JSON object
     // to the collection
-    if (model && model.hasOwnProperty('meta')) {
+    if (model && model.hasOwnProperty('meta'))
+    {
       // @ts-ignore
       this.meta = model.meta;
     }
@@ -261,10 +282,12 @@ export default class Collection
     // Check for `meta` on set, this sometimes happens
     // if we assign an entire bootstrapped JSON object
     // to the collection
-    if (model && model.hasOwnProperty('data')) {
+    if (model && model.hasOwnProperty('data'))
+    {
       // @ts-ignore
       this.add(model.data);
-    } else {
+    } else
+    {
       // @ts-ignore
       this.add(model);
     }
@@ -281,7 +304,8 @@ export default class Collection
    * @todo Might want to do more with this
    * @return {Collection}
    */
-  public reset(): Collection {
+  public reset(): Collection
+  {
     this.models = [];
 
     // Event for add
@@ -295,8 +319,36 @@ export default class Collection
    *
    * Alias for Reset
    */
-  public clear(): Collection {
+  public clear(): Collection
+  {
     return this.reset();
+  }
+
+  /**
+   * Delete Model
+   *
+   * @todo There's a ton to do here too
+   */
+  public delete(attributes: any = null)
+  {
+    // Query params
+    const url: string = this.builder.identifier(
+      this.id || (attributes ? attributes.id : ''),
+    ).url;
+
+    // Check for identifier
+    if (this.builder.id)
+    {
+      var model = this.find(attributes);
+      this.remove(model);
+    }
+
+    // Attributes
+    const body: any = null;
+    const headers: any = this.headers;
+    const method: string = 'DELETE';
+
+    return this._fetch(null, {}, method, body, headers);
   }
 
   /**
@@ -309,7 +361,8 @@ export default class Collection
   public push(
     model: Model[] | Model | object,
     options: object = {}
-  ): Collection {
+  ): Collection
+  {
     this.add(model, options);
 
     return this;
@@ -321,7 +374,8 @@ export default class Collection
    * @param  {object = {}} options
    * @return Collection
    */
-  public pop(options: object = {}): Collection {
+  public pop(options: object = {}): Collection
+  {
     const model: Model = this.at(this.length - 1);
 
     return this.remove(model, options);
@@ -337,7 +391,8 @@ export default class Collection
   public unshift(
     model: Model[] | Model | object,
     options: object = {}
-  ): Collection {
+  ): Collection
+  {
     return this.add(model, Object.assign({ prepend: true }, options));
   }
 
@@ -347,7 +402,8 @@ export default class Collection
    * @param  {object = {}} options
    * @return {any}
    */
-  public shift(options: object = {}): Collection {
+  public shift(options: object = {}): Collection
+  {
     const model: Model = this.at(0);
 
     return this.remove(model, options);
@@ -358,8 +414,9 @@ export default class Collection
    *
    * @return Model[]
    */
-  public slice(...params: any): Model[] {
-    return <Model[]>Array.prototype.slice.apply(this.models, params);
+  public slice(...params: any): Model[]
+  {
+    return <Model[]> Array.prototype.slice.apply(this.models, params);
   }
 
   /**
@@ -368,8 +425,10 @@ export default class Collection
    * @param  string | number  id
    * @return Model | undefined
    */
-  public get(query: Model | string | number): Model | undefined {
-    if (query == null) {
+  public get(query: Model | string | number): Model | undefined
+  {
+    if (query == null)
+    {
       return void 0;
     }
 
@@ -387,7 +446,8 @@ export default class Collection
    * @param  Model | object  obj
    * @return boolean
    */
-  public has(obj: Model | string | number): boolean {
+  public has(obj: Model | string | number): boolean
+  {
     return this.get(obj) != undefined;
   }
 
@@ -397,8 +457,10 @@ export default class Collection
    * @param  {number = 0} index
    * @return Model
    */
-  public at(index: number = 0): Model {
-    if (index < 0) {
+  public at(index: number = 0): Model
+  {
+    if (index < 0)
+    {
       index += this.length;
     }
 
@@ -410,7 +472,8 @@ export default class Collection
    *
    * @return {Model}
    */
-  public first(): Model {
+  public first(): Model
+  {
     return this.at(0);
   }
 
@@ -419,7 +482,8 @@ export default class Collection
    *
    * @return {Model}
    */
-  public last(): Model {
+  public last(): Model
+  {
     return this.at(this.length - 1);
   }
 
@@ -430,13 +494,16 @@ export default class Collection
    * @param  {boolean = false} first
    * @return {any}
    */
-  public where(attributes: any = {}, first: boolean = false): any /* Self */ {
+  public where(attributes: any = {}, first: boolean = false): any /* Self */
+  {
     // @ts-ignore
     const collection = new this.constructor();
 
     // @todo, this code sucks but I'm not spending all day here
-    _.map(this.models, (model: any) => {
-      if (_.find(model, attributes)) {
+    _.map(this.models, (model: any) =>
+    {
+      if (_.find(model, attributes))
+      {
         collection.add(model);
       }
     });
@@ -449,7 +516,8 @@ export default class Collection
    * @param  {object = {}} attributes
    * @return Model
    */
-  public findWhere(attributes: object = {}): Model {
+  public findWhere(attributes: object = {}): Model
+  {
     return this.where(attributes, true);
   }
 
@@ -458,7 +526,8 @@ export default class Collection
    * @param  {string} cid
    * @return {Model}
    */
-  public findByCid(cid: string): Model | undefined {
+  public findByCid(cid: string): Model | undefined
+  {
     return _.find(this.models, { cid });
   }
 
@@ -467,7 +536,8 @@ export default class Collection
    * @param  {string} cid
    * @return {Model}
    */
-  public each(predicate: any): any {
+  public each(predicate: any): any
+  {
     return _.each(this.models, predicate);
   }
 
@@ -476,7 +546,8 @@ export default class Collection
    * @param  {string} cid
    * @return {Model}
    */
-  public filter(predicate: any): any {
+  public filter(predicate: any): any
+  {
     return _.filter(this.models, predicate);
   }
 
@@ -485,7 +556,8 @@ export default class Collection
    * @param  {string} cid
    * @return {Model}
    */
-  public find(predicate: any): any {
+  public find(predicate: any): any
+  {
     return _.find(this.models, predicate);
   }
 
@@ -498,16 +570,19 @@ export default class Collection
    * @param  {ISortOptions|null = null} options
    * @return {Collection}
    */
-  public sort(options: ISortOptions | null = null): Collection {
+  public sort(options: ISortOptions | null = null): Collection
+  {
     let key: string = this.sortKey;
 
     // Sort options
-    if (options !== null) {
+    if (options !== null)
+    {
       key = options.key;
     }
 
     // Sort
-    this.models = this.models.sort((a: any, b: any) => {
+    this.models = this.models.sort((a: any, b: any) =>
+    {
       return options && options.reverse
         ? (a.attr(key) - b.attr(key)) * -1
         : (a.attr(key) - b.attr(key)) * 1;
@@ -527,7 +602,8 @@ export default class Collection
    * @param  {string} attribute
    * @return {any}
    */
-  public pluck(attribute: string): any {
+  public pluck(attribute: string): any
+  {
     return this.models.map((model) => model.attr(attribute));
   }
 
@@ -537,7 +613,8 @@ export default class Collection
    * @param {object = {}} attributes
    * @return Collection
    */
-  public clone(attributes: object = {}) {
+  public clone(attributes: object = {})
+  {
     // @ts-ignore
     const instance = new this.constructor();
     instance.add(this.toJSON());
@@ -550,7 +627,8 @@ export default class Collection
    *
    * @return CollectionIterator
    */
-  public values(): CollectionIterator {
+  public values(): CollectionIterator
+  {
     return new CollectionIterator(this, CollectionIterator.ITERATOR_VALUES);
   }
 
@@ -559,7 +637,8 @@ export default class Collection
    *
    * @return CollectionIterator
    */
-  public keys(attributes: object = {}): CollectionIterator {
+  public keys(attributes: object = {}): CollectionIterator
+  {
     return new CollectionIterator(this, CollectionIterator.ITERATOR_KEYS);
   }
 
@@ -568,7 +647,8 @@ export default class Collection
    *
    * @return CollectionIterator
    */
-  public entries(attributes: object = {}): CollectionIterator {
+  public entries(attributes: object = {}): CollectionIterator
+  {
     return new CollectionIterator(this, CollectionIterator.ITERATOR_KEYSVALUES);
   }
 
@@ -578,14 +658,16 @@ export default class Collection
    * @param  {any} model
    * @return {boolean}
    */
-  private _isModel(model: any): boolean {
+  private _isModel(model: any): boolean
+  {
     return model instanceof Model;
   }
 
   /**
    * Iterator
    */
-  [Symbol.iterator](): Iterator<any> {
+  [Symbol.iterator](): Iterator<any>
+  {
     return new CollectionIterator(this, CollectionIterator.ITERATOR_VALUES);
   }
 }

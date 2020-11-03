@@ -376,12 +376,6 @@ export default class ActiveRecord extends Core {
             this.id || (attributes ? attributes.id : ''),
         ).url;
 
-        // Check for identifier
-        if (this.builder.id) {
-            var model = this.find(attributes);
-            this.remove(model);
-        }
-
         // Attributes
         const body: any = null;
         const headers: any = this.headers;

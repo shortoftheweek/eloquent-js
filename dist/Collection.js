@@ -103,6 +103,17 @@ class Collection extends ActiveRecord_1.default {
     clear() {
         return this.reset();
     }
+    delete(attributes = null) {
+        const url = this.builder.identifier(this.id || (attributes ? attributes.id : '')).url;
+        if (this.builder.id) {
+            var model = this.find(attributes);
+            this.remove(model);
+        }
+        const body = null;
+        const headers = this.headers;
+        const method = 'DELETE';
+        return this._fetch(null, {}, method, body, headers);
+    }
     push(model, options = {}) {
         this.add(model, options);
         return this;
