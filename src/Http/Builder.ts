@@ -5,7 +5,8 @@ import ActiveRecord from '../ActiveRecord';
  *
  * @type
  */
-export default class Builder {
+export default class Builder
+{
     /**
      * Base Url
      *
@@ -116,7 +117,9 @@ export default class Builder {
         urlBuilder += '?' + queryParamStr;
 
         // Clean URL
-        urlBuilder = urlBuilder.split('//').join('/');
+        // mk: We tried split/join at first but that created errors
+        // on "https://" and "//api.sotw.com..."
+        urlBuilder = urlBuilder.replace(/([a-zA-Z0-9])\/\//g, '$1/');
 
         return urlBuilder;
     }
