@@ -1,4 +1,4 @@
-import ActiveRecord from "../ActiveRecord";
+import ActiveRecord from '../ActiveRecord';
 
 /**
  * Builder
@@ -29,7 +29,7 @@ export default class Builder {
      *
      * @type string
      */
-    public id: string = "";
+    public id: string = '';
 
     /**
      * List of includes
@@ -67,25 +67,25 @@ export default class Builder {
      * @type string
      */
     public get queryParamsAsString(): string {
-        let str: string = "";
+        let str: string = '';
 
         // Combine query params
         // for (let [key, value] of this.queryParams) {
         for (let key in this.queryParams) {
             let value = this.queryParams[key];
 
-            if (value != null && value != "") {
+            if (value != null && value != '') {
                 str +=
-                    "&" +
+                    '&' +
                     encodeURIComponent(key) +
-                    "=" +
+                    '=' +
                     encodeURIComponent(value);
             }
         }
 
         // Add includes
         if (this.includes.length) {
-            str += "&include=" + this.includes.join(",");
+            str += '&include=' + this.includes.join(',');
         }
 
         return str;
@@ -101,19 +101,22 @@ export default class Builder {
         const endpoint: string = this.endpoint;
         const queryParamStr: string = this.queryParamsAsString;
 
-        let urlBuilder = "";
+        let urlBuilder = '';
 
         // Root API URI
         urlBuilder += baseUrl;
-        urlBuilder += endpoint[0] === "/" ? endpoint : "/" + endpoint;
+        urlBuilder += endpoint[0] === '/' ? endpoint : '/' + endpoint;
 
         // Check for ID
-        if (this.id !== "") {
-            urlBuilder += "/" + this.id;
+        if (this.id !== '') {
+            urlBuilder += '/' + this.id;
         }
 
         // Separate query string
-        urlBuilder += "?" + queryParamStr;
+        urlBuilder += '?' + queryParamStr;
+
+        // Clean URL
+        urlBuilder = urlBuilder.split('//').join('/');
 
         return urlBuilder;
     }
