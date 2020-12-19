@@ -1,4 +1,4 @@
-import ActiveRecord from "../ActiveRecord";
+import ActiveRecord from '../ActiveRecord';
 export default class Builder {
     get baseUrl(): string;
     get endpoint(): string;
