@@ -936,6 +936,10 @@ export default class ActiveRecord extends Core
             dataKey: this.dataKey,
         }));
 
+        // note: this *should* be set by fetch as well, but
+        // we have an issue right now we're working out
+        this.request.method = method;
+
         // After parse
         request.on('parse:after', e => this.FetchParseAfter(request, e, options));
         request.on('progress', e => this.FetchProgress(request, e, options));
@@ -983,12 +987,14 @@ export default class ActiveRecord extends Core
      */
     protected FetchParseAfter(request: Request, e: any, options: any = {})
     {
+        var method: string = request.method || 'get';
+
         // Add model
-        if (request.method.toLowerCase() === 'post')
+        if (method.toLowerCase() === 'post')
         {
             this.add(request.data);
         }
-        else if (request.method.toLowerCase() === 'delete')
+        else if (method.toLowerCase() === 'delete')
         {
             // Intentionally empty
         }

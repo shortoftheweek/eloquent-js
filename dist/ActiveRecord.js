@@ -277,6 +277,7 @@ class ActiveRecord extends Core_1.default {
         var request = (this.request = new Request_1.default(url, {
             dataKey: this.dataKey,
         }));
+        this.request.method = method;
         request.on('parse:after', e => this.FetchParseAfter(request, e, options));
         request.on('progress', e => this.FetchProgress(request, e, options));
         request.on('complete', e => this.FetchComplete(request, e, options));
@@ -290,10 +291,11 @@ class ActiveRecord extends Core_1.default {
         this.dispatch('progress', e.data);
     }
     FetchParseAfter(request, e, options = {}) {
-        if (request.method.toLowerCase() === 'post') {
+        var method = request.method || 'get';
+        if (method.toLowerCase() === 'post') {
             this.add(request.data);
         }
-        else if (request.method.toLowerCase() === 'delete') {
+        else if (method.toLowerCase() === 'delete') {
         }
         else {
             var data = this.dataKey !== undefined ?
