@@ -8,6 +8,7 @@ class Collection extends ActiveRecord_1.default {
     constructor(options = {}) {
         super(options);
         this.atRelationship = [];
+        this.index = 0;
         this.meta = {
             pagination: {
                 total: 0,
@@ -21,7 +22,6 @@ class Collection extends ActiveRecord_1.default {
         this.model = Model_1.default;
         this.models = [];
         this.dataKey = 'data';
-        this.index = 0;
         this.sortKey = 'id';
         this.builder
             .qp('limit', this.limit)

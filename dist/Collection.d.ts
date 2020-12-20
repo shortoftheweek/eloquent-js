@@ -9,11 +9,11 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
     get modelId(): string;
     get pagination(): IPagination;
     atRelationship: string[];
+    index: number;
     meta: ICollectionMeta;
     model: Model;
     models: Model[];
     protected dataKey: string | undefined;
-    protected index: number;
     protected sortKey: string;
     constructor(options?: any);
     toJSON(): object;

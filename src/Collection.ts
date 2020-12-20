@@ -93,6 +93,12 @@ implements Iterable < Model > {
     public atRelationship: string[] = [];
 
     /**
+     * Get the next row
+     * Adjacent to first/last
+     */
+    public index: number = 0;
+
+    /**
      * Meta data associated with collection
      *
      * @type {ICollectionMeta}
@@ -134,12 +140,6 @@ implements Iterable < Model > {
      * @type string
      */
     protected dataKey: string | undefined = 'data';
-
-    /**
-     * Get the next row
-     * Adjacent to first/last
-     */
-    protected index: number = 0;
 
     /**
      * Change key we sort on
