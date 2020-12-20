@@ -49,6 +49,7 @@ export default class ActiveRecord extends Core {
     upload(name: string, file: HTMLInputElement | FileList | File): Promise<void | Request | Response>;
     runLast(): any;
     getUrlByMethod(method: string): string;
+    cancelModifiedEndpoint(): any;
     useModifiedEndpoint(activeRecord: ActiveRecord): any;
     setBody(value: any): any;
     setEndpoint(endpoint: string): any;

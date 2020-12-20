@@ -176,6 +176,11 @@ class ActiveRecord extends Core_1.default {
         this.endpoint = originalEndpoint;
         return url;
     }
+    cancelModifiedEndpoint() {
+        this.referenceForModifiedEndpoint = undefined;
+        this.modifiedEndpoint = null;
+        return this;
+    }
     useModifiedEndpoint(activeRecord) {
         this.referenceForModifiedEndpoint = activeRecord;
         if (activeRecord.id == null) {

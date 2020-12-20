@@ -210,7 +210,7 @@ export default class ActiveRecord extends Core {
      *
      * @type ActiveRecord
      */
-    private referenceForModifiedEndpoint: ActiveRecord | undefined;
+    private referenceForModifiedEndpoint: ActiveRecord | null | undefined;
 
     /**
      * Constructor
@@ -615,7 +615,7 @@ export default class ActiveRecord extends Core {
      * @return {any}
      */
     public cancelModifiedEndpoint(): any {
-        this.referenceForModifiedEndpoint = null;
+        this.referenceForModifiedEndpoint = undefined;
         this.modifiedEndpoint = null;
 
         return this;
