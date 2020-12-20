@@ -608,6 +608,20 @@ export default class ActiveRecord extends Core {
     // region Set Params
 
     /**
+     * We automatically assign modified endpoints through relationships
+     * like hasOne/hasMany, but sometimes we may not want to change that
+     * endpoint. This allows us to cancel the change.
+     *
+     * @return {any}
+     */
+    public cancelModifiedEndpoint(): any {
+        this.referenceForModifiedEndpoint = null;
+        this.modifiedEndpoint = null;
+
+        return this;
+    }
+
+    /**
      * Set specific endpoint override
      *
      * @param  {string} endpoint
