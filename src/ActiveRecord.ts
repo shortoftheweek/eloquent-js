@@ -1,24 +1,28 @@
 import Builder from './Http/Builder';
 import Core from './Core';
 import Request from './Http/Request';
-import {
+import
+{
     IAttributes,
     IModelRequestOptions,
     IModelRequestQueryParams,
-} from './Interfaces';
+}
+from './Interfaces';
 
 /**
  * ActiveRecord
  *
  * @type {[type]}
  */
-export default class ActiveRecord extends Core {
+export default class ActiveRecord extends Core
+{
     /**
      * Get builder reference
      *
      * @return Builder
      */
-    public get b(): Builder {
+    public get b(): Builder
+    {
         return this.builder;
     }
 
@@ -27,7 +31,8 @@ export default class ActiveRecord extends Core {
      *
      * @return boolean
      */
-    protected get isModel(): boolean {
+    protected get isModel(): boolean
+    {
         return this.builder.identifier !== undefined;
     }
 
@@ -166,7 +171,7 @@ export default class ActiveRecord extends Core {
      *
      * @type Request
      */
-    public request?: Request;
+    public request ? : Request;
 
     /**
      * Last Request Time
@@ -215,7 +220,8 @@ export default class ActiveRecord extends Core {
     /**
      * Constructor
      */
-    constructor(options: any = {}) {
+    constructor(options: any = {})
+    {
         super(options);
 
         // Set options on class
@@ -241,7 +247,8 @@ export default class ActiveRecord extends Core {
      *
      * @return string
      */
-    public attr(key: string): string | number | null {
+    public attr(key: string): string | number | null
+    {
         return this.attributes[key];
     }
 
@@ -252,11 +259,13 @@ export default class ActiveRecord extends Core {
      *
      * @return ActiveRecord
      */
-    public set(hash: IAttributes = {}, trigger: boolean = true): any {
+    public set(hash: IAttributes = {}, trigger: boolean = true): any
+    {
         // @ts-ignore
         var possibleSetters = Object.getOwnPropertyDescriptors(this.__proto__);
 
-        for (let key in hash) {
+        for (let key in hash)
+        {
             this.attributes[key] = hash[key];
 
             // Check for setters
@@ -264,19 +273,22 @@ export default class ActiveRecord extends Core {
                 possibleSetters &&
                 possibleSetters[key] &&
                 possibleSetters[key].set
-            ) {
+            )
+            {
                 // @ts-ignore
                 this[key] = hash[key];
             }
         }
 
         // Check for ID
-        if (hash && hash['id']) {
+        if (hash && hash['id'])
+        {
             this.id = hash.id;
         }
 
         // Trigger
-        if (trigger) {
+        if (trigger)
+        {
             this.dispatch('set');
         }
 
@@ -292,7 +304,8 @@ export default class ActiveRecord extends Core {
      *
      * @return ActiveRecord
      */
-    public unset(key: string): any {
+    public unset(key: string): any
+    {
         delete this.attributes[key];
 
         return this;
@@ -304,24 +317,38 @@ export default class ActiveRecord extends Core {
      * @param  {any} options
      * @return {ActiveRecord}
      */
-    public options(options: any = {}): any {
+    public options(options: any = {}): any
+    {
         // Override endpoint
-        if (options.endpoint) {
+        if (options.endpoint)
+        {
             this.setEndpoint(options.endpoint);
         }
 
         // Check options for headers
-        if (options.headers) {
+        if (options.headers)
+        {
             this.setHeaders(options.headers);
         }
 
         // Set metadata
-        if (options.meta) {
+        if (options.meta)
+        {
+            // Increase count
+            // mk: This is kind of wonky...
+            if (options.merge) {
+                if (options.meta.pagination.count && this.meta.pagination.count) {
+                    options.meta.pagination.count += this.meta.pagination.count;
+                }
+            }
+
+            // Set
             this.meta = options.meta;
         }
 
         // Check options for params
-        if (options.params || options.qp || options.queryParams) {
+        if (options.params || options.qp || options.queryParams)
+        {
             this.setQueryParams(
                 options.queryParams || options.qp || options.params,
             );
@@ -335,7 +362,8 @@ export default class ActiveRecord extends Core {
      *
      * @return object
      */
-    public toJSON(): object {
+    public toJSON(): object
+    {
         let json: any = this.attributes;
 
         // @todo is this code copasetic?
@@ -343,9 +371,11 @@ export default class ActiveRecord extends Core {
         var possibleGetters = Object.getOwnPropertyNames(this.__proto__);
 
         // Convert toJSON on subobjects so they stay in sync
-        for (var key of possibleGetters) {
+        for (var key of possibleGetters)
+        {
             // @ts-ignore
-            if (json[key] && this[key] && this[key].toJSON) {
+            if (json[key] && this[key] && this[key].toJSON)
+            {
                 // @ts-ignore
                 json[key] = this[key].toJSON();
             }
@@ -361,7 +391,8 @@ export default class ActiveRecord extends Core {
      *
      * @todo There's a ton to do here too
      */
-    public create(attributes: any) {
+    public create(attributes: any)
+    {
         return this.post(attributes);
     }
 
@@ -370,7 +401,8 @@ export default class ActiveRecord extends Core {
      *
      * @todo There's a ton to do here too
      */
-    public delete(attributes: any = null) {
+    public delete(attributes: any = null)
+    {
         // Query params
         const url: string = this.builder.identifier(
             this.id || (attributes ? attributes.id : ''),
@@ -381,13 +413,15 @@ export default class ActiveRecord extends Core {
         const headers: any = this.headers;
         const method: string = 'DELETE';
 
-        return this._fetch(null, {}, method, body, headers);
+        return this._fetch(null,
+        {}, method, body, headers);
     }
 
     /**
      * POST Model
      */
-    public post(attributes: any = null) {
+    public post(attributes: any = null)
+    {
         // Query params
         const url: string = this.builder.url;
 
@@ -396,7 +430,8 @@ export default class ActiveRecord extends Core {
         const headers: any = this.headers;
         const method: string = 'POST';
 
-        return this._fetch(null, {}, method, body, headers);
+        return this._fetch(null,
+        {}, method, body, headers);
     }
 
     /**
@@ -406,7 +441,8 @@ export default class ActiveRecord extends Core {
      * @param  {any = {}} queryParams
      * @return {any}
      */
-    public put(attributes: any): any {
+    public put(attributes: any): any
+    {
         // Query params
         const url: string = this.builder.url;
 
@@ -415,7 +451,8 @@ export default class ActiveRecord extends Core {
         const headers: any = this.headers;
         const method: string = 'PUT';
 
-        return this._fetch(null, {}, method, body, headers);
+        return this._fetch(null,
+        {}, method, body, headers);
     }
 
     /**
@@ -427,7 +464,8 @@ export default class ActiveRecord extends Core {
      * @param  {any = {}} queryParams
      * @return {any}
      */
-    public save(attributes: any = null): any {
+    public save(attributes: any = null): any
+    {
         // Query params
         const url: string = this.builder.identifier(
             this.id || (attributes ? attributes.id : ''),
@@ -438,23 +476,27 @@ export default class ActiveRecord extends Core {
         const headers: any = this.headers;
         const method: string = this.id ? 'PUT' : 'POST';
 
-        return this._fetch(null, {}, method, body, headers);
+        return this._fetch(null,
+        {}, method, body, headers);
     }
 
     /**
      * Interface for Collection
      */
-    public add(x: any) {}
+    public add(x: any)
+    {}
 
     /**
      * Interface for Collection
      */
-    public remove(x: any) {}
+    public remove(x: any)
+    {}
 
     /**
      * Empty attributes
      */
-    public reset() {
+    public reset()
+    {
         this.attributes = {};
     }
 
@@ -469,9 +511,14 @@ export default class ActiveRecord extends Core {
     public async find(
         id: string | number,
         queryParams: IModelRequestQueryParams = {},
-    ): Promise<any> {
+    ): Promise < any >
+    {
         // Promise<void | Request | Response>
-        return await this.fetch({ id }, queryParams).then((request) => {
+        return await this.fetch(
+        {
+            id
+        }, queryParams).then((request) =>
+        {
             return this;
         });
     }
@@ -486,7 +533,8 @@ export default class ActiveRecord extends Core {
     public file(
         name: string,
         file: HTMLInputElement | FileList | File,
-    ): Promise<void | Request | Response> {
+    ): Promise < void | Request | Response >
+    {
         // Query params
         const url: string = this.builder.identifier(this.id).url;
 
@@ -494,13 +542,20 @@ export default class ActiveRecord extends Core {
         const formData = new FormData();
 
         // Get file
-        if (file instanceof HTMLInputElement) {
-            file = (<FileList>file.files)[0];
-        } else if (file instanceof FileList) {
+        if (file instanceof HTMLInputElement)
+        {
+            file = ( < FileList > file.files)[0];
+        }
+        else if (file instanceof FileList)
+        {
             file = file[0];
-        } else if (file instanceof File) {
+        }
+        else if (file instanceof File)
+        {
             // Good
-        } else {
+        }
+        else
+        {
             console.warn('File provided unacceptable type.');
         }
 
@@ -511,7 +566,9 @@ export default class ActiveRecord extends Core {
         formData.append(name, file);
 
         // Set fetch
-        return this._fetch(null, {}, 'POST', formData).then((request: any) => {
+        return this._fetch(null,
+        {}, 'POST', formData).then((request: any) =>
+        {
             this.dispatch('file:complete', this);
 
             // @note This was duplicating our images
@@ -533,7 +590,8 @@ export default class ActiveRecord extends Core {
     public async fetch(
         options: IModelRequestOptions | null = {},
         queryParams: IModelRequestQueryParams = {},
-    ): Promise<void | Request | Response> {
+    ): Promise < void | Request | Response >
+    {
         return await this._fetch(options, queryParams);
     }
 
@@ -547,7 +605,8 @@ export default class ActiveRecord extends Core {
     public upload(
         name: string,
         file: HTMLInputElement | FileList | File,
-    ): Promise<void | Request | Response> {
+    ): Promise < void | Request | Response >
+    {
         return this.file(name, file);
     }
 
@@ -555,7 +614,8 @@ export default class ActiveRecord extends Core {
      * Run last query
      * @return {any}
      */
-    public runLast(): any {
+    public runLast(): any
+    {
         return this._fetch(
             this.lastRequest.options,
             this.lastRequest.queryParams,
@@ -569,27 +629,32 @@ export default class ActiveRecord extends Core {
 
     // region Get Params
 
-    public getUrlByMethod(method: string): string {
+    public getUrlByMethod(method: string): string
+    {
         // Setup URL
         let url: string = '';
         let originalEndpoint: string = this.endpoint;
 
         // Use a modified endpoint, if one exists
-        if (method === 'delete' && this.delete_endpoint) {
+        if (method === 'delete' && this.delete_endpoint)
+        {
             originalEndpoint = this.endpoint;
             this.endpoint = this.delete_endpoint;
         }
-        else if (method === 'put' && this.put_endpoint) {
+        else if (method === 'put' && this.put_endpoint)
+        {
             originalEndpoint = this.endpoint;
             this.endpoint = this.put_endpoint;
         }
-        else if (method === 'post' && this.post_endpoint) {
+        else if (method === 'post' && this.post_endpoint)
+        {
             originalEndpoint = this.endpoint;
             this.endpoint = this.post_endpoint;
         }
 
         // Check if we're using modified
-        if (this.referenceForModifiedEndpoint && this.modifiedEndpoint) {
+        if (this.referenceForModifiedEndpoint && this.modifiedEndpoint)
+        {
             this.useModifiedEndpoint(this.referenceForModifiedEndpoint);
         }
 
@@ -614,7 +679,8 @@ export default class ActiveRecord extends Core {
      *
      * @return {any}
      */
-    public cancelModifiedEndpoint(): any {
+    public cancelModifiedEndpoint(): any
+    {
         this.referenceForModifiedEndpoint = undefined;
         this.modifiedEndpoint = null;
 
@@ -627,7 +693,8 @@ export default class ActiveRecord extends Core {
      * @param  {string} endpoint
      * @return {any}
      */
-    public useModifiedEndpoint(activeRecord: ActiveRecord): any {
+    public useModifiedEndpoint(activeRecord: ActiveRecord): any
+    {
         // @todo, we shouldn't actually mutate this
         // we should turn the endpoint that we actually use into a getter
         // then have a way of modifying that so we maintain the original class endpoint
@@ -637,7 +704,8 @@ export default class ActiveRecord extends Core {
         this.referenceForModifiedEndpoint = activeRecord;
 
         // Warnings
-        if (activeRecord.id == null) {
+        if (activeRecord.id == null)
+        {
             console.warn(
                 'Modified endpoints usually have an ID signature. Are you sure this is right?',
             );
@@ -660,7 +728,8 @@ export default class ActiveRecord extends Core {
      * @param  {string} value
      * @return {any}
      */
-    public setBody(value: any): any {
+    public setBody(value: any): any
+    {
         this.body = value;
 
         return this;
@@ -672,7 +741,8 @@ export default class ActiveRecord extends Core {
      * @param  {string} endpoint
      * @return {any}
      */
-    public setEndpoint(endpoint: string): any {
+    public setEndpoint(endpoint: string): any
+    {
         this.referenceForModifiedEndpoint = undefined;
         this.modifiedEndpoint = null;
         this.endpoint = endpoint;
@@ -687,7 +757,8 @@ export default class ActiveRecord extends Core {
      * @param  {string} value
      * @return {any}
      */
-    public setHeader(header: string, value: string | null): any {
+    public setHeader(header: string, value: string | null): any
+    {
         this.headers[header] = value;
 
         return this;
@@ -699,8 +770,10 @@ export default class ActiveRecord extends Core {
      * @param  {any} headers
      * @return {any}
      */
-    public setHeaders(headers: any): any {
-        for (var k in headers) {
+    public setHeaders(headers: any): any
+    {
+        for (var k in headers)
+        {
             this.setHeader(k, headers[k]);
         }
 
@@ -713,7 +786,8 @@ export default class ActiveRecord extends Core {
      * @param  {any} id
      * @return {any}
      */
-    public setId(id: any): any {
+    public setId(id: any): any
+    {
         this.id = id;
 
         return this;
@@ -725,7 +799,8 @@ export default class ActiveRecord extends Core {
      * @param  {any} id
      * @return {any}
      */
-    public unsetId(): any {
+    public unsetId(): any
+    {
         this.id = '';
 
         return this;
@@ -737,7 +812,8 @@ export default class ActiveRecord extends Core {
      * @param  {any} headers
      * @return {any}
      */
-    public unsetHeader(header: string): any {
+    public unsetHeader(header: string): any
+    {
         this.setHeader(header, null);
         delete this.headers[header];
 
@@ -751,7 +827,8 @@ export default class ActiveRecord extends Core {
      * @param  {string} value
      * @return {any}
      */
-    public setQueryParam(key: string, value: string): any {
+    public setQueryParam(key: string, value: string): any
+    {
         this.builder.qp(key, value);
 
         return this;
@@ -763,8 +840,10 @@ export default class ActiveRecord extends Core {
      * @param  {any} params
      * @return {any}
      */
-    public setQueryParams(params: any): any {
-        for (var k in params) {
+    public setQueryParams(params: any): any
+    {
+        for (var k in params)
+        {
             this.setQueryParam(k, params[k]);
         }
 
@@ -777,7 +856,8 @@ export default class ActiveRecord extends Core {
      * @param  {any} headers
      * @return {any}
      */
-    public unsetQueryParam(param: string): any {
+    public unsetQueryParam(param: string): any
+    {
         delete this.builder.queryParams[param];
 
         return this;
@@ -789,7 +869,8 @@ export default class ActiveRecord extends Core {
      * @param  {string} token
      * @return {any}
      */
-    public setToken(token: string): any {
+    public setToken(token: string): any
+    {
         this.setHeader('Authorization', 'Bearer ' + token);
 
         return this;
@@ -804,7 +885,8 @@ export default class ActiveRecord extends Core {
         method: any = null,
         body: any = null,
         headers: any = null,
-    ): any {
+    ): any
+    {
         // Promise<void | Request | Response>
         // Normalize method
         method = method ? method.toLowerCase() : 'get';
@@ -822,17 +904,20 @@ export default class ActiveRecord extends Core {
         this.requestTime = Date.now();
 
         // Check cacheable
-        if (!this.cacheable) {
+        if (!this.cacheable)
+        {
             this.builder.qp('cb', Date.now());
         }
 
         // Check for query params
-        for (let key in queryParams) {
+        for (let key in queryParams)
+        {
             this.builder.qp(key, queryParams[key]);
         }
 
         // Check for ID
-        if (options && options.id) {
+        if (options && options.id)
+        {
             this.builder.identifier(options.id);
         }
 
@@ -846,49 +931,15 @@ export default class ActiveRecord extends Core {
         this.loading = true;
 
         // Setup request
-        var request = (this.request = new Request(url, {
+        var request = (this.request = new Request(url,
+        {
             dataKey: this.dataKey,
         }));
 
         // After parse
-        request.on('parse:after', (e) => {
-            method = method || 'get';
-
-            // Add model
-            if (method.toLowerCase() === 'post') {
-                this.add(request.data);
-            } else if (method.toLowerCase() === 'delete') {
-                // Intentionally empty
-            } else {
-                this.set(
-                    this.dataKey !== undefined
-                        ? request.data[this.dataKey]
-                        : request.data,
-                );
-            }
-
-            // Set options
-            this.options({
-                meta: request.data.meta,
-            });
-
-            // Events
-            this.dispatch('fetched', this);
-        });
-
-        // Bubble `progress` event
-        request.on('progress', (e) => {
-            this.dispatch('progress', e.data);
-        });
-
-        // Bubble `complete` event
-        request.on('complete', (e) => {
-            // Set loading
-            this.loading = false;
-
-            // Bubble
-            this.dispatch('complete');
-        });
+        request.on('parse:after', e => this.FetchParseAfter(request, e, options));
+        request.on('progress', e => this.FetchProgress(request, e, options));
+        request.on('complete', e => this.FetchComplete(request, e, options));
 
         // Request (method, body headers)
         return request.fetch(
@@ -896,5 +947,66 @@ export default class ActiveRecord extends Core {
             body || this.body,
             headers || this.headers,
         );
+    }
+
+    /**
+     * Complete from fetch request
+     *
+     * @param {Request} request
+     * @param {any} e
+     */
+    protected FetchComplete(request: Request, e: any, options: any = {})
+    {
+        // Set loading
+        this.loading = false;
+
+        // Bubble
+        this.dispatch('complete');
+    }
+
+    /**
+     * Progress from fetch request
+     *
+     * @param {Request} request
+     * @param {any} e
+     */
+    protected FetchProgress(request: Request, e: any, options: any = {})
+    {
+        this.dispatch('progress', e.data);
+    }
+
+    /**
+     * Overrideable fetch parse:after
+     *
+     * @param {string = 'get'} method
+     * @param {Request} request
+     */
+    protected FetchParseAfter(request: Request, e: any, options: any = {})
+    {
+        // Add model
+        if (request.method.toLowerCase() === 'post')
+        {
+            this.add(request.data);
+        }
+        else if (request.method.toLowerCase() === 'delete')
+        {
+            // Intentionally empty
+        }
+        else
+        {
+            var data = this.dataKey !== undefined ?
+                request.data[this.dataKey] :
+                request.data;
+
+            this.set(data, options);
+        }
+
+        // Set options
+        this.options(Object.assign({}, options, {
+            meta: request.data.meta,
+        }));
+
+        // Events
+        this.dispatch('fetched', this);
     }
 }

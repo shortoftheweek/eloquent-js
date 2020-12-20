@@ -57,9 +57,18 @@ export default class Request extends Core {
   public loading: boolean = false;
 
   /**
-   * Methods
+   * Method
    *
-   * Example: 'cors'
+   * Example: 'get'
+   *
+   * @type {string}
+   */
+  public method: string = "get";
+
+  /**
+   * Mode
+   *
+   * Example: cors, no-cors, same-origin, navigate
    *
    * @type {string}
    */
@@ -107,6 +116,8 @@ export default class Request extends Core {
     body: any = null,
     headers: any = {}
   ): Promise<Request> {
+      this.method = method || 'GET';
+
     this.dispatch("fetch:before");
 
     // Combine headers

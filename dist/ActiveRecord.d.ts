@@ -63,4 +63,7 @@ export default class ActiveRecord extends Core {
     unsetQueryParam(param: string): any;
     setToken(token: string): any;
     protected _fetch(options?: IModelRequestOptions | null, queryParams?: IModelRequestQueryParams, method?: any, body?: any, headers?: any): any;
+    protected FetchComplete(request: Request, e: any, options?: any): void;
+    protected FetchProgress(request: Request, e: any, options?: any): void;
+    protected FetchParseAfter(request: Request, e: any, options?: any): void;
 }

@@ -66,6 +66,11 @@ class ActiveRecord extends Core_1.default {
             this.setHeaders(options.headers);
         }
         if (options.meta) {
+            if (options.merge) {
+                if (options.meta.pagination.count && this.meta.pagination.count) {
+                    options.meta.pagination.count += this.meta.pagination.count;
+                }
+            }
             this.meta = options.meta;
         }
         if (options.params || options.qp || options.queryParams) {
@@ -120,7 +125,9 @@ class ActiveRecord extends Core_1.default {
         this.attributes = {};
     }
     async find(id, queryParams = {}) {
-        return await this.fetch({ id }, queryParams).then((request) => {
+        return await this.fetch({
+            id
+        }, queryParams).then((request) => {
             return this;
         });
     }
@@ -270,31 +277,34 @@ class ActiveRecord extends Core_1.default {
         var request = (this.request = new Request_1.default(url, {
             dataKey: this.dataKey,
         }));
-        request.on('parse:after', (e) => {
-            method = method || 'get';
-            if (method.toLowerCase() === 'post') {
-                this.add(request.data);
-            }
-            else if (method.toLowerCase() === 'delete') {
-            }
-            else {
-                this.set(this.dataKey !== undefined
-                    ? request.data[this.dataKey]
-                    : request.data);
-            }
-            this.options({
-                meta: request.data.meta,
-            });
-            this.dispatch('fetched', this);
-        });
-        request.on('progress', (e) => {
-            this.dispatch('progress', e.data);
-        });
-        request.on('complete', (e) => {
-            this.loading = false;
-            this.dispatch('complete');
-        });
+        request.on('parse:after', e => this.FetchParseAfter(request, e, options));
+        request.on('progress', e => this.FetchProgress(request, e, options));
+        request.on('complete', e => this.FetchComplete(request, e, options));
         return request.fetch(method, body || this.body, headers || this.headers);
+    }
+    FetchComplete(request, e, options = {}) {
+        this.loading = false;
+        this.dispatch('complete');
+    }
+    FetchProgress(request, e, options = {}) {
+        this.dispatch('progress', e.data);
+    }
+    FetchParseAfter(request, e, options = {}) {
+        if (request.method.toLowerCase() === 'post') {
+            this.add(request.data);
+        }
+        else if (request.method.toLowerCase() === 'delete') {
+        }
+        else {
+            var data = this.dataKey !== undefined ?
+                request.data[this.dataKey] :
+                request.data;
+            this.set(data, options);
+        }
+        this.options(Object.assign({}, options, {
+            meta: request.data.meta,
+        }));
+        this.dispatch('fetched', this);
     }
 }
 exports.default = ActiveRecord;

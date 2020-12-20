@@ -1,13 +1,13 @@
-import CollectionIterator from './CollectionIterator';
 import ActiveRecord from './ActiveRecord';
+import CollectionIterator from './CollectionIterator';
 import Model from './Model';
-import
-  {
+import Request from './Http/Request';
+import {
     IAttributes,
     ICollectionMeta,
     IPagination,
     ISortOptions,
-  } from './Interfaces';
+} from './Interfaces';
 
 // Try `npm install @types/lodash` if it exists or add a new declaration (.d.ts) file containing `declare module 'lodash';`
 // @ts-ignore
@@ -31,643 +31,682 @@ import * as _ from 'lodash';
  *
  */
 export default class Collection
-  extends ActiveRecord
-  implements Iterable<Model> {
-  /**
-   * Hydrate a collection full of models
-   *
-   * @type {Model[]}
-   */
-  public static hydrate<T>(models: Model[] = [], options: object = {}): any
-  {
-    // Instantiate collection
-    const collection = new this(options);
+extends ActiveRecord
+implements Iterable < Model > {
+    /**
+     * Hydrate a collection full of models
+     *
+     * @type {Model[]}
+     */
+    public static hydrate < T > (models: Model[] = [], options: object = {}): any {
+        // Instantiate collection
+        const collection = new this(options);
 
-    // Add models to collection
-    collection.add(models);
+        // Add models to collection
+        collection.add(models);
 
-    // Add options to collection
-    collection.options(options);
+        // Add options to collection
+        collection.options(options);
 
-    return collection;
-  }
-
-  /**
-   * Return count of models
-   *
-   * @todo Make sure this isn't caching
-   *
-   * @return number
-   */
-  public get length(): number
-  {
-    return this.models.length;
-  }
-
-  /**
-   * @todo Replace this based on Model
-   * @return {string}
-   */
-  public get modelId(): string
-  {
-    return 'id';
-  }
-
-  /**
-   * Pagination
-   *
-   * @return IPagination
-   */
-  public get pagination(): IPagination
-  {
-    return this.meta.pagination;
-  }
-
-  /**
-   * Meta data associated with collection
-   *
-   * @type {ICollectionMeta}
-   */
-  public meta: ICollectionMeta = {
-    pagination: {
-      total: 0,
-      count: 15,
-      per_page: 15,
-      current_page: 1,
-      total_pages: 1,
-      links: {},
-    },
-  };
-
-  /**
-   * Model object instantiated by this collection
-   * This should be replaced by subclass
-   *
-   * @type {any}
-   */
-  // @ts-ignore Because webpack attempts to autoload this
-  public model: Model = Model;
-
-  /**
-   * List of models
-   *
-   * @type {Model[]}
-   */
-  public models: Model[] = [];
-
-  /**
-   * The key that collection data exists on, e.g.
-   *
-   * {
-   *     data: [ .. ]
-   * }
-   *
-   * @type string
-   */
-  protected dataKey: string | undefined = 'data';
-
-  /**
-   * Change key we sort on
-   *
-   * @type {string}
-   */
-  protected sortKey: string = 'id';
-
-  /**
-   * Constructor
-   *
-   * We specifically don't set models here because the Model doesn't exist
-   * until constructor is done. We must use hydrate for that. Don't add data.
-   *
-   * If we do it early, we won't get FilmModels, we'll get Models.
-   *
-   * @param {object = {}} options
-   */
-  constructor(options: any = {})
-  {
-    super(options);
-
-    // Set default content type header
-    this.setHeader('Content-Type', 'application/json; charset=utf8');
-
-    // Set defaults
-    this.cid = this.cidPrefix + Math.random().toString(36).substr(2, 5);
-  }
-
-  /**
-   * Convert collection to JSON
-   *
-   * @return {any}
-   */
-  public toJSON(): object
-  {
-    return JSON.parse(JSON.stringify(this.models));
-  }
-
-  /**
-   * Sync
-   *
-   * @todo
-   *
-   * @return {any}
-   */
-  public sync(): any
-  {
-    // Not implemented
-    // call parent
-  }
-
-  /**
-   * Add or prepend Model(s) to our list
-   *
-   * @param  {Model[] | Model | object} model
-   * @param  {any = {}} options
-   * @return Collection
-   */
-  public add(model: Model[] | Model | object, options: any = {}): Collection
-  {
-    if (model == undefined)
-    {
-      return this;
+        return collection;
     }
 
-    const models: any = Array.isArray(model) ? model : [model];
+    /**
+     * Return count of models
+     *
+     * @todo Make sure this isn't caching
+     *
+     * @return number
+     */
+    public get length(): number {
+        return this.models.length;
+    }
 
-    // Iterate through models
-    models.forEach((model: any) =>
-    {
-      // Data supplied is an object that must be instantiated
-      if (!(model instanceof Model))
-      {
-        // @ts-ignore
-        model = new this.model(model);
-      }
+    /**
+     * @todo Replace this based on Model
+     * @return {string}
+     */
+    public get modelId(): string {
+        return 'id';
+    }
 
-      if (options.prepend)
-      {
-        this.models.unshift(model);
-      } else
-      {
-        this.models.push(model);
-      }
-    });
+    /**
+     * Pagination
+     *
+     * @return IPagination
+     */
+    public get pagination(): IPagination {
+        return this.meta.pagination;
+    }
 
-    // Event for add
-    this.dispatch('add');
+    /**
+     * Descending list, for instance:
+     *
+     *     ['receiver', 'person']
+     *
+     * Translates to:
+     *
+     *     at(0).receiver.person
+     *
+     * @type {string[]}
+     */
+    public atRelationship: string[] = [];
 
-    return this;
-  }
+    /**
+     * Meta data associated with collection
+     *
+     * @type {ICollectionMeta}
+     */
+    public meta: ICollectionMeta = {
+        pagination: {
+            total: 0,
+            count: 15,
+            per_page: 15,
+            current_page: 1,
+            total_pages: 1,
+            links: {},
+        },
+    };
 
-  /**
-   * Remove a model, a set of models, or an object
-   *
-   * @param  {Model[] | Model | object} model
-   * @param  {object = {}} options
-   * @return {Collection}
-   */
-  public remove(
-    model: Model[] | Model | object,
-    options: any = {}
-  ): Collection
-  {
-    let i: number = 0;
-    let ii: number = 0;
-    const items: any = Array.isArray(model) ? model : [model];
+    /**
+     * Model object instantiated by this collection
+     * This should be replaced by subclass
+     *
+     * @type {any}
+     */
+    // @ts-ignore Because webpack attempts to autoload this
+    public model: Model = Model;
 
-    // Take the first model in our list and iterate through our local
-    // models. If we are successful, call recursive
-    for (ii = 0; ii < items.length; ii++)
-    {
-      i = 0;
-      while (i < this.models.length)
-      {
-        if (this.models[i] == items[ii])
-        {
-          this.models.splice(i, 1);
-        } else
-        {
-          ++i;
+    /**
+     * List of models
+     *
+     * @type {Model[]}
+     */
+    public models: Model[] = [];
+
+    /**
+     * The key that collection data exists on, e.g.
+     *
+     * {
+     *     data: [ .. ]
+     * }
+     *
+     * @type string
+     */
+    protected dataKey: string | undefined = 'data';
+
+    /**
+     * Get the next row
+     * Adjacent to first/last
+     */
+    protected index: number = 0;
+
+    /**
+     * Change key we sort on
+     *
+     * @type {string}
+     */
+    protected sortKey: string = 'id';
+
+    /**
+     * Constructor
+     *
+     * We specifically don't set models here because the Model doesn't exist
+     * until constructor is done. We must use hydrate for that. Don't add data.
+     *
+     * If we do it early, we won't get FilmModels, we'll get Models.
+     *
+     * @param {object = {}} options
+     */
+    constructor(options: any = {}) {
+        super(options);
+
+        // Default builder
+        this.builder
+            .qp('limit', this.limit)
+            .qp('page', this.page);
+
+        // Set default content type header
+        this.setHeader('Content-Type', 'application/json; charset=utf8');
+
+        // Set defaults
+        this.cid = this.cidPrefix + Math.random().toString(36).substr(2, 5);
+
+        // Custom options
+        if (options.atRelationship) {
+            this.atRelationship = options.atRelationship;
         }
-      }
     }
 
-    // Event for add
-    this.dispatch('remove');
-
-    return this;
-  }
-
-  /**
-   * Reset and add new models
-   *
-   * @todo Review this
-   *
-   * @param  {Model[] | Model | object} model
-   * @param  {any = {}} options
-   * @return {Collection}
-   */
-  public set(model: Model[] | Model | object, options: any = {}): Collection
-  {
-    this.reset();
-
-    // Check for `meta` on set, this sometimes happens
-    // if we assign an entire bootstrapped JSON object
-    // to the collection
-    if (model && model.hasOwnProperty('meta'))
-    {
-      // @ts-ignore
-      this.meta = model.meta;
+    /**
+     * Convert collection to JSON
+     *
+     * @return {any}
+     */
+    public toJSON(): object {
+        return JSON.parse(JSON.stringify(this.models));
     }
 
-    // Check for `meta` on set, this sometimes happens
-    // if we assign an entire bootstrapped JSON object
-    // to the collection
-    if (model && model.hasOwnProperty('data'))
-    {
-      // @ts-ignore
-      this.add(model.data);
-    } else
-    {
-      // @ts-ignore
-      this.add(model);
+    /**
+     * Fetch next page with last set of options
+     *
+     * @return {any}
+     */
+    public async fetchNext(append: boolean = false): Promise < void | Request | Response > {
+        var options = Object.assign({}, this.lastRequest.options);
+        var qp = Object.assign({}, this.builder.queryParams, this.lastRequest.queryParams);
+
+        // Increase page number
+        qp.page = parseFloat(qp.page) + 1;
+
+        // Merge
+        options.merge = append;
+
+        // Fetch
+        return await this._fetch(
+            options,
+            qp,
+            this.lastRequest.method,
+            this.lastRequest.body,
+            this.lastRequest.headers,
+        );
     }
 
-    // Event for add
-    this.dispatch('set');
-
-    return this;
-  }
-
-  /**
-   * Reset
-   *
-   * @todo Might want to do more with this
-   * @return {Collection}
-   */
-  public reset(): Collection
-  {
-    this.models = [];
-
-    // Event for add
-    this.dispatch('reset');
-
-    return this;
-  }
-
-  /**
-   * Clear
-   *
-   * Alias for Reset
-   */
-  public clear(): Collection
-  {
-    return this.reset();
-  }
-
-  /**
-   * Delete Model
-   *
-   * @todo There's a ton to do here too
-   */
-  public delete(attributes: any = null)
-  {
-    // Query params
-    const url: string = this.builder.identifier(
-      this.id || (attributes ? attributes.id : ''),
-    ).url;
-
-    // Check for identifier
-    if (this.builder.id)
-    {
-      var model = this.find(attributes);
-      this.remove(model);
+    /**
+     * Sync
+     *
+     * @todo
+     *
+     * @return {any}
+     */
+    public sync(): any {
+        // Not implemented
+        // call parent
     }
 
-    // Attributes
-    const body: any = null;
-    const headers: any = this.headers;
-    const method: string = 'DELETE';
+    /**
+     * Add or prepend Model(s) to our list
+     *
+     * @param  {Model[] | Model | object} model
+     * @param  {any = {}} options
+     * @return Collection
+     */
+    public add(model: Model[] | Model | object, options: any = {}): Collection {
+        if (model == undefined) {
+            return this;
+        }
 
-    return this._fetch(null, {}, method, body, headers);
-  }
+        const models: any = Array.isArray(model) ? model : [model];
 
-  /**
-   * Append Model(s) to end of list
-   *
-   * @param  {Model[] | Model | object} model
-   * @param  {object = {}} options
-   * @return {Collection}
-   */
-  public push(
-    model: Model[] | Model | object,
-    options: object = {}
-  ): Collection
-  {
-    this.add(model, options);
+        // Iterate through models
+        models.forEach((model: any) => {
+            // Data supplied is an object that must be instantiated
+            if (!(model instanceof Model)) {
+                // @ts-ignore
+                model = new this.model(model);
+            }
 
-    return this;
-  }
+            if (options.prepend) {
+                this.models.unshift(model);
+            } else {
+                this.models.push(model);
+            }
+        });
 
-  /**
-   * Remove model from end of list
-   *
-   * @param  {object = {}} options
-   * @return Collection
-   */
-  public pop(options: object = {}): Collection
-  {
-    const model: Model = this.at(this.length - 1);
+        // Event for add
+        this.dispatch('add');
 
-    return this.remove(model, options);
-  }
-
-  /**
-   * Add Model(s) to beginning of list
-   *
-   * @param  {Model[] | Model | object} model
-   * @param  {object = {}} options
-   * @return {any}
-   */
-  public unshift(
-    model: Model[] | Model | object,
-    options: object = {}
-  ): Collection
-  {
-    return this.add(model, Object.assign({ prepend: true }, options));
-  }
-
-  /**
-   * Remove first object
-   *
-   * @param  {object = {}} options
-   * @return {any}
-   */
-  public shift(options: object = {}): Collection
-  {
-    const model: Model = this.at(0);
-
-    return this.remove(model, options);
-  }
-
-  /**
-   * Cut up collection models
-   *
-   * @return Model[]
-   */
-  public slice(...params: any): Model[]
-  {
-    return <Model[]> Array.prototype.slice.apply(this.models, params);
-  }
-
-  /**
-   * Get model by ID
-   *
-   * @param  string | number  id
-   * @return Model | undefined
-   */
-  public get(query: Model | string | number): Model | undefined
-  {
-    if (query == null)
-    {
-      return void 0;
+        return this;
     }
 
-    return this.where(
-      {
-        [this.modelId]: query instanceof Model ? query.cid : query,
-      },
-      true
-    );
-  }
+    /**
+     * Remove a model, a set of models, or an object
+     *
+     * @param  {Model[] | Model | object} model
+     * @param  {object = {}} options
+     * @return {Collection}
+     */
+    public remove(
+        model: Model[] | Model | object,
+        options: any = {}
+    ): Collection {
+        let i: number = 0;
+        let ii: number = 0;
+        const items: any = Array.isArray(model) ? model : [model];
 
-  /**
-   * Checks if we have an object or Model
-   *
-   * @param  Model | object  obj
-   * @return boolean
-   */
-  public has(obj: Model | string | number): boolean
-  {
-    return this.get(obj) != undefined;
-  }
+        // Take the first model in our list and iterate through our local
+        // models. If we are successful, call recursive
+        for (ii = 0; ii < items.length; ii++) {
+            i = 0;
+            while (i < this.models.length) {
+                if (this.models[i] == items[ii]) {
+                    this.models.splice(i, 1);
+                } else {
+                    ++i;
+                }
+            }
+        }
 
-  /**
-   * Get model at index
-   *
-   * @param  {number = 0} index
-   * @return Model
-   */
-  public at(index: number = 0): Model
-  {
-    if (index < 0)
-    {
-      index += this.length;
+        // Event for add
+        this.dispatch('remove');
+
+        return this;
     }
 
-    return this.models[index];
-  }
+    /**
+     * Reset and add new models
+     *
+     * @todo Review this
+     *
+     * @param  {Model[] | Model | object} model
+     * @param  {any = {}} options
+     * @return {Collection}
+     */
+    public set(model: Model[] | Model | object, options: any = {}): Collection {
 
-  /**
-   * Get first item
-   *
-   * @return {Model}
-   */
-  public first(): Model
-  {
-    return this.at(0);
-  }
+        if (options.merge != true) {
+            this.reset();
+        }
 
-  /**
-   * Get last item
-   *
-   * @return {Model}
-   */
-  public last(): Model
-  {
-    return this.at(this.length - 1);
-  }
+        // Check for `meta` on set, this sometimes happens
+        // if we assign an entire bootstrapped JSON object
+        // to the collection
+        if (model && model.hasOwnProperty('meta')) {
+            // @ts-ignore
+            this.meta = model.meta;
+        }
 
-  /**
-   * Comparing hard object attributes to model attr
-   *
-   * @param  {any = {}} attributes
-   * @param  {boolean = false} first
-   * @return {any}
-   */
-  public where(attributes: any = {}, first: boolean = false): any /* Self */
-  {
-    // @ts-ignore
-    const collection = new this.constructor();
+        // Check for `meta` on set, this sometimes happens
+        // if we assign an entire bootstrapped JSON object
+        // to the collection
+        if (model && model.hasOwnProperty('data')) {
+            // @ts-ignore
+            this.add(model.data);
+        } else {
+            // @ts-ignore
+            this.add(model);
+        }
 
-    // @todo, this code sucks but I'm not spending all day here
-    _.map(this.models, (model: any) =>
-    {
-      if (_.find(model, attributes))
-      {
-        collection.add(model);
-      }
-    });
+        // Event for add
+        this.dispatch('set');
 
-    return first ? collection.first() : collection;
-  }
-
-  /**
-   * First where
-   * @param  {object = {}} attributes
-   * @return Model
-   */
-  public findWhere(attributes: object = {}): Model
-  {
-    return this.where(attributes, true);
-  }
-
-  /**
-   * Search by CID
-   * @param  {string} cid
-   * @return {Model}
-   */
-  public findByCid(cid: string): Model | undefined
-  {
-    return _.find(this.models, { cid });
-  }
-
-  /**
-   * Each
-   * @param  {string} cid
-   * @return {Model}
-   */
-  public each(predicate: any): any
-  {
-    return _.each(this.models, predicate);
-  }
-
-  /**
-   * Search by CID
-   * @param  {string} cid
-   * @return {Model}
-   */
-  public filter(predicate: any): any
-  {
-    return _.filter(this.models, predicate);
-  }
-
-  /**
-   * Search by CID
-   * @param  {string} cid
-   * @return {Model}
-   */
-  public find(predicate: any): any
-  {
-    return _.find(this.models, predicate);
-  }
-
-  /**
-   * Sorting models by key or in reverse
-   *
-   * We have a basic `sortKey` defined on the collection, but
-   * can also pass in an object with `key` and `reverse` on it
-   *
-   * @param  {ISortOptions|null = null} options
-   * @return {Collection}
-   */
-  public sort(options: ISortOptions | null = null): Collection
-  {
-    let key: string = this.sortKey;
-
-    // Sort options
-    if (options !== null)
-    {
-      key = options.key;
+        return this;
     }
 
-    // Sort
-    this.models = this.models.sort((a: any, b: any) =>
-    {
-      return options && options.reverse
-        ? (a.attr(key) - b.attr(key)) * -1
-        : (a.attr(key) - b.attr(key)) * 1;
-    });
+    /**
+     * Reset
+     *
+     * @todo Might want to do more with this
+     * @return {Collection}
+     */
+    public reset(): Collection {
+        this.models = [];
 
-    return this;
-  }
+        // Event for add
+        this.dispatch('reset');
 
-  /**
-   * Pull out an attribute from our models
-   *
-   * Example:
-   *     collection.pluck('name');
-   *
-   *     ['Ashley', 'Briana', 'Chloe', ...]
-   *
-   * @param  {string} attribute
-   * @return {any}
-   */
-  public pluck(attribute: string): any
-  {
-    return this.models.map((model) => model.attr(attribute));
-  }
+        return this;
+    }
 
-  /**
-   * Clone current object
-   *
-   * @param {object = {}} attributes
-   * @return Collection
-   */
-  public clone(attributes: object = {})
-  {
-    // @ts-ignore
-    const instance = new this.constructor();
-    instance.add(this.toJSON());
+    /**
+     * Clear
+     *
+     * Alias for Reset
+     */
+    public clear(): Collection {
+        return this.reset();
+    }
 
-    return instance;
-  }
+    /**
+     * Delete Model
+     *
+     * @todo There's a ton to do here too
+     */
+    public delete(attributes: any = null) {
+        // Query params
+        const url: string = this.builder.identifier(
+            this.id || (attributes ? attributes.id : ''),
+        ).url;
 
-  /**
-   * Return an interator for values based on this collection
-   *
-   * @return CollectionIterator
-   */
-  public values(): CollectionIterator
-  {
-    return new CollectionIterator(this, CollectionIterator.ITERATOR_VALUES);
-  }
+        // Check for identifier
+        if (this.builder.id) {
+            var model = this.find(attributes);
+            this.remove(model);
+        }
 
-  /**
-   * Return an interator for keys based on this collection
-   *
-   * @return CollectionIterator
-   */
-  public keys(attributes: object = {}): CollectionIterator
-  {
-    return new CollectionIterator(this, CollectionIterator.ITERATOR_KEYS);
-  }
+        // Attributes
+        const body: any = null;
+        const headers: any = this.headers;
+        const method: string = 'DELETE';
 
-  /**
-   * Return an interator for entries (key + value) based on this collection
-   *
-   * @return CollectionIterator
-   */
-  public entries(attributes: object = {}): CollectionIterator
-  {
-    return new CollectionIterator(this, CollectionIterator.ITERATOR_KEYSVALUES);
-  }
+        return this._fetch(null, {}, method, body, headers);
+    }
 
-  /**
-   * Determine if an object is infact a model
-   *
-   * @param  {any} model
-   * @return {boolean}
-   */
-  private _isModel(model: any): boolean
-  {
-    return model instanceof Model;
-  }
+    /**
+     * Append Model(s) to end of list
+     *
+     * @param  {Model[] | Model | object} model
+     * @param  {object = {}} options
+     * @return {Collection}
+     */
+    public push(
+        model: Model[] | Model | object,
+        options: object = {}
+    ): Collection {
+        this.add(model, options);
 
-  /**
-   * Iterator
-   */
-  [Symbol.iterator](): Iterator<any>
-  {
-    return new CollectionIterator(this, CollectionIterator.ITERATOR_VALUES);
-  }
+        return this;
+    }
+
+    /**
+     * Remove model from end of list
+     *
+     * @param  {object = {}} options
+     * @return Collection
+     */
+    public pop(options: object = {}): Collection {
+        const model: Model = this.at(this.length - 1);
+
+        return this.remove(model, options);
+    }
+
+    /**
+     * Add Model(s) to beginning of list
+     *
+     * @param  {Model[] | Model | object} model
+     * @param  {object = {}} options
+     * @return {any}
+     */
+    public unshift(
+        model: Model[] | Model | object,
+        options: object = {}
+    ): Collection {
+        return this.add(model, Object.assign({
+            prepend: true
+        }, options));
+    }
+
+    /**
+     * Remove first object
+     *
+     * @param  {object = {}} options
+     * @return {any}
+     */
+    public shift(options: object = {}): Collection {
+        const model: Model = this.at(0);
+
+        return this.remove(model, options);
+    }
+
+    /**
+     * Cut up collection models
+     *
+     * @return Model[]
+     */
+    public slice(...params: any): Model[] {
+        return <Model[] > Array.prototype.slice.apply(this.models, params);
+    }
+
+    /**
+     * Get model by ID
+     *
+     * @param  string | number  id
+     * @return Model | undefined
+     */
+    public get(query: Model | string | number): Model | undefined {
+        if (query == null) {
+            return void 0;
+        }
+
+        return this.where({
+                [this.modelId]: query instanceof Model ? query.cid : query,
+            },
+            true
+        );
+    }
+
+    /**
+     * Checks if we have an object or Model
+     *
+     * @param  Model | object  obj
+     * @return boolean
+     */
+    public has(obj: Model | string | number): boolean {
+        return this.get(obj) != undefined;
+    }
+
+    /**
+     * Get model at index
+     *
+     * @param  {number = 0} index
+     * @return Model
+     */
+    public at(index: number = 0): Model {
+        if (index < 0) {
+            index += this.length;
+        }
+
+        // Get model
+        var item: any = this.models[index];
+
+        // Transform through
+        if (this.atRelationship && this.atRelationship.length) {
+            this.atRelationship.forEach(key => item = item[key]);
+        }
+
+        return item;
+    }
+
+    /**
+     * Get first item
+     *
+     * @return {Model}
+     */
+    public first(): Model {
+        return this.at(0);
+    }
+
+    /**
+     * Get last item
+     *
+     * @return {Model}
+     */
+    public last(): Model {
+        return this.at(this.length - 1);
+    }
+
+    public next() {
+        // We have reached the end
+        // if (this.index >= this.length) {
+        //     return false;
+        // }
+
+        // Get model
+        var model = this.at(++this.index);
+
+        return model;
+    }
+
+    public previous() {
+        // We have reached the beginning
+        // if (this.index <= 0) {
+        //     return false;
+        // }
+
+        // Advance
+        return this.at(--this.index);
+    }
+
+    public current() {
+        // Advance
+        return this.at(this.index);
+    }
+
+    /**
+     * Comparing hard object attributes to model attr
+     *
+     * @param  {any = {}} attributes
+     * @param  {boolean = false} first
+     * @return {any}
+     */
+    public where(attributes: any = {}, first: boolean = false): any /* Self */ {
+        // @ts-ignore
+        const collection = new this.constructor();
+
+        // @todo, this code sucks but I'm not spending all day here
+        _.map(this.models, (model: any) => {
+            if (_.find(model, attributes)) {
+                collection.add(model);
+            }
+        });
+
+        return first ? collection.first() : collection;
+    }
+
+    /**
+     * First where
+     * @param  {object = {}} attributes
+     * @return Model
+     */
+    public findWhere(attributes: object = {}): Model {
+        return this.where(attributes, true);
+    }
+
+    /**
+     * Search by CID
+     * @param  {string} cid
+     * @return {Model}
+     */
+    public findByCid(cid: string): Model | undefined {
+        return _.find(this.models, {
+            cid
+        });
+    }
+
+    /**
+     * Each
+     * @param  {string} cid
+     * @return {Model}
+     */
+    public each(predicate: any): any {
+        return _.each(this.models, predicate);
+    }
+
+    /**
+     * Search by CID
+     * @param  {string} cid
+     * @return {Model}
+     */
+    public filter(predicate: any): any {
+        return _.filter(this.models, predicate);
+    }
+
+    /**
+     * Search by CID
+     * @param  {string} cid
+     * @return {Model}
+     */
+    public find(predicate: any): any {
+        return _.find(this.models, predicate);
+    }
+
+    /**
+     * Sorting models by key or in reverse
+     *
+     * We have a basic `sortKey` defined on the collection, but
+     * can also pass in an object with `key` and `reverse` on it
+     *
+     * @param  {ISortOptions|null = null} options
+     * @return {Collection}
+     */
+    public sort(options: ISortOptions | null = null): Collection {
+        let key: string = this.sortKey;
+
+        // Sort options
+        if (options !== null) {
+            key = options.key;
+        }
+
+        // Sort
+        this.models = this.models.sort((a: any, b: any) => {
+            return options && options.reverse ?
+                (a.attr(key) - b.attr(key)) * -1 :
+                (a.attr(key) - b.attr(key)) * 1;
+        });
+
+        return this;
+    }
+
+    /**
+     * Pull out an attribute from our models
+     *
+     * Example:
+     *     collection.pluck('name');
+     *
+     *     ['Ashley', 'Briana', 'Chloe', ...]
+     *
+     * @param  {string} attribute
+     * @return {any}
+     */
+    public pluck(attribute: string): any {
+        return this.models.map((model) => model.attr(attribute));
+    }
+
+    /**
+     * Clone current object
+     *
+     * @param {object = {}} attributes
+     * @return Collection
+     */
+    public clone(attributes: object = {}) {
+        // @ts-ignore
+        const instance = new this.constructor();
+        instance.add(this.toJSON());
+
+        return instance;
+    }
+
+    /**
+     * Return an interator for values based on this collection
+     *
+     * @return CollectionIterator
+     */
+    public values(): CollectionIterator {
+        return new CollectionIterator(this, CollectionIterator.ITERATOR_VALUES);
+    }
+
+    /**
+     * Return an interator for keys based on this collection
+     *
+     * @return CollectionIterator
+     */
+    public keys(attributes: object = {}): CollectionIterator {
+        return new CollectionIterator(this, CollectionIterator.ITERATOR_KEYS);
+    }
+
+    /**
+     * Return an interator for entries (key + value) based on this collection
+     *
+     * @return CollectionIterator
+     */
+    public entries(attributes: object = {}): CollectionIterator {
+        return new CollectionIterator(this, CollectionIterator.ITERATOR_KEYSVALUES);
+    }
+
+    /**
+     * Determine if an object is infact a model
+     *
+     * @param  {any} model
+     * @return {boolean}
+     */
+    private _isModel(model: any): boolean {
+        return model instanceof Model;
+    }
+
+    /**
+     * Iterator
+     */
+    [Symbol.iterator](): Iterator < any > {
+        return new CollectionIterator(this, CollectionIterator.ITERATOR_VALUES);
+    }
 }

@@ -5,6 +5,7 @@ export default class Request extends Core {
     dataKey: string;
     headers: any;
     loading: boolean;
+    method: string;
     mode: string;
     request?: Promise<Request | Response>;
     response?: Response;

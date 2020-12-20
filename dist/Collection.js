@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const CollectionIterator_1 = require("./CollectionIterator");
 const ActiveRecord_1 = require("./ActiveRecord");
+const CollectionIterator_1 = require("./CollectionIterator");
 const Model_1 = require("./Model");
 const _ = require("lodash");
 class Collection extends ActiveRecord_1.default {
     constructor(options = {}) {
         super(options);
+        this.atRelationship = [];
         this.meta = {
             pagination: {
                 total: 0,
@@ -20,9 +21,16 @@ class Collection extends ActiveRecord_1.default {
         this.model = Model_1.default;
         this.models = [];
         this.dataKey = 'data';
+        this.index = 0;
         this.sortKey = 'id';
+        this.builder
+            .qp('limit', this.limit)
+            .qp('page', this.page);
         this.setHeader('Content-Type', 'application/json; charset=utf8');
         this.cid = this.cidPrefix + Math.random().toString(36).substr(2, 5);
+        if (options.atRelationship) {
+            this.atRelationship = options.atRelationship;
+        }
     }
     static hydrate(models = [], options = {}) {
         const collection = new this(options);
@@ -41,6 +49,13 @@ class Collection extends ActiveRecord_1.default {
     }
     toJSON() {
         return JSON.parse(JSON.stringify(this.models));
+    }
+    async fetchNext(append = false) {
+        var options = Object.assign({}, this.lastRequest.options);
+        var qp = Object.assign({}, this.builder.queryParams, this.lastRequest.queryParams);
+        qp.page = parseFloat(qp.page) + 1;
+        options.merge = append;
+        return await this._fetch(options, qp, this.lastRequest.method, this.lastRequest.body, this.lastRequest.headers);
     }
     sync() {
     }
@@ -82,7 +97,9 @@ class Collection extends ActiveRecord_1.default {
         return this;
     }
     set(model, options = {}) {
-        this.reset();
+        if (options.merge != true) {
+            this.reset();
+        }
         if (model && model.hasOwnProperty('meta')) {
             this.meta = model.meta;
         }
@@ -123,7 +140,9 @@ class Collection extends ActiveRecord_1.default {
         return this.remove(model, options);
     }
     unshift(model, options = {}) {
-        return this.add(model, Object.assign({ prepend: true }, options));
+        return this.add(model, Object.assign({
+            prepend: true
+        }, options));
     }
     shift(options = {}) {
         const model = this.at(0);
@@ -147,13 +166,27 @@ class Collection extends ActiveRecord_1.default {
         if (index < 0) {
             index += this.length;
         }
-        return this.models[index];
+        var item = this.models[index];
+        if (this.atRelationship && this.atRelationship.length) {
+            this.atRelationship.forEach(key => item = item[key]);
+        }
+        return item;
     }
     first() {
         return this.at(0);
     }
     last() {
         return this.at(this.length - 1);
+    }
+    next() {
+        var model = this.at(++this.index);
+        return model;
+    }
+    previous() {
+        return this.at(--this.index);
+    }
+    current() {
+        return this.at(this.index);
     }
     where(attributes = {}, first = false) {
         const collection = new this.constructor();
@@ -168,7 +201,9 @@ class Collection extends ActiveRecord_1.default {
         return this.where(attributes, true);
     }
     findByCid(cid) {
-        return _.find(this.models, { cid });
+        return _.find(this.models, {
+            cid
+        });
     }
     each(predicate) {
         return _.each(this.models, predicate);
@@ -185,9 +220,9 @@ class Collection extends ActiveRecord_1.default {
             key = options.key;
         }
         this.models = this.models.sort((a, b) => {
-            return options && options.reverse
-                ? (a.attr(key) - b.attr(key)) * -1
-                : (a.attr(key) - b.attr(key)) * 1;
+            return options && options.reverse ?
+                (a.attr(key) - b.attr(key)) * -1 :
+                (a.attr(key) - b.attr(key)) * 1;
         });
         return this;
     }

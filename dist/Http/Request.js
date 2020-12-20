@@ -16,6 +16,7 @@ class Request extends Core_1.default {
         this.dataKey = "";
         this.headers = {};
         this.loading = false;
+        this.method = "get";
         this.mode = "";
         this.dataKey = params.dataKey;
         this.url = url;
@@ -23,6 +24,7 @@ class Request extends Core_1.default {
         this.url = this.url.replace(/\?&/, "?");
     }
     fetch(method = "GET", body = null, headers = {}) {
+        this.method = method || 'GET';
         this.dispatch("fetch:before");
         var headers = Object.assign(this.headers, headers);
         var params = {};
