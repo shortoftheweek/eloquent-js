@@ -97,7 +97,7 @@ class Collection extends ActiveRecord_1.default {
         return this;
     }
     set(model, options = {}) {
-        if (options && options.merge != true) {
+        if (!options || (options && options.merge != true)) {
             this.reset();
         }
         if (model && model.hasOwnProperty('meta')) {

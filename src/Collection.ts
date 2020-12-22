@@ -304,7 +304,7 @@ implements Iterable < Model > {
      */
     public set(model: Model[] | Model | object, options: any = {}): Collection {
 
-        if (options && options.merge != true) {
+        if (!options || (options && options.merge != true)) {
             this.reset();
         }
 
