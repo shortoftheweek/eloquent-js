@@ -31,6 +31,11 @@ class Request extends Core_1.default {
         params.headers = headers;
         params.method = method || "GET";
         params.redirect = "follow";
+        body instanceof FormData
+            ? body
+            : typeof body == "object"
+                ? JSON.stringify(body)
+                : body;
         if (body) {
             if (typeof FormData == undefined) {
                 params.body = typeof body == "object"
@@ -38,7 +43,11 @@ class Request extends Core_1.default {
                     : body;
             }
             else {
-                params.body = body;
+                params.body = body instanceof FormData
+                    ? body
+                    : typeof body == "object"
+                        ? JSON.stringify(body)
+                        : body;
             }
         }
         var isFile = !params.headers["Content-Type"] && params.method === "POST";

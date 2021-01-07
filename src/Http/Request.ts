@@ -130,14 +130,26 @@ export default class Request extends Core {
     params.method = method || "GET";
     params.redirect = "follow";
 
+        body instanceof FormData
+          ? body
+          : typeof body == "object"
+          ? JSON.stringify(body)
+          : body;
+
     if (body) {
+        // For node
         if (typeof FormData == undefined) {
             params.body = typeof body == "object"
                 ? JSON.stringify(body)
                 : body;
         }
+        // For web
         else {
-            params.body = body;
+            params.body = body instanceof FormData
+                ? body
+                : typeof body == "object"
+                    ? JSON.stringify(body)
+                    : body;
         }
     }
 
