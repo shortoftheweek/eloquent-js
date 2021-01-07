@@ -28,6 +28,8 @@ export default class ActiveRecord extends Core {
     protected cidPrefix: string;
     protected dataKey: string | undefined;
     protected lastRequest: any;
+    protected runLastAttempts: number;
+    protected runLastAttemptsMax: number;
     private referenceForModifiedEndpoint;
     constructor(options?: any);
     attr(key: string): string | number | null;

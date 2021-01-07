@@ -211,6 +211,18 @@ export default class ActiveRecord extends Core
     protected lastRequest: any;
 
     /**
+     * Prevent overflow of runLastAttempts
+     * @type {number}
+     */
+    protected runLastAttempts: number = 0;
+
+    /**
+     * Max attempts to runLast
+     * @type {number}
+     */
+    protected runLastAttemptsMax: number = 2;
+
+    /**
      * Reference to object we use in our modified active record
      *
      * @type ActiveRecord
@@ -616,6 +628,16 @@ export default class ActiveRecord extends Core
      */
     public runLast(): any
     {
+        // Check if we can do this
+        if (++this.runLastAttempts >= this.runLastAttemptsMax) {
+            console.warn('Run last attempts expired');
+
+            setTimeout(() => {
+                this.runLastAttempts = 0;
+            }, 1000);
+            return;
+        }
+
         return this._fetch(
             this.lastRequest.options,
             this.lastRequest.queryParams,

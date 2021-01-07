@@ -32,12 +32,14 @@ class Request extends Core_1.default {
         params.method = method || "GET";
         params.redirect = "follow";
         if (body) {
-            params.body =
-                body instanceof FormData
-                    ? body
-                    : typeof body == "object"
-                        ? JSON.stringify(body)
-                        : body;
+            if (typeof FormData == undefined) {
+                params.body = typeof body == "object"
+                    ? JSON.stringify(body)
+                    : body;
+            }
+            else {
+                params.body = body;
+            }
         }
         var isFile = !params.headers["Content-Type"] && params.method === "POST";
         this.loading = true;
@@ -139,6 +141,7 @@ class Request extends Core_1.default {
     afterAll(request) {
         if (request && request.response && request.response.ok) {
             this.dispatch("complete", this);
+            this.dispatch("complete:" + this.method, this);
         }
         else {
             this.dispatch("error");

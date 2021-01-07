@@ -131,12 +131,14 @@ export default class Request extends Core {
     params.redirect = "follow";
 
     if (body) {
-      params.body =
-        body instanceof FormData
-          ? body
-          : typeof body == "object"
-          ? JSON.stringify(body)
-          : body;
+        if (typeof FormData == undefined) {
+            params.body = typeof body == "object"
+                ? JSON.stringify(body)
+                : body;
+        }
+        else {
+            params.body = body;
+        }
     }
 
     // Is File?
@@ -403,6 +405,7 @@ export default class Request extends Core {
     // Check request
     if (request && request.response && request.response.ok) {
       this.dispatch("complete", this);
+      this.dispatch("complete:" + this.method, this);
     } else {
       this.dispatch("error");
 

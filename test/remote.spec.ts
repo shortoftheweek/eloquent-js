@@ -65,14 +65,29 @@ describe('Remote Collection Tests', () => {
         await collection
             .fetch()
             .then(() => {
-                console.log(collection.at(0).id, collection.length, collection.meta);
+                // console.log(collection.at(0).id, collection.length, collection.meta);
 
                 collection.fetchNext().then(() => {
-                    console.log(collection.at(0).id, collection.length, collection.meta);
+                    // console.log(collection.at(0).id, collection.length, collection.meta);
                 });
 
                 return collection;
             });
+
+    });
+
+    it('should error', async () => {
+        const collection: FilmCollection = new FilmCollection;
+        collection.baseUrl = 'https://api.shortoftheweek.app/v1';
+
+        await collection
+            .post()
+            .then(() => {
+                console.log('then error');
+            })
+            .catch((e: any) => {
+                console.log('catch error', e.message);
+            })
 
     });
 

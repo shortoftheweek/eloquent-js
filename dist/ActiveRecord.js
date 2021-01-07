@@ -21,6 +21,8 @@ class ActiveRecord extends Core_1.default {
         this.page = 1;
         this.cidPrefix = 'c';
         this.dataKey = 'data';
+        this.runLastAttempts = 0;
+        this.runLastAttemptsMax = 2;
         Object.assign(this, options);
         this.lastRequest = {};
         this.builder = new Builder_1.default(this);
@@ -159,6 +161,13 @@ class ActiveRecord extends Core_1.default {
         return this.file(name, file);
     }
     runLast() {
+        if (++this.runLastAttempts >= this.runLastAttemptsMax) {
+            console.warn('Run last attempts expired');
+            setTimeout(() => {
+                this.runLastAttempts = 0;
+            }, 1000);
+            return;
+        }
         return this._fetch(this.lastRequest.options, this.lastRequest.queryParams, this.lastRequest.method, this.lastRequest.body, this.lastRequest.headers);
     }
     getUrlByMethod(method) {
