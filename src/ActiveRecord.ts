@@ -993,7 +993,7 @@ export default class ActiveRecord extends Core
         this.loading = false;
 
         // Bubble
-        this.dispatch('complete', request);
+        this.dispatch('complete', request.data);
     }
 
     /**
