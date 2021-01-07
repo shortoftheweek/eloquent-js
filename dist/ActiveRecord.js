@@ -290,13 +290,16 @@ class ActiveRecord extends Core_1.default {
         request.on('parse:after', e => this.FetchParseAfter(request, e, options));
         request.on('progress', e => this.FetchProgress(request, e, options));
         request.on('complete', e => this.FetchComplete(request, e, options));
+        request.on('complete:get', e => this.dispatch('complete:get'));
+        request.on('complete:put', e => this.dispatch('complete:put'));
+        request.on('complete:post', e => this.dispatch('complete:post'));
+        request.on('complete:delete', e => this.dispatch('complete:delete'));
         return request.fetch(method, body || this.body, headers || this.headers);
     }
     FetchComplete(request, e, options = {}) {
         var method = request.method || 'get';
         this.loading = false;
         this.dispatch('complete');
-        this.dispatch('complete:' + method);
     }
     FetchProgress(request, e, options = {}) {
         this.dispatch('progress', e.data);
@@ -317,6 +320,7 @@ class ActiveRecord extends Core_1.default {
         this.options(Object.assign({}, options, {
             meta: request.data.meta,
         }));
+        this.dispatch('parse:after', this);
         this.dispatch('fetched', this);
     }
 }

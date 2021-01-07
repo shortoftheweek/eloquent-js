@@ -966,6 +966,10 @@ export default class ActiveRecord extends Core
         request.on('parse:after', e => this.FetchParseAfter(request, e, options));
         request.on('progress', e => this.FetchProgress(request, e, options));
         request.on('complete', e => this.FetchComplete(request, e, options));
+        request.on('complete:get', e => this.dispatch('complete:get'));
+        request.on('complete:put', e => this.dispatch('complete:put'));
+        request.on('complete:post', e => this.dispatch('complete:post'));
+        request.on('complete:delete', e => this.dispatch('complete:delete'));
 
         // Request (method, body headers)
         return request.fetch(
@@ -990,7 +994,6 @@ export default class ActiveRecord extends Core
 
         // Bubble
         this.dispatch('complete');
-        this.dispatch('complete:' + method);
     }
 
     /**
@@ -1038,6 +1041,7 @@ export default class ActiveRecord extends Core
         }));
 
         // Events
+        this.dispatch('parse:after', this);
         this.dispatch('fetched', this);
     }
 }
