@@ -983,11 +983,14 @@ export default class ActiveRecord extends Core
      */
     protected FetchComplete(request: Request, e: any, options: any = {})
     {
+        var method: string = request.method || 'get';
+
         // Set loading
         this.loading = false;
 
         // Bubble
         this.dispatch('complete');
+        this.dispatch('complete:' + method);
     }
 
     /**

@@ -293,8 +293,10 @@ class ActiveRecord extends Core_1.default {
         return request.fetch(method, body || this.body, headers || this.headers);
     }
     FetchComplete(request, e, options = {}) {
+        var method = request.method || 'get';
         this.loading = false;
         this.dispatch('complete');
+        this.dispatch('complete:' + method);
     }
     FetchProgress(request, e, options = {}) {
         this.dispatch('progress', e.data);
