@@ -254,9 +254,6 @@ class Collection extends ActiveRecord_1.default {
     }
     createModel(model) {
         var instantiableModel = this.model;
-        if (typeof instantiableModel == 'function') {
-            return instantiableModel(model);
-        }
         return new instantiableModel(model);
     }
 }

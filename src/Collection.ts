@@ -726,10 +726,10 @@ implements Iterable < Model > {
     {
         var instantiableModel: any = this.model;
 
-        // Let the function instantiate
-        if (typeof instantiableModel == 'function') {
-            return instantiableModel(model);
-        }
+        // // Let the function instantiate
+        // if (this.modelBuilder) {
+        //     return this.modelBuilder(model);
+        // }
 
         // Instantiate based on type
         return new instantiableModel(model);
