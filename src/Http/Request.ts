@@ -418,10 +418,10 @@ export default class Request extends Core {
     if (request && request.response && request.response.ok) {
       this.dispatch("complete", this);
       this.dispatch("complete:" + this.method, this);
-    } else {
-      this.dispatch("error");
-
-      throw new Error("Failed response, after all");
+    } else
+    {
+      this.dispatch("error", request.data);
+      throw new Error(request && request.data ? request.data.error : 'After All');
     }
 
     return request;

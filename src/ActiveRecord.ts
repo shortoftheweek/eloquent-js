@@ -581,7 +581,7 @@ export default class ActiveRecord extends Core
         return this._fetch(null,
         {}, 'POST', formData).then((request: any) =>
         {
-            this.dispatch('file:complete', this);
+            this.dispatch('file:complete', request.data);
 
             // @note This was duplicating our images
             // this.add(request.data);

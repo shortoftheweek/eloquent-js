@@ -18,6 +18,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
     constructor(options?: any);
     toJSON(): object;
     fetchNext(append?: boolean): Promise<void | Request | Response>;
+    count(): number;
     sync(): any;
     add(model: Model[] | Model | object, options?: any): Collection;
     remove(model: Model[] | Model | object, options?: any): Collection;
@@ -52,4 +53,5 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
     entries(attributes?: object): CollectionIterator;
     private _isModel;
     [Symbol.iterator](): Iterator<any>;
+    protected createModel(model: any): any;
 }

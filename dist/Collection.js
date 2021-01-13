@@ -57,6 +57,9 @@ class Collection extends ActiveRecord_1.default {
         options.merge = append;
         return await this._fetch(options, qp, this.lastRequest.method, this.lastRequest.body, this.lastRequest.headers);
     }
+    count() {
+        return this.length;
+    }
     sync() {
     }
     add(model, options = {}) {
@@ -66,7 +69,7 @@ class Collection extends ActiveRecord_1.default {
         const models = Array.isArray(model) ? model : [model];
         models.forEach((model) => {
             if (!(model instanceof Model_1.default)) {
-                model = new this.model(model);
+                model = this.createModel(model);
             }
             if (options.prepend) {
                 this.models.unshift(model);
@@ -248,6 +251,13 @@ class Collection extends ActiveRecord_1.default {
     }
     [Symbol.iterator]() {
         return new CollectionIterator_1.default(this, CollectionIterator_1.default.ITERATOR_VALUES);
+    }
+    createModel(model) {
+        var instantiableModel = this.model;
+        if (typeof instantiableModel == 'function') {
+            return instantiableModel(model);
+        }
+        return new instantiableModel(model);
     }
 }
 exports.default = Collection;

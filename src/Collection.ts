@@ -213,6 +213,14 @@ implements Iterable < Model > {
     }
 
     /**
+     * @return {number}
+     */
+    public count(): number
+    {
+        return this.length;
+    }
+
+    /**
      * Sync
      *
      * @todo
@@ -243,7 +251,8 @@ implements Iterable < Model > {
             // Data supplied is an object that must be instantiated
             if (!(model instanceof Model)) {
                 // @ts-ignore
-                model = new this.model(model);
+                // model = new this.model(model);
+                model = this.createModel(model);
             }
 
             if (options.prepend) {
@@ -708,5 +717,21 @@ implements Iterable < Model > {
      */
     [Symbol.iterator](): Iterator < any > {
         return new CollectionIterator(this, CollectionIterator.ITERATOR_VALUES);
+    }
+
+    /**
+     * Create model
+     */
+    protected createModel(model: any)
+    {
+        var instantiableModel: any = this.model;
+
+        // Let the function instantiate
+        if (typeof instantiableModel == 'function') {
+            return instantiableModel(model);
+        }
+
+        // Instantiate based on type
+        return new instantiableModel(model);
     }
 }

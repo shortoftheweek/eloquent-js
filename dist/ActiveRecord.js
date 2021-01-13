@@ -150,7 +150,7 @@ class ActiveRecord extends Core_1.default {
         this.unsetHeader('Content-Type');
         formData.append(name, file);
         return this._fetch(null, {}, 'POST', formData).then((request) => {
-            this.dispatch('file:complete', this);
+            this.dispatch('file:complete', request.data);
             return request;
         });
     }
@@ -299,7 +299,7 @@ class ActiveRecord extends Core_1.default {
     FetchComplete(request, e, options = {}) {
         var method = request.method || 'get';
         this.loading = false;
-        this.dispatch('complete', request.response);
+        this.dispatch('complete', request.data);
     }
     FetchProgress(request, e, options = {}) {
         this.dispatch('progress', e.data);

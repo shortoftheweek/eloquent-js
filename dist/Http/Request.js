@@ -153,8 +153,8 @@ class Request extends Core_1.default {
             this.dispatch("complete:" + this.method, this);
         }
         else {
-            this.dispatch("error");
-            throw new Error("Failed response, after all");
+            this.dispatch("error", request.data);
+            throw new Error(request && request.data ? request.data.error : 'After All');
         }
         return request;
     }
