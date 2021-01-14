@@ -50,7 +50,8 @@ class Request extends Core_1.default {
                         : body;
             }
         }
-        var isFile = !params.headers["Content-Type"] && params.method === "POST";
+        var isFile = (!params.headers["Content-Type"] || params.headers["Content-Type"].indexOf('multipart'))
+            && params.method.toLowerCase() === "post";
         this.loading = true;
         this.dispatch("requesting", this);
         var response = isFile

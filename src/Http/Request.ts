@@ -154,7 +154,8 @@ export default class Request extends Core {
     }
 
     // Is File?
-    var isFile = !params.headers["Content-Type"] && params.method === "POST";
+    var isFile = (!params.headers["Content-Type"] || params.headers["Content-Type"].indexOf('multipart'))
+      && params.method.toLowerCase() === "post";
 
     // Loading
     this.loading = true;
