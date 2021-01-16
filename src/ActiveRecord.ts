@@ -898,6 +898,43 @@ export default class ActiveRecord extends Core
         return this;
     }
 
+    /**
+     * Function to call after setting a fetch
+     *
+     * This is useful if we're doing callbacks from cached promises
+     */
+    public setAfterResponse(request: Request, options: any = {})
+    {
+        var method: string = request.method || 'get';
+
+        // Add model
+        if (method.toLowerCase() === 'post')
+        {
+            this.add(request.data);
+        }
+        else if (method.toLowerCase() === 'delete')
+        {
+            // Intentionally empty
+        }
+        else
+        {
+            var data = this.dataKey !== undefined ?
+                request.data[this.dataKey] :
+                request.data;
+
+            this.set(data, options);
+        }
+
+        // Set options
+        this.options(Object.assign({}, options, {
+            meta: request.data.meta,
+        }));
+
+        // Events
+        this.dispatch('parse:after', this);
+        this.dispatch('fetched', this);
+    }
+
     // endregion Set Params
 
     // @todo Update return
@@ -1015,33 +1052,6 @@ export default class ActiveRecord extends Core
      */
     protected FetchParseAfter(request: Request, e: any, options: any = {})
     {
-        var method: string = request.method || 'get';
-
-        // Add model
-        if (method.toLowerCase() === 'post')
-        {
-            this.add(request.data);
-        }
-        else if (method.toLowerCase() === 'delete')
-        {
-            // Intentionally empty
-        }
-        else
-        {
-            var data = this.dataKey !== undefined ?
-                request.data[this.dataKey] :
-                request.data;
-
-            this.set(data, options);
-        }
-
-        // Set options
-        this.options(Object.assign({}, options, {
-            meta: request.data.meta,
-        }));
-
-        // Events
-        this.dispatch('parse:after', this);
-        this.dispatch('fetched', this);
+        this.setAfterResponse(request, options);
     }
 }

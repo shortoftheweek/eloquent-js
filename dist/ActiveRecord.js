@@ -261,6 +261,25 @@ class ActiveRecord extends Core_1.default {
         this.setHeader('Authorization', 'Bearer ' + token);
         return this;
     }
+    setAfterResponse(request, options = {}) {
+        var method = request.method || 'get';
+        if (method.toLowerCase() === 'post') {
+            this.add(request.data);
+        }
+        else if (method.toLowerCase() === 'delete') {
+        }
+        else {
+            var data = this.dataKey !== undefined ?
+                request.data[this.dataKey] :
+                request.data;
+            this.set(data, options);
+        }
+        this.options(Object.assign({}, options, {
+            meta: request.data.meta,
+        }));
+        this.dispatch('parse:after', this);
+        this.dispatch('fetched', this);
+    }
     _fetch(options = {}, queryParams = {}, method = null, body = null, headers = null) {
         method = method ? method.toLowerCase() : 'get';
         this.lastRequest = {
@@ -305,23 +324,7 @@ class ActiveRecord extends Core_1.default {
         this.dispatch('progress', e.data);
     }
     FetchParseAfter(request, e, options = {}) {
-        var method = request.method || 'get';
-        if (method.toLowerCase() === 'post') {
-            this.add(request.data);
-        }
-        else if (method.toLowerCase() === 'delete') {
-        }
-        else {
-            var data = this.dataKey !== undefined ?
-                request.data[this.dataKey] :
-                request.data;
-            this.set(data, options);
-        }
-        this.options(Object.assign({}, options, {
-            meta: request.data.meta,
-        }));
-        this.dispatch('parse:after', this);
-        this.dispatch('fetched', this);
+        this.setAfterResponse(request, options);
     }
 }
 exports.default = ActiveRecord;
