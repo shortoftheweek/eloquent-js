@@ -97,7 +97,7 @@ class Request extends Core_1.default {
                         status: xhr.status,
                         statusText: xhr.statusText,
                     };
-                    var response = new Response(blob, init);
+                    var response = new Response(xhr.response ? blob : null, init);
                     resolve(response);
                 };
                 xhr.onerror = function () {

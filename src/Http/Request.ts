@@ -154,6 +154,7 @@ export default class Request extends Core {
     }
 
     // Is File?
+    // @todo this is inaccurate and makes many requests (forgot password) think it's a file
     var isFile = (!params.headers["Content-Type"] || params.headers["Content-Type"].indexOf('multipart'))
       && params.method.toLowerCase() === "post";
 
@@ -278,7 +279,7 @@ export default class Request extends Core {
             status: xhr.status,
             statusText: xhr.statusText,
           };
-          var response = new Response(blob, init);
+          var response = new Response(xhr.response ? blob : null, init);
 
           // Resolved
           resolve(response);
