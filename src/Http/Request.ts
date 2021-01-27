@@ -423,7 +423,7 @@ export default class Request extends Core {
     } else
     {
       this.dispatch("error", request.data);
-      throw new Error(request && request.data ? request.data.error : 'After All');
+      throw new Error(request && request.data ? request.data.error || request.data.message : 'After All');
     }
 
     return request;
