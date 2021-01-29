@@ -14,6 +14,8 @@ export default class ActiveRecord extends Core {
     delete_endpoint: string | undefined;
     post_endpoint: string | undefined;
     put_endpoint: string | undefined;
+    hasFetched: boolean;
+    hasLoaded: boolean;
     headers: any;
     id: string;
     limit: number;

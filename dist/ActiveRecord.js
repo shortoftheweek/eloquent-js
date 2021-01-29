@@ -12,6 +12,8 @@ class ActiveRecord extends Core_1.default {
         this.cacheable = true;
         this.cid = '';
         this.endpoint = '';
+        this.hasFetched = false;
+        this.hasLoaded = false;
         this.headers = {};
         this.id = '';
         this.limit = 15;
@@ -301,6 +303,7 @@ class ActiveRecord extends Core_1.default {
         }
         const url = this.getUrlByMethod(method);
         this.dispatch('requesting', this);
+        this.hasFetched = true;
         this.loading = true;
         var request = (this.request = new Request_1.default(url, {
             dataKey: this.dataKey,
@@ -317,6 +320,7 @@ class ActiveRecord extends Core_1.default {
     }
     FetchComplete(request, e, options = {}) {
         var method = request.method || 'get';
+        this.hasLoaded = true;
         this.loading = false;
         this.dispatch('complete', request.data);
     }

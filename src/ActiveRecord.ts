@@ -109,6 +109,16 @@ export default class ActiveRecord extends Core
     public put_endpoint: string | undefined;
 
     /**
+     * If this has ever fetched
+     */
+    public hasFetched: boolean = false;
+
+    /**
+     * If this has ever fetched and loaded
+     */
+    public hasLoaded: boolean = false;
+
+    /**
      * List of headers
      *
      * @type {any}
@@ -986,6 +996,9 @@ export default class ActiveRecord extends Core
         // Events
         this.dispatch('requesting', this);
 
+        // Has fetched
+        this.hasFetched = true;
+
         // Set loading
         this.loading = true;
 
@@ -1025,6 +1038,9 @@ export default class ActiveRecord extends Core
     protected FetchComplete(request: Request, e: any, options: any = {})
     {
         var method: string = request.method || 'get';
+
+        // Has loaded ever
+        this.hasLoaded = true;
 
         // Set loading
         this.loading = false;
