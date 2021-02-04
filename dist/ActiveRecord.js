@@ -280,7 +280,6 @@ class ActiveRecord extends Core_1.default {
             meta: request.data.meta,
         }));
         this.dispatch('parse:after', this);
-        this.dispatch('fetched', this);
     }
     _fetch(options = {}, queryParams = {}, method = null, body = null, headers = null) {
         method = method ? method.toLowerCase() : 'get';
@@ -328,7 +327,12 @@ class ActiveRecord extends Core_1.default {
         this.dispatch('progress', e.data);
     }
     FetchParseAfter(request, e, options = {}) {
-        this.setAfterResponse(request, options);
+        const response = request.response;
+        const code = response.status;
+        if (code < 400) {
+            this.setAfterResponse(request, options);
+        }
+        this.dispatch('fetched', this);
     }
 }
 exports.default = ActiveRecord;

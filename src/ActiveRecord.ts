@@ -942,7 +942,6 @@ export default class ActiveRecord extends Core
 
         // Events
         this.dispatch('parse:after', this);
-        this.dispatch('fetched', this);
     }
 
     // endregion Set Params
@@ -1068,6 +1067,15 @@ export default class ActiveRecord extends Core
      */
     protected FetchParseAfter(request: Request, e: any, options: any = {})
     {
-        this.setAfterResponse(request, options);
+        const response: Response = <Response> request.response;
+        const code: number = <number> response.status;
+
+        // Only set for acceptable responses
+        if (code < 400) {
+            this.setAfterResponse(request, options);
+        }
+
+        // Fetched event
+        this.dispatch('fetched', this);
     }
 }
