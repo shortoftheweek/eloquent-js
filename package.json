@@ -1,6 +1,6 @@
 {
     "name": "eloquent-js",
-    "version": "0.3.0",
+    "version": "0.6.0",
     "description": "Laravel mock of Eloquet for Javascript",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -35,7 +35,9 @@
         "https": "^1.0.0",
         "mocha": "^7.2.0",
         "node-fetch": "^2.6.0",
+        "prettier": "^2.1.2",
         "ts-node": "^8.10.2",
+        "tslint": "^6.1.3",
         "typescript": "^3.9.3"
     },
     "devDependencies": {

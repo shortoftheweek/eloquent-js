@@ -1,12 +1,15 @@
-import ActiveRecord from "./ActiveRecord";
-import CollectionIterator from "./CollectionIterator";
-import Model from "./Model";
-import { ICollectionMeta, IPagination, ISortOptions } from "./Interfaces";
+import ActiveRecord from './ActiveRecord';
+import CollectionIterator from './CollectionIterator';
+import Model from './Model';
+import Request from './Http/Request';
+import { ICollectionMeta, IPagination, ISortOptions } from './Interfaces';
 export default class Collection extends ActiveRecord implements Iterable<Model> {
     static hydrate<T>(models?: Model[], options?: object): any;
     get length(): number;
     get modelId(): string;
     get pagination(): IPagination;
+    atRelationship: string[];
+    index: number;
     meta: ICollectionMeta;
     model: Model;
     models: Model[];
@@ -14,6 +17,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
     protected sortKey: string;
     constructor(options?: any);
     toJSON(): object;
+    fetchNext(append?: boolean): Promise<Request>;
     sync(): any;
     add(model: Model[] | Model | object, options?: any): Collection;
     remove(model: Model[] | Model | object, options?: any): Collection;
@@ -21,6 +25,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
     reset(): Collection;
     clear(): Collection;
     count(): number;
+    delete(attributes?: any): Promise<Request>;
     push(model: Model[] | Model | object, options?: object): Collection;
     pop(options?: object): Collection;
     unshift(model: Model[] | Model | object, options?: object): Collection;
@@ -31,6 +36,9 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
     at(index?: number): Model;
     first(): Model;
     last(): Model;
+    next(): Model;
+    previous(): Model;
+    current(): Model;
     where(attributes?: any, first?: boolean): any;
     findWhere(attributes?: object): Model;
     findByCid(cid: string): Model | undefined;

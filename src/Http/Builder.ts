@@ -1,21 +1,16 @@
-
 import ActiveRecord from '../ActiveRecord';
 
 /**
  * Builder
- *
- * @type
  */
 export default class Builder
 {
-
     /**
      * Base Url
      *
      * @type string
      */
-    public get baseUrl(): string
-    {
+    public get baseUrl(): string {
         return this.activeRecord.baseUrl;
     }
 
@@ -24,8 +19,7 @@ export default class Builder
      *
      * @type string
      */
-    public get endpoint(): string
-    {
+    public get endpoint(): string {
         return this.activeRecord.modifiedEndpoint || this.activeRecord.endpoint;
     }
 
@@ -41,7 +35,7 @@ export default class Builder
      *
      * @type string[]
      */
-    public includes: string[] = [ ];
+    public includes: string[] = [];
 
     /**
      * List of query params
@@ -60,8 +54,7 @@ export default class Builder
     /**
      * Constructor
      */
-    constructor(activeRecord: ActiveRecord)
-    {
+    constructor(activeRecord: ActiveRecord) {
         this.activeRecord = activeRecord;
     }
 
@@ -72,8 +65,7 @@ export default class Builder
      *
      * @type string
      */
-    public get queryParamsAsString(): string
-    {
+    public get queryParamsAsString(): string {
         let str: string = '';
 
         // Combine query params
@@ -82,7 +74,11 @@ export default class Builder
             let value = this.queryParams[key];
 
             if (value != null && value != '') {
-                str += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value);
+                str +=
+                    '&' +
+                    encodeURIComponent(key) +
+                    '=' +
+                    encodeURIComponent(value);
             }
         }
 
@@ -99,8 +95,7 @@ export default class Builder
      *
      * @return string
      */
-    public get url(): string
-    {
+    public get url(): string {
         const baseUrl: string = this.baseUrl;
         const endpoint: string = this.endpoint;
         const queryParamStr: string = this.queryParamsAsString;
@@ -119,6 +114,11 @@ export default class Builder
         // Separate query string
         urlBuilder += '?' + queryParamStr;
 
+        // Clean URL
+        // mk: We tried split/join at first but that created errors
+        // on "https://" and "//api.sotw.com..."
+        urlBuilder = urlBuilder.replace(/([a-zA-Z0-9])\/\//g, '$1/');
+
         return urlBuilder;
     }
 
@@ -128,8 +128,7 @@ export default class Builder
      * @param  number id
      * @return Builder
      */
-    public identifier(id: string | number): Builder
-    {
+    public identifier(id: string | number): Builder {
         this.id = id.toString();
         return this;
     }
@@ -140,8 +139,7 @@ export default class Builder
      * @param  string  $value
      * @return Builder
      */
-    public include(value: string): Builder
-    {
+    public include(value: string): Builder {
         this.includes.push(value);
         return this;
     }
@@ -153,8 +151,7 @@ export default class Builder
      * @param  string  value
      * @return Builder
      */
-    public queryParam(key: string, value: string | number): Builder
-    {
+    public queryParam(key: string, value: string | number): Builder {
         this.queryParams[key] = value;
         return this;
     }
@@ -166,9 +163,7 @@ export default class Builder
      * @param  string | number value
      * @return Builder
      */
-    public qp(key: string, value: string | number): Builder
-    {
+    public qp(key: string, value: string | number): Builder {
         return this.queryParam(key, value);
     }
-
 }

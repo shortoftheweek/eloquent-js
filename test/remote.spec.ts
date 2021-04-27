@@ -1,4 +1,9 @@
-'use strict';
+// 'use strict';
+
+/**
+ * @Todo we're using the shortoftheweek.app domain for requests, but
+ * we shouldn't. We should have something mocked or local.
+ */
 
 import { expect } from 'chai';
 import FilmModel from './models/FilmModel';
@@ -12,14 +17,13 @@ import {
 
 // -----------------------------------------------------------------------------
 
-
 const items: any = [
-    { name: 'Ashley', x: 1 },
-    { name: 'Briana', x: 2 },
-    { name: 'Charlotte', x: 3 },
-    { name: 'Danielle', x: 4 },
-    { name: 'Elizabeth', x: 5 },
-    { name: 'Fallon', x: 6 },
+    new FilmModel({ name: 'Ashley', x: 1 }),
+    new FilmModel({ name: 'Briana', x: 2 }),
+    new FilmModel({ name: 'Charlotte', x: 3 }),
+    new FilmModel({ name: 'Danielle', x: 4 }),
+    new FilmModel({ name: 'Elizabeth', x: 5 }),
+    new FilmModel({ name: 'Fallon', x: 6 }),
 ];
 
 const options = {

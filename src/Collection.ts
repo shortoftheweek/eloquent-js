@@ -1,20 +1,22 @@
-import ActiveRecord from "./ActiveRecord";
-import CollectionIterator from "./CollectionIterator";
-import Model from "./Model";
-import { IAttributes, ICollectionMeta, IPagination, ISortOptions } from "./Interfaces";
+
+import ActiveRecord from './ActiveRecord';
+import CollectionIterator from './CollectionIterator';
+import Model from './Model';
+import Request from './Http/Request';
+import { IAttributes, ICollectionMeta, IPagination, ISortOptions } from './Interfaces';
 
 /**
  * [Collection description]
  *
- * "meta": {
- *     "pagination": {
- *         "total": 1938,
- *         "count": 15,
- *         "per_page": 15,
- *         "current_page": 1,
- *         "total_pages": 130,
- *         "links": {
- *             "next": "http://api.sotw.com/v1/film?page=2"
+ * 'meta': {
+ *     'pagination': {
+ *         'total': 1938,
+ *         'count': 15,
+ *         'per_page': 15,
+ *         'current_page': 1,
+ *         'total_pages': 130,
+ *         'links': {
+ *             'next': 'http://api.sotw.com/v1/film?page=2'
  *         }
  *     }
  * }
@@ -55,7 +57,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
      * @return {string}
      */
     public get modelId(): string {
-        return "id";
+        return 'id';
     }
 
     /**
@@ -66,6 +68,25 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
     public get pagination(): IPagination {
         return this.meta.pagination;
     }
+
+    /**
+     * Descending list, for instance:
+     *
+     *     ['receiver', 'person']
+     *
+     * Translates to:
+     *
+     *     at(0).receiver.person
+     *
+     * @type {string[]}
+     */
+    public atRelationship: string[] = [];
+
+    /**
+     * Get the next row
+     * Adjacent to first/last
+     */
+    public index: number = 0;
 
     /**
      * Meta data associated with collection
@@ -130,11 +151,21 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
     constructor(options: any = {}) {
         super(options);
 
+        // Default builder
+        this.builder
+            .qp('limit', this.limit)
+            .qp('page', this.page);
+
         // Set default content type header
         this.setHeader("Content-Type", "application/json; charset=utf8");
 
         // Set defaults
         this.cid = this.cidPrefix + Math.random().toString(36).substr(2, 5);
+
+        // Custom options
+        if (options.atRelationship) {
+            this.atRelationship = options.atRelationship;
+        }
     }
 
     /**
@@ -144,6 +175,31 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
      */
     public toJSON(): object {
         return JSON.parse(JSON.stringify(this.models));
+    }
+
+    /**
+     * Fetch next page with last set of options
+     *
+     * @return {any}
+     */
+    public async fetchNext(append: boolean = false): Promise<Request> {
+        var options = Object.assign({}, this.lastRequest.options);
+        var qp = Object.assign({}, this.builder.queryParams, this.lastRequest.queryParams);
+
+        // Increase page number
+        qp.page = parseFloat(qp.page) + 1;
+
+        // Merge
+        options.merge = append;
+
+        // Fetch
+        return await this._fetch(
+            options,
+            qp,
+            this.lastRequest.method,
+            this.lastRequest.body,
+            this.lastRequest.headers,
+        );
     }
 
     /**
@@ -178,6 +234,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
             if (!(model instanceof Model)) {
                 // @ts-ignore
                 model = new this.model(model);
+                // model = this.createModel(model);
             }
 
             if (options.prepend) {
@@ -234,7 +291,9 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
      * @return {Collection}
      */
     public set(model: Model[] | Model | object, options: any = {}): Collection {
-        this.reset();
+        if (!options || (options && options.merge != true)) {
+            this.reset();
+        }
 
         // Check for `meta` on set, this sometimes happens
         // if we assign an entire bootstrapped JSON object
@@ -292,6 +351,31 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
      */
     public count(): number {
         return this.length;
+    }
+
+    /**
+     * Delete Model
+     *
+     * @todo There's a ton to do here too
+     */
+    public delete(attributes: any = null) {
+        // Query params
+        const url: string = this.builder.identifier(
+            this.id || (attributes ? attributes.id : ''),
+        ).url;
+
+        // Check for identifier
+        if (this.builder.id) {
+            var model = this.find(attributes);
+            this.remove(model);
+        }
+
+        // Attributes
+        const body: any = null;
+        const headers: any = this.headers;
+        const method: string = 'DELETE';
+
+        return this._fetch(null, {}, method, body, headers);
     }
 
     /**
@@ -391,7 +475,15 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
             index += this.length;
         }
 
-        return this.models[index];
+        // Get model
+        var item: any = this.models[index];
+
+        // Transform through
+        if (this.atRelationship && this.atRelationship.length) {
+            this.atRelationship.forEach(key => item = item[key]);
+        }
+
+        return item;
     }
 
     /**
@@ -410,6 +502,33 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
      */
     public last(): Model {
         return this.at(this.length - 1);
+    }
+
+    public next() {
+        // We have reached the end
+        // if (this.index >= this.length) {
+        //     return false;
+        // }
+
+        // Get model
+        var model = this.at(++this.index);
+
+        return model;
+    }
+
+    public previous() {
+        // We have reached the beginning
+        // if (this.index <= 0) {
+        //     return false;
+        // }
+
+        // Advance
+        return this.at(--this.index);
+    }
+
+    public current() {
+        // Advance
+        return this.at(this.index);
     }
 
     /**
@@ -567,7 +686,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
     /**
      * Iterator
      */
-    [Symbol.iterator](): Iterator<any> {
+    [Symbol.iterator](): Iterator < any > {
         return new CollectionIterator(this, CollectionIterator.ITERATOR_VALUES);
     }
 }

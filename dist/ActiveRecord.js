@@ -10,6 +10,8 @@ export default class ActiveRecord extends Core {
         this.cacheable = true;
         this.cid = "";
         this.endpoint = "";
+        this.hasFetched = false;
+        this.hasLoaded = false;
         this.headers = {};
         this.id = "";
         this.limit = 15;
@@ -19,6 +21,8 @@ export default class ActiveRecord extends Core {
         this.page = 1;
         this.cidPrefix = "c";
         this.dataKey = "data";
+        this.runLastAttempts = 0;
+        this.runLastAttemptsMax = 2;
         Object.assign(this, options);
         this.lastRequest = {};
         this.builder = new Builder(this);
@@ -62,6 +66,11 @@ export default class ActiveRecord extends Core {
             this.setHeaders(options.headers);
         }
         if (options.meta) {
+            if (options.merge) {
+                if (options.meta.pagination.count && this.meta.pagination.count) {
+                    options.meta.pagination.count += this.meta.pagination.count;
+                }
+            }
             this.meta = options.meta;
         }
         if (options.params || options.qp || options.queryParams) {
@@ -108,7 +117,6 @@ export default class ActiveRecord extends Core {
         return this._fetch(null, {}, method, body, headers);
     }
     save(attributes = null) {
-        const url = this.builder.identifier(this.id || (attributes ? attributes.id : "")).url;
         const body = attributes || this.attributes;
         const headers = this.headers;
         const method = this.id ? "PUT" : "POST";
@@ -152,10 +160,53 @@ export default class ActiveRecord extends Core {
         return this.file(name, file);
     }
     runLast() {
+        if (++this.runLastAttempts >= this.runLastAttemptsMax) {
+            console.warn('Run last attempts expired');
+            setTimeout(() => {
+                this.runLastAttempts = 0;
+            }, 1000);
+            return;
+        }
         return this._fetch(this.lastRequest.options, this.lastRequest.queryParams, this.lastRequest.method, this.lastRequest.body, this.lastRequest.headers);
     }
+    getUrlByMethod(method) {
+        let url = '';
+        let originalEndpoint = this.endpoint;
+        if (method === 'delete' && this.delete_endpoint) {
+            originalEndpoint = this.endpoint;
+            this.endpoint = this.delete_endpoint;
+        }
+        else if (method === 'put' && this.put_endpoint) {
+            originalEndpoint = this.endpoint;
+            this.endpoint = this.put_endpoint;
+        }
+        else if (method === 'post' && this.post_endpoint) {
+            originalEndpoint = this.endpoint;
+            this.endpoint = this.post_endpoint;
+        }
+        if (this.referenceForModifiedEndpoint && this.modifiedEndpoint) {
+            this.useModifiedEndpoint(this.referenceForModifiedEndpoint);
+        }
+        url = this.builder.url;
+        this.endpoint = originalEndpoint;
+        return url;
+    }
+    cancelModifiedEndpoint() {
+        this.referenceForModifiedEndpoint = undefined;
+        this.modifiedEndpoint = null;
+        return this;
+    }
     useModifiedEndpoint(activeRecord) {
-        this.modifiedEndpoint = activeRecord.endpoint + "/" + activeRecord.id + "/" + this.endpoint;
+        this.referenceForModifiedEndpoint = activeRecord;
+        if (activeRecord.id == null) {
+            console.warn('Modified endpoints usually have an ID signature. Are you sure this is right?');
+        }
+        this.modifiedEndpoint =
+            activeRecord.endpoint +
+                '/' +
+                activeRecord.id +
+                (activeRecord.id ? '/' : '') +
+                this.endpoint;
         return this;
     }
     setBody(value) {
@@ -163,6 +214,7 @@ export default class ActiveRecord extends Core {
         return this;
     }
     setEndpoint(endpoint) {
+        this.referenceForModifiedEndpoint = undefined;
         this.modifiedEndpoint = null;
         this.endpoint = endpoint;
         return this;
@@ -208,7 +260,26 @@ export default class ActiveRecord extends Core {
         this.setHeader("Authorization", "Bearer " + token);
         return this;
     }
+    setAfterResponse(request, options = {}) {
+        var method = request.method || 'get';
+        if (method.toLowerCase() === 'post') {
+            this.add(request.data);
+        }
+        else if (method.toLowerCase() === 'delete') {
+        }
+        else {
+            var data = this.dataKey !== undefined ?
+                request.data[this.dataKey] :
+                request.data;
+            this.set(data, options);
+        }
+        this.options(Object.assign({}, options, {
+            meta: request.data.meta,
+        }));
+        this.dispatch('parse:after', this);
+    }
     _fetch(options = {}, queryParams = {}, method = null, body = null, headers = null) {
+        method = method ? method.toLowerCase() : 'get';
         this.lastRequest = {
             options,
             queryParams,
@@ -226,12 +297,14 @@ export default class ActiveRecord extends Core {
         if (options && options.id) {
             this.builder.identifier(options.id);
         }
-        const url = this.builder.url;
+        const url = this.getUrlByMethod(method);
         this.dispatch("requesting", this);
+        this.hasFetched = true;
         this.loading = true;
         var request = (this.request = new Request(url, {
             dataKey: this.dataKey,
         }));
+        this.request.method = method;
         request.on("parse:after", (e) => {
             method = method || "get";
             if (method.toLowerCase() === "post") {
@@ -242,9 +315,6 @@ export default class ActiveRecord extends Core {
             else {
                 this.set(this.dataKey !== undefined ? request.data[this.dataKey] : request.data);
             }
-            this.options({
-                meta: request.data.meta,
-            });
             this.dispatch("fetched", this);
         });
         request.on("progress", (e) => {
@@ -254,6 +324,13 @@ export default class ActiveRecord extends Core {
             this.loading = false;
             this.dispatch("complete");
         });
+        request.on('parse:after', e => this.FetchParseAfter(request, e, options));
+        request.on('progress', e => this.FetchProgress(request, e, options));
+        request.on('complete', e => this.FetchComplete(request, e, options));
+        request.on('complete:get', e => this.dispatch('complete:get'));
+        request.on('complete:put', e => this.dispatch('complete:put'));
+        request.on('complete:post', e => this.dispatch('complete:post'));
+        request.on('complete:delete', e => this.dispatch('complete:delete'));
         return request.fetch(method, body || this.body, headers || this.headers);
     }
     cache(key, value, isComplete = false, ttl = 5000) {
@@ -288,6 +365,23 @@ export default class ActiveRecord extends Core {
     clearCacheSubscribers(key) {
         const cache = this.getCache(key);
         cache.subscribers = [];
+    }
+    FetchComplete(request, e, options = {}) {
+        var method = request.method || 'get';
+        this.hasLoaded = true;
+        this.loading = false;
+        this.dispatch('complete', request.data);
+    }
+    FetchProgress(request, e, options = {}) {
+        this.dispatch('progress', e.data);
+    }
+    FetchParseAfter(request, e, options = {}) {
+        const response = request.response;
+        const code = response.status;
+        if (code < 400) {
+            this.setAfterResponse(request, options);
+        }
+        this.dispatch('fetched', this);
     }
 }
 ActiveRecord.cachedResponses = {};

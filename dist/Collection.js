@@ -1,9 +1,11 @@
-import ActiveRecord from "./ActiveRecord";
-import CollectionIterator from "./CollectionIterator";
-import Model from "./Model";
+import ActiveRecord from './ActiveRecord';
+import CollectionIterator from './CollectionIterator';
+import Model from './Model';
 export default class Collection extends ActiveRecord {
     constructor(options = {}) {
         super(options);
+        this.atRelationship = [];
+        this.index = 0;
         this.meta = {
             pagination: {
                 total: 0,
@@ -18,8 +20,14 @@ export default class Collection extends ActiveRecord {
         this.models = [];
         this.dataKey = "data";
         this.sortKey = "id";
+        this.builder
+            .qp('limit', this.limit)
+            .qp('page', this.page);
         this.setHeader("Content-Type", "application/json; charset=utf8");
         this.cid = this.cidPrefix + Math.random().toString(36).substr(2, 5);
+        if (options.atRelationship) {
+            this.atRelationship = options.atRelationship;
+        }
     }
     static hydrate(models = [], options = {}) {
         const collection = new this(options);
@@ -31,13 +39,20 @@ export default class Collection extends ActiveRecord {
         return this.models.length;
     }
     get modelId() {
-        return "id";
+        return 'id';
     }
     get pagination() {
         return this.meta.pagination;
     }
     toJSON() {
         return JSON.parse(JSON.stringify(this.models));
+    }
+    async fetchNext(append = false) {
+        var options = Object.assign({}, this.lastRequest.options);
+        var qp = Object.assign({}, this.builder.queryParams, this.lastRequest.queryParams);
+        qp.page = parseFloat(qp.page) + 1;
+        options.merge = append;
+        return await this._fetch(options, qp, this.lastRequest.method, this.lastRequest.body, this.lastRequest.headers);
     }
     sync() {
     }
@@ -48,7 +63,7 @@ export default class Collection extends ActiveRecord {
         const models = Array.isArray(model) ? model : [model];
         models.forEach((model) => {
             if (!(model instanceof Model)) {
-                model = new this.model(model);
+                model = this.createModel(model);
             }
             if (options.prepend) {
                 this.models.unshift(model);
@@ -79,7 +94,9 @@ export default class Collection extends ActiveRecord {
         return this;
     }
     set(model, options = {}) {
-        this.reset();
+        if (!options || (options && options.merge != true)) {
+            this.reset();
+        }
         if (model && model.hasOwnProperty("meta")) {
             this.meta = model.meta;
         }
@@ -102,6 +119,17 @@ export default class Collection extends ActiveRecord {
     }
     count() {
         return this.length;
+    }
+    delete(attributes = null) {
+        const url = this.builder.identifier(this.id || (attributes ? attributes.id : '')).url;
+        if (this.builder.id) {
+            var model = this.find(attributes);
+            this.remove(model);
+        }
+        const body = null;
+        const headers = this.headers;
+        const method = 'DELETE';
+        return this._fetch(null, {}, method, body, headers);
     }
     push(model, options = {}) {
         this.add(model, options);
@@ -136,13 +164,27 @@ export default class Collection extends ActiveRecord {
         if (index < 0) {
             index += this.length;
         }
-        return this.models[index];
+        var item = this.models[index];
+        if (this.atRelationship && this.atRelationship.length) {
+            this.atRelationship.forEach(key => item = item[key]);
+        }
+        return item;
     }
     first() {
         return this.at(0);
     }
     last() {
         return this.at(this.length - 1);
+    }
+    next() {
+        var model = this.at(++this.index);
+        return model;
+    }
+    previous() {
+        return this.at(--this.index);
+    }
+    current() {
+        return this.at(this.index);
     }
     where(attributes = {}, first = false) {
         const constructor = this.constructor;

@@ -16,7 +16,11 @@ export default class Builder {
         for (let key in this.queryParams) {
             let value = this.queryParams[key];
             if (value != null && value != '') {
-                str += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value);
+                str +=
+                    '&' +
+                        encodeURIComponent(key) +
+                        '=' +
+                        encodeURIComponent(value);
             }
         }
         if (this.includes.length) {
@@ -35,6 +39,7 @@ export default class Builder {
             urlBuilder += '/' + this.id;
         }
         urlBuilder += '?' + queryParamStr;
+        urlBuilder = urlBuilder.replace(/([a-zA-Z0-9])\/\//g, '$1/');
         return urlBuilder;
     }
     identifier(id) {

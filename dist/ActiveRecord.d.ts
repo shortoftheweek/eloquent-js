@@ -11,6 +11,11 @@ export default class ActiveRecord extends Core {
     cacheable: boolean;
     cid: string;
     endpoint: string;
+    delete_endpoint: string | undefined;
+    post_endpoint: string | undefined;
+    put_endpoint: string | undefined;
+    hasFetched: boolean;
+    hasLoaded: boolean;
     headers: any;
     id: string;
     limit: number;
@@ -18,12 +23,16 @@ export default class ActiveRecord extends Core {
     meta: any;
     modifiedEndpoint: string | null;
     page: number;
+    parent: any;
     request?: Request;
     requestTime: number;
     protected builder: Builder;
     protected cidPrefix: string;
     protected dataKey: string | undefined;
     protected lastRequest: any;
+    protected runLastAttempts: number;
+    protected runLastAttemptsMax: number;
+    private referenceForModifiedEndpoint;
     constructor(options?: any);
     attr(key: string): string | number | null;
     set(hash?: IAttributes, trigger?: boolean): any;
@@ -43,6 +52,8 @@ export default class ActiveRecord extends Core {
     fetch(options?: IModelRequestOptions | null, queryParams?: IModelRequestQueryParams): Promise<void | Request | Response>;
     upload(name: string, file: HTMLInputElement | FileList | File): Promise<void | Request | Response>;
     runLast(): any;
+    getUrlByMethod(method: string): string;
+    cancelModifiedEndpoint(): any;
     useModifiedEndpoint(activeRecord: ActiveRecord): any;
     setBody(value: any): any;
     setEndpoint(endpoint: string): any;
@@ -55,6 +66,7 @@ export default class ActiveRecord extends Core {
     setQueryParams(params: any): any;
     unsetQueryParam(param: string): any;
     setToken(token: string): any;
+    setAfterResponse(request: Request, options?: any): void;
     protected _fetch(options?: IModelRequestOptions | null, queryParams?: IModelRequestQueryParams, method?: any, body?: any, headers?: any): Promise<Request>;
     protected static cachedResponses: ICachedResponses;
     protected cache(key: string, value: any, isComplete?: boolean, ttl?: number): void;
@@ -63,4 +75,7 @@ export default class ActiveRecord extends Core {
     protected getCache(key: string): any;
     protected addCacheSubscriber(key: string, resolve: any, reject: any, collection: any): void;
     protected clearCacheSubscribers(key: string): void;
+    protected FetchComplete(request: Request, e: any, options?: any): void;
+    protected FetchProgress(request: Request, e: any, options?: any): void;
+    protected FetchParseAfter(request: Request, e: any, options?: any): void;
 }

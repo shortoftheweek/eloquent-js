@@ -1,3 +1,4 @@
+
 import Builder from "./Http/Builder";
 import Core from "./Core";
 import Request from "./Http/Request";
@@ -73,6 +74,43 @@ export default class ActiveRecord extends Core {
     public endpoint: string = "";
 
     /**
+     * Optional override for DELETEs
+     *
+     * https://api.sotw.com/v1/{post_endpoint}
+     *
+     * @type string | undefined
+     */
+    public delete_endpoint: string | undefined;
+
+    /**
+     * Optional override for POSTs
+     *
+     * https://api.sotw.com/v1/{post_endpoint}
+     *
+     * @type string | undefined
+     */
+    public post_endpoint: string | undefined;
+
+    /**
+     * Optional override for PUTs
+     *
+     * https://api.sotw.com/v1/{post_endpoint}
+     *
+     * @type string | undefined
+     */
+    public put_endpoint: string | undefined;
+
+    /**
+     * If this has ever fetched
+     */
+    public hasFetched: boolean = false;
+
+    /**
+     * If this has ever fetched and loaded
+     */
+    public hasLoaded: boolean = false;
+
+    /**
      * List of headers
      *
      * @type {any}
@@ -111,6 +149,7 @@ export default class ActiveRecord extends Core {
 
     /**
      * Modified endpoint takes precedence
+     *
      * @type {string}
      */
     public modifiedEndpoint: string | null = null;
@@ -123,11 +162,19 @@ export default class ActiveRecord extends Core {
     public page: number = 1;
 
     /**
+     * Parent object
+     * Usually when there's a relationship involved
+     *
+     * @type ActiveRecord
+     */
+    public parent: any;
+
+    /**
      * Last request
      *
      * @type Request
      */
-    public request?: Request;
+    public request ? : Request;
 
     /**
      * Last Request Time
@@ -165,6 +212,25 @@ export default class ActiveRecord extends Core {
      * @type {Object}
      */
     protected lastRequest: any;
+
+    /**
+     * Prevent overflow of runLastAttempts
+     * @type {number}
+     */
+    protected runLastAttempts: number = 0;
+
+    /**
+     * Max attempts to runLast
+     * @type {number}
+     */
+    protected runLastAttemptsMax: number = 2;
+
+    /**
+     * Reference to object we use in our modified active record
+     *
+     * @type ActiveRecord
+     */
+    private referenceForModifiedEndpoint: ActiveRecord | null | undefined;
 
     /**
      * Constructor
@@ -210,7 +276,8 @@ export default class ActiveRecord extends Core {
         // @ts-ignore
         var possibleSetters = Object.getOwnPropertyDescriptors(this.__proto__);
 
-        for (let key in hash) {
+        for (let key in hash)
+        {
             this.attributes[key] = hash[key];
 
             // Check for setters
@@ -266,12 +333,23 @@ export default class ActiveRecord extends Core {
 
         // Set metadata
         if (options.meta) {
+            // Increase count
+            // mk: This is kind of wonky...
+            if (options.merge) {
+                if (options.meta.pagination.count && this.meta.pagination.count) {
+                    options.meta.pagination.count += this.meta.pagination.count;
+                }
+            }
+
+            // Set
             this.meta = options.meta;
         }
 
         // Check options for params
         if (options.params || options.qp || options.queryParams) {
-            this.setQueryParams(options.queryParams || options.qp || options.params);
+            this.setQueryParams(
+                options.queryParams || options.qp || options.params,
+            );
         }
 
         return this;
@@ -290,9 +368,11 @@ export default class ActiveRecord extends Core {
         var possibleGetters = Object.getOwnPropertyNames(this.__proto__);
 
         // Convert toJSON on subobjects so they stay in sync
-        for (var key of possibleGetters) {
+        for (var key of possibleGetters)
+        {
             // @ts-ignore
-            if (json[key] && this[key] && this[key].toJSON) {
+            if (json[key] && this[key] && this[key].toJSON)
+            {
                 // @ts-ignore
                 json[key] = this[key].toJSON();
             }
@@ -327,12 +407,17 @@ export default class ActiveRecord extends Core {
             this.remove(model);
         }
 
+        // const url: string = this.builder.identifier(
+        //     this.id || (attributes ? attributes.id : ''),
+        // ).url;
+
         // Attributes
         const body: any = null;
         const headers: any = this.headers;
         const method: string = "DELETE";
 
-        return this._fetch(null, {}, method, body, headers);
+        return this._fetch(null,
+        {}, method, body, headers);
     }
 
     /**
@@ -347,7 +432,8 @@ export default class ActiveRecord extends Core {
         const headers: any = this.headers;
         const method: string = "POST";
 
-        return this._fetch(null, {}, method, body, headers);
+        return this._fetch(null,
+        {}, method, body, headers);
     }
 
     /**
@@ -366,7 +452,8 @@ export default class ActiveRecord extends Core {
         const headers: any = this.headers;
         const method: string = "PUT";
 
-        return this._fetch(null, {}, method, body, headers);
+        return this._fetch(null,
+        {}, method, body, headers);
     }
 
     /**
@@ -380,14 +467,15 @@ export default class ActiveRecord extends Core {
      */
     public save(attributes: any = null): any {
         // Query params
-        const url: string = this.builder.identifier(this.id || (attributes ? attributes.id : "")).url;
+        // const url: string = this.builder.identifier(this.id || (attributes ? attributes.id : "")).url;
 
         // Attributes
         const body: any = attributes || this.attributes;
         const headers: any = this.headers;
         const method: string = this.id ? "PUT" : "POST";
 
-        return this._fetch(null, {}, method, body, headers);
+        return this._fetch(null,
+        {}, method, body, headers);
     }
 
     /**
@@ -499,18 +587,85 @@ export default class ActiveRecord extends Core {
      * @return {any}
      */
     public runLast(): any {
+        // Check if we can do this
+        if (++this.runLastAttempts >= this.runLastAttemptsMax) {
+            console.warn('Run last attempts expired');
+
+            setTimeout(() => {
+                this.runLastAttempts = 0;
+            }, 1000);
+            return;
+        }
+
         return this._fetch(
             this.lastRequest.options,
             this.lastRequest.queryParams,
             this.lastRequest.method,
             this.lastRequest.body,
-            this.lastRequest.headers
+            this.lastRequest.headers,
         );
     }
 
     //#endregion Actions
 
+    //#region Get Params
+
+    public getUrlByMethod(method: string): string {
+        // Setup URL
+        let url: string = '';
+        let originalEndpoint: string = this.endpoint;
+
+        // Use a modified endpoint, if one exists
+        if (method === 'delete' && this.delete_endpoint)
+        {
+            originalEndpoint = this.endpoint;
+            this.endpoint = this.delete_endpoint;
+        }
+        else if (method === 'put' && this.put_endpoint)
+        {
+            originalEndpoint = this.endpoint;
+            this.endpoint = this.put_endpoint;
+        }
+        else if (method === 'post' && this.post_endpoint)
+        {
+            originalEndpoint = this.endpoint;
+            this.endpoint = this.post_endpoint;
+        }
+
+        // Check if we're using modified
+        if (this.referenceForModifiedEndpoint && this.modifiedEndpoint)
+        {
+            this.useModifiedEndpoint(this.referenceForModifiedEndpoint);
+        }
+
+        // Mark url
+        url = this.builder.url;
+
+        // Reset endpoint
+        this.endpoint = originalEndpoint;
+
+        // Query params
+        return url;
+    }
+
+    //#endregion Get Params
+
     //#region Set Params
+
+    /**
+     * We automatically assign modified endpoints through relationships
+     * like hasOne/hasMany, but sometimes we may not want to change that
+     * endpoint. This allows us to cancel the change.
+     *
+     * @return {any}
+     */
+    public cancelModifiedEndpoint(): any
+    {
+        this.referenceForModifiedEndpoint = undefined;
+        this.modifiedEndpoint = null;
+
+        return this;
+    }
 
     /**
      * Set specific endpoint override
@@ -524,8 +679,24 @@ export default class ActiveRecord extends Core {
         // then have a way of modifying that so we maintain the original class endpoint
         // this.setEndpoint(activeRecord.endpoint + '/' + activeRecord.id + '/' + this.endpoint);
 
+        // Object we reference for modified
+        this.referenceForModifiedEndpoint = activeRecord;
+
+        // Warnings
+        if (activeRecord.id == null)
+        {
+            console.warn(
+                'Modified endpoints usually have an ID signature. Are you sure this is right?',
+            );
+        }
+
         // Set modified endpoint
-        this.modifiedEndpoint = activeRecord.endpoint + "/" + activeRecord.id + "/" + this.endpoint;
+        this.modifiedEndpoint =
+            activeRecord.endpoint +
+            '/' +
+            activeRecord.id +
+            (activeRecord.id ? '/' : '') +
+            this.endpoint;
 
         return this;
     }
@@ -548,7 +719,9 @@ export default class ActiveRecord extends Core {
      * @param  {string} endpoint
      * @return {any}
      */
-    public setEndpoint(endpoint: string): any {
+    public setEndpoint(endpoint: string): any
+    {
+        this.referenceForModifiedEndpoint = undefined;
         this.modifiedEndpoint = null;
         this.endpoint = endpoint;
 
@@ -670,6 +843,42 @@ export default class ActiveRecord extends Core {
         return this;
     }
 
+    /**
+     * Function to call after setting a fetch
+     *
+     * This is useful if we're doing callbacks from cached promises
+     */
+    public setAfterResponse(request: Request, options: any = {})
+    {
+        var method: string = request.method || 'get';
+
+        // Add model
+        if (method.toLowerCase() === 'post')
+        {
+            this.add(request.data);
+        }
+        else if (method.toLowerCase() === 'delete')
+        {
+            // Intentionally empty
+        }
+        else
+        {
+            var data = this.dataKey !== undefined ?
+                request.data[this.dataKey] :
+                request.data;
+
+            this.set(data, options);
+        }
+
+        // Set options
+        this.options(Object.assign({}, options, {
+            meta: request.data.meta,
+        }));
+
+        // Events
+        this.dispatch('parse:after', this);
+    }
+
     //#endregion Set Params
 
     // @todo Update return
@@ -680,6 +889,10 @@ export default class ActiveRecord extends Core {
         body: any = null,
         headers: any = null
     ): Promise<Request> {
+        // Promise<void | Request | Response>
+        // Normalize method
+        method = method ? method.toLowerCase() : 'get';
+
         // Save request params
         this.lastRequest = {
             options,
@@ -698,20 +911,25 @@ export default class ActiveRecord extends Core {
         }
 
         // Check for query params
-        for (let key in queryParams) {
+        for (let key in queryParams)
+        {
             this.builder.qp(key, queryParams[key]);
         }
 
         // Check for ID
-        if (options && options.id) {
+        if (options && options.id)
+        {
             this.builder.identifier(options.id);
         }
 
         // Query params
-        const url: string = this.builder.url;
+        const url: string = this.getUrlByMethod(method);
 
         // Events
         this.dispatch("requesting", this);
+
+        // Has fetched
+        this.hasFetched = true;
 
         // Set loading
         this.loading = true;
@@ -720,6 +938,10 @@ export default class ActiveRecord extends Core {
         var request = (this.request = new Request(url, {
             dataKey: this.dataKey,
         }));
+
+        // note: this *should* be set by fetch as well, but
+        // we have an issue right now we're working out
+        this.request.method = method;
 
         // After parse
         request.on("parse:after", (e) => {
@@ -734,11 +956,6 @@ export default class ActiveRecord extends Core {
             else {
                 this.set(this.dataKey !== undefined ? request.data[this.dataKey] : request.data);
             }
-
-            // Set options
-            this.options({
-                meta: request.data.meta,
-            });
 
             // Events
             this.dispatch("fetched", this);
@@ -757,6 +974,15 @@ export default class ActiveRecord extends Core {
             // Bubble
             this.dispatch("complete");
         });
+
+        // After parse
+        request.on('parse:after', e => this.FetchParseAfter(request, e, options));
+        request.on('progress', e => this.FetchProgress(request, e, options));
+        request.on('complete', e => this.FetchComplete(request, e, options));
+        request.on('complete:get', e => this.dispatch('complete:get'));
+        request.on('complete:put', e => this.dispatch('complete:put'));
+        request.on('complete:post', e => this.dispatch('complete:post'));
+        request.on('complete:delete', e => this.dispatch('complete:delete'));
 
         // Request (method, body headers)
         return request.fetch(method, body || this.body, headers || this.headers);
@@ -867,4 +1093,55 @@ export default class ActiveRecord extends Core {
     }
 
     //#endregion Cache
+
+    /*
+     * Complete from fetch request
+     *
+     * @param {Request} request
+     * @param {any} e
+     */
+    protected FetchComplete(request: Request, e: any, options: any = {})
+    {
+        var method: string = request.method || 'get';
+
+        // Has loaded ever
+        this.hasLoaded = true;
+
+        // Set loading
+        this.loading = false;
+
+        // Bubble
+        this.dispatch('complete', request.data);
+    }
+
+    /**
+     * Progress from fetch request
+     *
+     * @param {Request} request
+     * @param {any} e
+     */
+    protected FetchProgress(request: Request, e: any, options: any = {})
+    {
+        this.dispatch('progress', e.data);
+    }
+
+    /**
+     * Overrideable fetch parse:after
+     *
+     * @param {string = 'get'} method
+     * @param {Request} request
+     */
+    protected FetchParseAfter(request: Request, e: any, options: any = {})
+    {
+        const response: Response = <Response> request.response;
+        const code: number = <number> response.status;
+
+        // Only set for acceptable responses
+        if (code < 400) {
+            this.setAfterResponse(request, options);
+        }
+
+        // Fetched event
+        this.dispatch('fetched', this);
+    }
 }

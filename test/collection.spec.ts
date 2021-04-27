@@ -1,4 +1,4 @@
-'use strict';
+// 'use strict';
 
 import { expect } from 'chai';
 import FilmModel from './models/FilmModel';
@@ -9,9 +9,7 @@ import {
     Model,
 } from '../src/index';
 
-
 // -----------------------------------------------------------------------------
-
 
 const items: any = [
     { name: 'Ashley', x: 1 },
@@ -34,9 +32,7 @@ const options = {
     },
 };
 
-
 // -----------------------------------------------------------------------------
-
 
 /**
  * Specific Collection Tests
