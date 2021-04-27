@@ -1,8 +1,24 @@
 export interface IAttributes {
     [key: string]: any;
 }
+export interface ICachedResponse {
+    complete?: boolean;
+    time?: number;
+    value?: any;
+    ttl?: number;
+    subscribers?: any[];
+}
+export interface ICachedResponses {
+    [key: string]: ICachedResponse;
+}
 export interface ICollectionMeta {
     pagination: IPagination;
+}
+export interface IDispatcher {
+    trigger: (eventName: string, data?: any) => any;
+    dispatch: (eventName: string, data?: any) => any;
+    on: (eventName: string, callback: (data?: any) => void) => any;
+    off: (eventName: string, callback?: any) => any;
 }
 export interface IModelRequestOptions {
     id?: number | string;
@@ -22,10 +38,4 @@ export interface IPagination {
 export interface ISortOptions {
     key: string;
     reverse?: boolean;
-}
-export interface IDispatcher {
-    trigger: (eventName: string, data?: any) => any;
-    dispatch: (eventName: string, data?: any) => any;
-    on: (eventName: string, callback: (data?: any) => void) => any;
-    off: (eventName: string, callback?: any) => any;
 }

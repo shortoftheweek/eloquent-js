@@ -1,6 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-class Builder {
+export default class Builder {
     constructor(activeRecord) {
         this.id = '';
         this.includes = [];
@@ -55,5 +53,4 @@ class Builder {
         return this.queryParam(key, value);
     }
 }
-exports.default = Builder;
 //# sourceMappingURL=Builder.js.map

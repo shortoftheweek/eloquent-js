@@ -1,7 +1,7 @@
-import CollectionIterator from './CollectionIterator';
-import ActiveRecord from './ActiveRecord';
-import Model from './Model';
-import { ICollectionMeta, IPagination, ISortOptions } from './Interfaces';
+import ActiveRecord from "./ActiveRecord";
+import CollectionIterator from "./CollectionIterator";
+import Model from "./Model";
+import { ICollectionMeta, IPagination, ISortOptions } from "./Interfaces";
 export default class Collection extends ActiveRecord implements Iterable<Model> {
     static hydrate<T>(models?: Model[], options?: object): any;
     get length(): number;
@@ -20,6 +20,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
     set(model: Model[] | Model | object, options?: any): Collection;
     reset(): Collection;
     clear(): Collection;
+    count(): number;
     push(model: Model[] | Model | object, options?: object): Collection;
     pop(options?: object): Collection;
     unshift(model: Model[] | Model | object, options?: object): Collection;
@@ -33,9 +34,8 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
     where(attributes?: any, first?: boolean): any;
     findWhere(attributes?: object): Model;
     findByCid(cid: string): Model | undefined;
-    each(predicate: any): any;
-    filter(predicate: any): any;
-    find(predicate: any): any;
+    each(predicate: any): this;
+    filter(predicate: any): Collection;
     sort(options?: ISortOptions | null): Collection;
     pluck(attribute: string): any;
     clone(attributes?: object): any;

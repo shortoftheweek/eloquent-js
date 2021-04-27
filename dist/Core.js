@@ -1,7 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const dispatcher_1 = require("dispatcher");
-class Core extends dispatcher_1.Dispatcher {
+import { Dispatcher } from 'dispatcher';
+export default class Core extends Dispatcher {
     constructor(options = {}) {
         super();
         Object.assign(this, options);
@@ -19,5 +17,4 @@ class Core extends dispatcher_1.Dispatcher {
         return super.off(eventName, callback);
     }
 }
-exports.default = Core;
 //# sourceMappingURL=Core.js.map

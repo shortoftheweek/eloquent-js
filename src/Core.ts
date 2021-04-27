@@ -1,5 +1,4 @@
 
-// @ts-ignore
 import { Dispatcher } from 'dispatcher';
 import { IDispatcher } from './Interfaces';
 

@@ -1,5 +1,5 @@
 
-import { Model } from '../../index';
+import { Model } from '../../src/index';
 
 /**
  * Film Model

@@ -7,7 +7,7 @@ import {
     ActiveRecord,
     Collection,
     Model,
-} from '../index';
+} from '../src/index';
 
 
 // -----------------------------------------------------------------------------
@@ -156,6 +156,17 @@ describe('Specific Collection Tests', () => {
         var plucked = collection.pluck('name');
 
         expect(plucked[2]).to.equal('Charlotte');
+    });
+
+    it('should find first item', () => {
+        const collection: FilmCollection = FilmCollection.hydrate(items, options);
+
+        // sort
+        const model: FilmModel = collection.findWhere({
+            name: 'Danielle',
+        });
+
+        expect(model.attr('name')).to.equal('Danielle');
     });
 
     it('should find items by where', () => {

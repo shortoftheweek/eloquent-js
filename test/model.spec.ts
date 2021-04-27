@@ -7,7 +7,7 @@ import {
     ActiveRecord,
     Collection,
     Model,
-} from '../index';
+} from '../src/index';
 
 /**
  * Specific Model Tests

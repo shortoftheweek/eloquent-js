@@ -1,7 +1,7 @@
-import Builder from './Http/Builder';
-import Core from './Core';
-import Request from './Http/Request';
-import { IAttributes, IModelRequestOptions, IModelRequestQueryParams } from './Interfaces';
+import Builder from "./Http/Builder";
+import Core from "./Core";
+import Request from "./Http/Request";
+import { IAttributes, ICachedResponses, IModelRequestOptions, IModelRequestQueryParams } from "./Interfaces";
 export default class ActiveRecord extends Core {
     get b(): Builder;
     protected get isModel(): boolean;
@@ -30,9 +30,9 @@ export default class ActiveRecord extends Core {
     unset(key: string): any;
     options(options?: any): any;
     toJSON(): object;
-    create(attributes: any): any;
-    delete(attributes?: any): any;
-    post(attributes?: any): any;
+    create(attributes: any): Promise<Request>;
+    delete(attributes?: any): Promise<Request>;
+    post(attributes?: any): Promise<Request>;
     put(attributes: any): any;
     save(attributes?: any): any;
     add(x: any): void;
@@ -55,5 +55,12 @@ export default class ActiveRecord extends Core {
     setQueryParams(params: any): any;
     unsetQueryParam(param: string): any;
     setToken(token: string): any;
-    protected _fetch(options?: IModelRequestOptions | null, queryParams?: IModelRequestQueryParams, method?: any, body?: any, headers?: any): any;
+    protected _fetch(options?: IModelRequestOptions | null, queryParams?: IModelRequestQueryParams, method?: any, body?: any, headers?: any): Promise<Request>;
+    protected static cachedResponses: ICachedResponses;
+    protected cache(key: string, value: any, isComplete?: boolean, ttl?: number): void;
+    protected isCached(key: string): boolean;
+    protected isCachePending(key: string): boolean;
+    protected getCache(key: string): any;
+    protected addCacheSubscriber(key: string, resolve: any, reject: any, collection: any): void;
+    protected clearCacheSubscribers(key: string): void;
 }

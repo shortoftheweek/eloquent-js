@@ -1,12 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Request = exports.Model = exports.Collection = exports.ActiveRecord = void 0;
-const ActiveRecord_1 = require("./ActiveRecord");
-exports.ActiveRecord = ActiveRecord_1.default;
-const Collection_1 = require("./Collection");
-exports.Collection = Collection_1.default;
-const Model_1 = require("./Model");
-exports.Model = Model_1.default;
-const Request_1 = require("./Http/Request");
-exports.Request = Request_1.default;
+import ActiveRecord from './ActiveRecord';
+import Collection from './Collection';
+import Model from './Model';
+import Request from './Http/Request';
+export { ActiveRecord, Collection, Model, Request, };
 //# sourceMappingURL=index.js.map

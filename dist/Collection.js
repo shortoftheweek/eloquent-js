@@ -1,10 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const CollectionIterator_1 = require("./CollectionIterator");
-const ActiveRecord_1 = require("./ActiveRecord");
-const Model_1 = require("./Model");
-const _ = require("lodash");
-class Collection extends ActiveRecord_1.default {
+import ActiveRecord from "./ActiveRecord";
+import CollectionIterator from "./CollectionIterator";
+import Model from "./Model";
+export default class Collection extends ActiveRecord {
     constructor(options = {}) {
         super(options);
         this.meta = {
@@ -17,14 +14,12 @@ class Collection extends ActiveRecord_1.default {
                 links: {},
             },
         };
-        this.model = Model_1.default;
+        this.model = Model;
         this.models = [];
-        this.dataKey = 'data';
-        this.sortKey = 'id';
-        this.setHeader('Content-Type', 'application/json; charset=utf8');
-        this.cid = this.cidPrefix + Math.random()
-            .toString(36)
-            .substr(2, 5);
+        this.dataKey = "data";
+        this.sortKey = "id";
+        this.setHeader("Content-Type", "application/json; charset=utf8");
+        this.cid = this.cidPrefix + Math.random().toString(36).substr(2, 5);
     }
     static hydrate(models = [], options = {}) {
         const collection = new this(options);
@@ -36,7 +31,7 @@ class Collection extends ActiveRecord_1.default {
         return this.models.length;
     }
     get modelId() {
-        return 'id';
+        return "id";
     }
     get pagination() {
         return this.meta.pagination;
@@ -50,11 +45,9 @@ class Collection extends ActiveRecord_1.default {
         if (model == undefined) {
             return this;
         }
-        const models = Array.isArray(model)
-            ? model
-            : [model];
+        const models = Array.isArray(model) ? model : [model];
         models.forEach((model) => {
-            if (!(model instanceof Model_1.default)) {
+            if (!(model instanceof Model)) {
                 model = new this.model(model);
             }
             if (options.prepend) {
@@ -64,15 +57,13 @@ class Collection extends ActiveRecord_1.default {
                 this.models.push(model);
             }
         });
-        this.dispatch('add');
+        this.dispatch("add");
         return this;
     }
     remove(model, options = {}) {
         let i = 0;
         let ii = 0;
-        const items = Array.isArray(model)
-            ? model
-            : [model];
+        const items = Array.isArray(model) ? model : [model];
         for (ii = 0; ii < items.length; ii++) {
             i = 0;
             while (i < this.models.length) {
@@ -84,30 +75,33 @@ class Collection extends ActiveRecord_1.default {
                 }
             }
         }
-        this.dispatch('remove');
+        this.dispatch("remove");
         return this;
     }
     set(model, options = {}) {
         this.reset();
-        if (model && model.hasOwnProperty('meta')) {
+        if (model && model.hasOwnProperty("meta")) {
             this.meta = model.meta;
         }
-        if (model && model.hasOwnProperty('data')) {
+        if (model && model.hasOwnProperty("data")) {
             this.add(model.data);
         }
         else {
             this.add(model);
         }
-        this.dispatch('set');
+        this.dispatch("set");
         return this;
     }
     reset() {
         this.models = [];
-        this.dispatch('reset');
+        this.dispatch("reset");
         return this;
     }
     clear() {
         return this.reset();
+    }
+    count() {
+        return this.length;
     }
     push(model, options = {}) {
         this.add(model, options);
@@ -132,9 +126,7 @@ class Collection extends ActiveRecord_1.default {
             return void 0;
         }
         return this.where({
-            [this.modelId]: query instanceof Model_1.default
-                ? query.cid
-                : query,
+            [this.modelId]: query instanceof Model ? query.cid : query,
         }, true);
     }
     has(obj) {
@@ -153,30 +145,28 @@ class Collection extends ActiveRecord_1.default {
         return this.at(this.length - 1);
     }
     where(attributes = {}, first = false) {
-        const collection = new this.constructor();
-        _.map(this.models, (model) => {
-            if (_.find(model, attributes)) {
+        const constructor = this.constructor;
+        const collection = new constructor();
+        this.models.map((model) => {
+            const intersection = Object.keys(model.attributes).filter((k) => k in attributes && model.attr(k) == attributes[k]);
+            if (intersection.length) {
                 collection.add(model);
             }
         });
-        return first
-            ? collection.first()
-            : collection;
+        return first ? collection.first() : collection;
     }
     findWhere(attributes = {}) {
         return this.where(attributes, true);
     }
     findByCid(cid) {
-        return _.find(this.models, { cid });
+        return this.findWhere({ cid });
     }
     each(predicate) {
-        return _.each(this.models, predicate);
+        this.models.forEach(predicate);
+        return this;
     }
     filter(predicate) {
-        return _.filter(this.models, predicate);
-    }
-    find(predicate) {
-        return _.find(this.models, predicate);
+        return this.where(predicate);
     }
     sort(options = null) {
         let key = this.sortKey;
@@ -184,14 +174,12 @@ class Collection extends ActiveRecord_1.default {
             key = options.key;
         }
         this.models = this.models.sort((a, b) => {
-            return options && options.reverse
-                ? (a.attr(key) - b.attr(key)) * -1
-                : (a.attr(key) - b.attr(key)) * 1;
+            return options && options.reverse ? (a.attr(key) - b.attr(key)) * -1 : (a.attr(key) - b.attr(key)) * 1;
         });
         return this;
     }
     pluck(attribute) {
-        return this.models.map(model => model.attr(attribute));
+        return this.models.map((model) => model.attr(attribute));
     }
     clone(attributes = {}) {
         const instance = new this.constructor();
@@ -199,20 +187,19 @@ class Collection extends ActiveRecord_1.default {
         return instance;
     }
     values() {
-        return new CollectionIterator_1.default(this, CollectionIterator_1.default.ITERATOR_VALUES);
+        return new CollectionIterator(this, CollectionIterator.ITERATOR_VALUES);
     }
     keys(attributes = {}) {
-        return new CollectionIterator_1.default(this, CollectionIterator_1.default.ITERATOR_KEYS);
+        return new CollectionIterator(this, CollectionIterator.ITERATOR_KEYS);
     }
     entries(attributes = {}) {
-        return new CollectionIterator_1.default(this, CollectionIterator_1.default.ITERATOR_KEYSVALUES);
+        return new CollectionIterator(this, CollectionIterator.ITERATOR_KEYSVALUES);
     }
     _isModel(model) {
-        return model instanceof Model_1.default;
+        return model instanceof Model;
     }
     [Symbol.iterator]() {
-        return new CollectionIterator_1.default(this, CollectionIterator_1.default.ITERATOR_VALUES);
+        return new CollectionIterator(this, CollectionIterator.ITERATOR_VALUES);
     }
 }
-exports.default = Collection;
 //# sourceMappingURL=Collection.js.map

@@ -1,6 +1,6 @@
 
 import FilmModel from '../models/FilmModel';
-import { Collection } from '../../index';
+import { Collection } from '../../src/index';
 
 /**
  * Film Collection

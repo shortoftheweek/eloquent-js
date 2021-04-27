@@ -7,7 +7,7 @@ import {
     ActiveRecord,
     Collection,
     Model,
-} from '../index';
+} from '../src/index';
 
 
 // -----------------------------------------------------------------------------
@@ -43,12 +43,12 @@ const options = {
  */
 describe('Remote Collection Tests', () => {
 
-    it('should url', () => {
-        const collection: FilmCollection = FilmCollection.hydrate(items, options);
-        const model: FilmModel = collection.at(0);
+    // it('should url', () => {
+    //     const collection: FilmCollection = FilmCollection.hydrate(items, options);
+    //     const model: FilmModel = collection.at(0);
 
-        // Get attribute
-        // model.save();
-    });
+    //     // Get attribute
+    //     // model.save();
+    // });
 
 });

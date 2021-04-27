@@ -1,7 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const ActiveRecord_1 = require("./ActiveRecord");
-class Model extends ActiveRecord_1.default {
+import ActiveRecord from './ActiveRecord';
+export default class Model extends ActiveRecord {
     constructor(attributes = {}, options = {}) {
         super(options);
         this.changed = {};
@@ -66,5 +64,4 @@ class Model extends ActiveRecord_1.default {
         return false;
     }
 }
-exports.default = Model;
 //# sourceMappingURL=Model.js.map

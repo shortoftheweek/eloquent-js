@@ -1,17 +1,7 @@
-
-import CollectionIterator from './CollectionIterator';
-import ActiveRecord from './ActiveRecord';
-import Model from './Model';
-import {
-    IAttributes,
-    ICollectionMeta,
-    IPagination,
-    ISortOptions,
-} from './Interfaces';
-
-// Try `npm install @types/lodash` if it exists or add a new declaration (.d.ts) file containing `declare module 'lodash';`
-// @ts-ignore
-import * as _ from 'lodash';
+import ActiveRecord from "./ActiveRecord";
+import CollectionIterator from "./CollectionIterator";
+import Model from "./Model";
+import { IAttributes, ICollectionMeta, IPagination, ISortOptions } from "./Interfaces";
 
 /**
  * [Collection description]
@@ -30,15 +20,13 @@ import * as _ from 'lodash';
  * }
  *
  */
-export default class Collection extends ActiveRecord implements Iterable<Model>
-{
+export default class Collection extends ActiveRecord implements Iterable<Model> {
     /**
      * Hydrate a collection full of models
      *
      * @type {Model[]}
      */
-    public static hydrate<T>(models: Model[] = [], options: object = {}): any
-    {
+    public static hydrate<T>(models: Model[] = [], options: object = {}): any {
         // Instantiate collection
         const collection = new this(options);
 
@@ -58,8 +46,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      *
      * @return number
      */
-    public get length(): number
-    {
+    public get length(): number {
         return this.models.length;
     }
 
@@ -67,9 +54,8 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @todo Replace this based on Model
      * @return {string}
      */
-    public get modelId(): string
-    {
-        return 'id';
+    public get modelId(): string {
+        return "id";
     }
 
     /**
@@ -77,8 +63,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      *
      * @return IPagination
      */
-    public get pagination(): IPagination
-    {
+    public get pagination(): IPagination {
         return this.meta.pagination;
     }
 
@@ -94,7 +79,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
             per_page: 15,
             current_page: 1,
             total_pages: 1,
-            links: { },
+            links: {},
         },
     };
 
@@ -123,14 +108,14 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      *
      * @type string
      */
-    protected dataKey: string | undefined = 'data';
+    protected dataKey: string | undefined = "data";
 
     /**
      * Change key we sort on
      *
      * @type {string}
      */
-    protected sortKey: string = 'id';
+    protected sortKey: string = "id";
 
     /**
      * Constructor
@@ -142,17 +127,14 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      *
      * @param {object = {}} options
      */
-    constructor(options: any = {})
-    {
+    constructor(options: any = {}) {
         super(options);
 
         // Set default content type header
-        this.setHeader('Content-Type', 'application/json; charset=utf8');
+        this.setHeader("Content-Type", "application/json; charset=utf8");
 
         // Set defaults
-        this.cid = this.cidPrefix + Math.random()
-            .toString(36)
-            .substr(2, 5);
+        this.cid = this.cidPrefix + Math.random().toString(36).substr(2, 5);
     }
 
     /**
@@ -160,8 +142,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      *
      * @return {any}
      */
-    public toJSON(): object
-    {
+    public toJSON(): object {
         return JSON.parse(JSON.stringify(this.models));
     }
 
@@ -172,8 +153,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      *
      * @return {any}
      */
-    public sync(): any
-    {
+    public sync(): any {
         // Not implemented
         // call parent
     }
@@ -185,15 +165,12 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  {any = {}} options
      * @return Collection
      */
-    public add(model: Model[] | Model | object, options: any = {}): Collection
-    {
+    public add(model: Model[] | Model | object, options: any = {}): Collection {
         if (model == undefined) {
             return this;
         }
 
-        const models: any = Array.isArray(model)
-            ? model
-            : [model];
+        const models: any = Array.isArray(model) ? model : [model];
 
         // Iterate through models
         models.forEach((model: any) => {
@@ -205,14 +182,13 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
 
             if (options.prepend) {
                 this.models.unshift(model);
-            }
-            else {
+            } else {
                 this.models.push(model);
             }
         });
 
         // Event for add
-        this.dispatch('add');
+        this.dispatch("add");
 
         return this;
     }
@@ -224,13 +200,10 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  {object = {}} options
      * @return {Collection}
      */
-    public remove(model: Model[] | Model | object, options: any = {}): Collection
-    {
+    public remove(model: Model[] | Model | object, options: any = {}): Collection {
         let i: number = 0;
         let ii: number = 0;
-        const items: any = Array.isArray(model)
-            ? model
-            : [model];
+        const items: any = Array.isArray(model) ? model : [model];
 
         // Take the first model in our list and iterate through our local
         // models. If we are successful, call recursive
@@ -239,15 +212,14 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
             while (i < this.models.length) {
                 if (this.models[i] == items[ii]) {
                     this.models.splice(i, 1);
-                }
-                else {
+                } else {
                     ++i;
                 }
             }
         }
 
         // Event for add
-        this.dispatch('remove');
+        this.dispatch("remove");
 
         return this;
     }
@@ -261,14 +233,13 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  {any = {}} options
      * @return {Collection}
      */
-    public set(model: Model[] | Model | object, options: any = {}): Collection
-    {
+    public set(model: Model[] | Model | object, options: any = {}): Collection {
         this.reset();
 
         // Check for `meta` on set, this sometimes happens
         // if we assign an entire bootstrapped JSON object
         // to the collection
-        if (model && model.hasOwnProperty('meta')) {
+        if (model && model.hasOwnProperty("meta")) {
             // @ts-ignore
             this.meta = model.meta;
         }
@@ -276,17 +247,16 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
         // Check for `meta` on set, this sometimes happens
         // if we assign an entire bootstrapped JSON object
         // to the collection
-        if (model && model.hasOwnProperty('data')) {
+        if (model && model.hasOwnProperty("data")) {
             // @ts-ignore
             this.add(model.data);
-        }
-        else {
+        } else {
             // @ts-ignore
             this.add(model);
         }
 
         // Event for add
-        this.dispatch('set');
+        this.dispatch("set");
 
         return this;
     }
@@ -297,12 +267,11 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @todo Might want to do more with this
      * @return {Collection}
      */
-    public reset(): Collection
-    {
+    public reset(): Collection {
         this.models = [];
 
         // Event for add
-        this.dispatch('reset');
+        this.dispatch("reset");
 
         return this;
     }
@@ -312,9 +281,17 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      *
      * Alias for Reset
      */
-    public clear(): Collection
-    {
+    public clear(): Collection {
         return this.reset();
+    }
+
+    /**
+     * Count
+     *
+     * @return Number
+     */
+    public count(): number {
+        return this.length;
     }
 
     /**
@@ -324,8 +301,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  {object = {}} options
      * @return {Collection}
      */
-    public push(model: Model[] | Model | object, options: object = {}): Collection
-    {
+    public push(model: Model[] | Model | object, options: object = {}): Collection {
         this.add(model, options);
 
         return this;
@@ -337,11 +313,10 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  {object = {}} options
      * @return Collection
      */
-    public pop(options: object = {}): Collection
-    {
-      const model: Model = this.at(this.length - 1);
+    public pop(options: object = {}): Collection {
+        const model: Model = this.at(this.length - 1);
 
-      return this.remove(model, options);
+        return this.remove(model, options);
     }
 
     /**
@@ -351,8 +326,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  {object = {}} options
      * @return {any}
      */
-    public unshift(model: Model[] | Model | object, options: object = {}): Collection
-    {
+    public unshift(model: Model[] | Model | object, options: object = {}): Collection {
         return this.add(model, Object.assign({ prepend: true }, options));
     }
 
@@ -362,8 +336,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  {object = {}} options
      * @return {any}
      */
-    public shift(options: object = {}): Collection
-    {
+    public shift(options: object = {}): Collection {
         const model: Model = this.at(0);
 
         return this.remove(model, options);
@@ -374,9 +347,8 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      *
      * @return Model[]
      */
-    public slice(...params: any): Model[]
-    {
-        return <Model[]> Array.prototype.slice.apply(this.models, params);
+    public slice(...params: any): Model[] {
+        return <Model[]>Array.prototype.slice.apply(this.models, params);
     }
 
     /**
@@ -385,17 +357,17 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  string | number  id
      * @return Model | undefined
      */
-    public get(query: Model | string | number): Model | undefined
-    {
+    public get(query: Model | string | number): Model | undefined {
         if (query == null) {
             return void 0;
         }
 
-        return this.where({
-            [this.modelId]: query instanceof Model
-                ? query.cid
-                : query,
-        }, true);
+        return this.where(
+            {
+                [this.modelId]: query instanceof Model ? query.cid : query,
+            },
+            true
+        );
     }
 
     /**
@@ -404,8 +376,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  Model | object  obj
      * @return boolean
      */
-    public has(obj: Model | string | number): boolean
-    {
+    public has(obj: Model | string | number): boolean {
         return this.get(obj) != undefined;
     }
 
@@ -415,8 +386,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  {number = 0} index
      * @return Model
      */
-    public at(index: number = 0): Model
-    {
+    public at(index: number = 0): Model {
         if (index < 0) {
             index += this.length;
         }
@@ -429,8 +399,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      *
      * @return {Model}
      */
-    public first(): Model
-    {
+    public first(): Model {
         return this.at(0);
     }
 
@@ -439,8 +408,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      *
      * @return {Model}
      */
-    public last(): Model
-    {
+    public last(): Model {
         return this.at(this.length - 1);
     }
 
@@ -451,21 +419,20 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  {boolean = false} first
      * @return {any}
      */
-    public where(attributes: any = {}, first: boolean = false): any /* Self */
-    {
-        // @ts-ignore
-        const collection = new this.constructor();
+    public where(attributes: any = {}, first: boolean = false): any /* Self */ {
+        const constructor: any = this.constructor;
+        const collection = new constructor();
 
         // @todo, this code sucks but I'm not spending all day here
-        _.map(this.models, (model: any) => {
-            if (_.find(model, attributes)) {
+        this.models.map((model: any) => {
+            const intersection: string[] = Object.keys(model.attributes).filter((k: string) => k in attributes && model.attr(k) == attributes[k]);
+
+            if (intersection.length) {
                 collection.add(model);
             }
         });
 
-        return first
-            ? collection.first()
-            : collection;
+        return first ? collection.first() : collection;
     }
 
     /**
@@ -473,8 +440,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  {object = {}} attributes
      * @return Model
      */
-    public findWhere(attributes: object = {}): Model
-    {
+    public findWhere(attributes: object = {}): Model {
         return this.where(attributes, true);
     }
 
@@ -483,9 +449,8 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  {string} cid
      * @return {Model}
      */
-    public findByCid(cid: string): Model | undefined
-    {
-        return _.find(this.models, { cid });
+    public findByCid(cid: string): Model | undefined {
+        return this.findWhere({ cid });
     }
 
     /**
@@ -493,29 +458,19 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  {string} cid
      * @return {Model}
      */
-    public each(predicate: any): any
-    {
-        return _.each(this.models, predicate);
+    public each(predicate: any): this {
+        this.models.forEach(predicate);
+        return this;
     }
 
     /**
-     * Search by CID
+     * Alias for Where
+     *
      * @param  {string} cid
      * @return {Model}
      */
-    public filter(predicate: any): any
-    {
-        return _.filter(this.models, predicate);
-    }
-
-    /**
-     * Search by CID
-     * @param  {string} cid
-     * @return {Model}
-     */
-    public find(predicate: any): any
-    {
-        return _.find(this.models, predicate);
+    public filter(predicate: any): Collection {
+        return this.where(predicate);
     }
 
     /**
@@ -527,8 +482,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  {ISortOptions|null = null} options
      * @return {Collection}
      */
-    public sort(options: ISortOptions|null = null): Collection
-    {
+    public sort(options: ISortOptions | null = null): Collection {
         let key: string = this.sortKey;
 
         // Sort options
@@ -538,9 +492,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
 
         // Sort
         this.models = this.models.sort((a: any, b: any) => {
-            return options && options.reverse
-                ? (a.attr(key) - b.attr(key)) * -1
-                : (a.attr(key) - b.attr(key)) * 1;
+            return options && options.reverse ? (a.attr(key) - b.attr(key)) * -1 : (a.attr(key) - b.attr(key)) * 1;
         });
 
         return this;
@@ -557,9 +509,8 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  {string} attribute
      * @return {any}
      */
-    public pluck(attribute: string): any
-    {
-        return this.models.map(model => model.attr(attribute));
+    public pluck(attribute: string): any {
+        return this.models.map((model) => model.attr(attribute));
     }
 
     /**
@@ -568,8 +519,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param {object = {}} attributes
      * @return Collection
      */
-    public clone(attributes: object = {})
-    {
+    public clone(attributes: object = {}) {
         // @ts-ignore
         const instance = new this.constructor();
         instance.add(this.toJSON());
@@ -582,8 +532,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      *
      * @return CollectionIterator
      */
-    public values(): CollectionIterator
-    {
+    public values(): CollectionIterator {
         return new CollectionIterator(this, CollectionIterator.ITERATOR_VALUES);
     }
 
@@ -592,8 +541,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      *
      * @return CollectionIterator
      */
-    public keys(attributes: object = {}): CollectionIterator
-    {
+    public keys(attributes: object = {}): CollectionIterator {
         return new CollectionIterator(this, CollectionIterator.ITERATOR_KEYS);
     }
 
@@ -602,8 +550,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      *
      * @return CollectionIterator
      */
-    public entries(attributes: object = {}): CollectionIterator
-    {
+    public entries(attributes: object = {}): CollectionIterator {
         return new CollectionIterator(this, CollectionIterator.ITERATOR_KEYSVALUES);
     }
 
@@ -613,8 +560,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      * @param  {any} model
      * @return {boolean}
      */
-    private _isModel(model: any): boolean
-    {
+    private _isModel(model: any): boolean {
         return model instanceof Model;
     }
 
@@ -624,5 +570,4 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
     [Symbol.iterator](): Iterator<any> {
         return new CollectionIterator(this, CollectionIterator.ITERATOR_VALUES);
     }
-
 }

@@ -1,7 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const node_fetch_1 = require("node-fetch");
-const Core_1 = require("../Core");
+import fetch from 'node-fetch';
+import Core from '../Core';
 class RequestError extends Error {
     constructor(status, text) {
         super(text);
@@ -9,7 +7,7 @@ class RequestError extends Error {
         this.text = text;
     }
 }
-class Request extends Core_1.default {
+export default class Request extends Core {
     constructor(url, params = {}) {
         super();
         this.data = {};
@@ -42,7 +40,7 @@ class Request extends Core_1.default {
         this.dispatch('requesting', this);
         var response = isFile
             ? this.xhrFetch(this.url, params)
-            : node_fetch_1.default(this.url, params);
+            : fetch(this.url, params);
         return response
             .then(this.beforeParse.bind(this))
             .then(this.parse.bind(this))
@@ -142,5 +140,4 @@ class Request extends Core_1.default {
         return request;
     }
 }
-exports.default = Request;
 //# sourceMappingURL=Request.js.map
