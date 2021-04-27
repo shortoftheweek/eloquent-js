@@ -42,8 +42,8 @@ export default class ActiveRecord extends Core {
     create(attributes: any): Promise<Request>;
     delete(attributes?: any): Promise<Request>;
     post(attributes?: any): Promise<Request>;
-    put(attributes: any): any;
-    save(attributes?: any): any;
+    put(attributes: any): Promise<Request>;
+    save(attributes?: any): Promise<Request>;
     add(x: any): void;
     remove(x: any): void;
     reset(): void;

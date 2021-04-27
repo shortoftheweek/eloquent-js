@@ -405,7 +405,7 @@ export default class ActiveRecord extends Core {
      *
      * @todo There's a ton to do here too
      */
-    public delete(attributes: any = null) {
+    public delete(attributes: any = null): Promise<Request> {
         // Query params
         const url: string = this.builder.identifier(
             this.id || (attributes ? attributes.id : '')
@@ -432,7 +432,7 @@ export default class ActiveRecord extends Core {
     /**
      * POST Model
      */
-    public post(attributes: any = null) {
+    public post(attributes: any = null): Promise<Request> {
         // Query params
         const url: string = this.builder.url;
 
@@ -451,7 +451,7 @@ export default class ActiveRecord extends Core {
      * @param  {any = {}} queryParams
      * @return {any}
      */
-    public put(attributes: any): any {
+    public put(attributes: any): Promise<Request> {
         // Query params
         const url: string = this.builder.url;
 
@@ -472,7 +472,7 @@ export default class ActiveRecord extends Core {
      * @param  {any = {}} queryParams
      * @return {any}
      */
-    public save(attributes: any = null): any {
+    public save(attributes: any = null): Promise<Request> {
         // Query params
         // const url: string = this.builder.identifier(this.id || (attributes ? attributes.id : "")).url;
 
