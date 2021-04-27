@@ -1,8 +1,12 @@
-
-import Builder from "./Http/Builder";
-import Core from "./Core";
-import Request from "./Http/Request";
-import { IAttributes, ICachedResponses, IModelRequestOptions, IModelRequestQueryParams } from "./Interfaces";
+import Builder from './Http/Builder';
+import Core from './Core';
+import Request from './Http/Request';
+import {
+    IAttributes,
+    ICachedResponses,
+    IModelRequestOptions,
+    IModelRequestQueryParams,
+} from './Interfaces';
 
 /**
  * ActiveRecord
@@ -41,7 +45,7 @@ export default class ActiveRecord extends Core {
      *
      * @type string
      */
-    public baseUrl: string = "/v1";
+    public baseUrl: string = '/v1';
 
     /**
      * Body for POST
@@ -62,7 +66,7 @@ export default class ActiveRecord extends Core {
      *
      * @type {string}
      */
-    public cid: string = "";
+    public cid: string = '';
 
     /**
      * Endpoint key
@@ -71,7 +75,7 @@ export default class ActiveRecord extends Core {
      *
      * @type string
      */
-    public endpoint: string = "";
+    public endpoint: string = '';
 
     /**
      * Optional override for DELETEs
@@ -124,7 +128,7 @@ export default class ActiveRecord extends Core {
      *
      * @type string
      */
-    public id: string = "";
+    public id: string = '';
 
     /**
      * Limit
@@ -174,7 +178,7 @@ export default class ActiveRecord extends Core {
      *
      * @type Request
      */
-    public request ? : Request;
+    public request?: Request;
 
     /**
      * Last Request Time
@@ -193,7 +197,7 @@ export default class ActiveRecord extends Core {
      *
      * @type {string}
      */
-    protected cidPrefix: string = "c";
+    protected cidPrefix: string = 'c';
 
     /**
      * The key that collection data exists on, e.g.
@@ -204,7 +208,7 @@ export default class ActiveRecord extends Core {
      *
      * @type string
      */
-    protected dataKey: string | undefined = "data";
+    protected dataKey: string | undefined = 'data';
 
     /**
      * Save options of last _fetch
@@ -276,24 +280,27 @@ export default class ActiveRecord extends Core {
         // @ts-ignore
         var possibleSetters = Object.getOwnPropertyDescriptors(this.__proto__);
 
-        for (let key in hash)
-        {
+        for (let key in hash) {
             this.attributes[key] = hash[key];
 
             // Check for setters
-            if (possibleSetters && possibleSetters[key] && possibleSetters[key].set) {
+            if (
+                possibleSetters &&
+                possibleSetters[key] &&
+                possibleSetters[key].set
+            ) {
                 this[key] = hash[key];
             }
         }
 
         // Check for ID
-        if (hash && hash["id"]) {
+        if (hash && hash['id']) {
             this.id = hash.id;
         }
 
         // Trigger
         if (trigger) {
-            this.dispatch("set");
+            this.dispatch('set');
         }
 
         return this;
@@ -336,7 +343,10 @@ export default class ActiveRecord extends Core {
             // Increase count
             // mk: This is kind of wonky...
             if (options.merge) {
-                if (options.meta.pagination.count && this.meta.pagination.count) {
+                if (
+                    options.meta.pagination.count &&
+                    this.meta.pagination.count
+                ) {
                     options.meta.pagination.count += this.meta.pagination.count;
                 }
             }
@@ -348,7 +358,7 @@ export default class ActiveRecord extends Core {
         // Check options for params
         if (options.params || options.qp || options.queryParams) {
             this.setQueryParams(
-                options.queryParams || options.qp || options.params,
+                options.queryParams || options.qp || options.params
             );
         }
 
@@ -368,11 +378,9 @@ export default class ActiveRecord extends Core {
         var possibleGetters = Object.getOwnPropertyNames(this.__proto__);
 
         // Convert toJSON on subobjects so they stay in sync
-        for (var key of possibleGetters)
-        {
+        for (var key of possibleGetters) {
             // @ts-ignore
-            if (json[key] && this[key] && this[key].toJSON)
-            {
+            if (json[key] && this[key] && this[key].toJSON) {
                 // @ts-ignore
                 json[key] = this[key].toJSON();
             }
@@ -399,7 +407,9 @@ export default class ActiveRecord extends Core {
      */
     public delete(attributes: any = null) {
         // Query params
-        const url: string = this.builder.identifier(this.id || (attributes ? attributes.id : "")).url;
+        const url: string = this.builder.identifier(
+            this.id || (attributes ? attributes.id : '')
+        ).url;
 
         // Check for identifier
         if (this.builder.id) {
@@ -414,10 +424,9 @@ export default class ActiveRecord extends Core {
         // Attributes
         const body: any = null;
         const headers: any = this.headers;
-        const method: string = "DELETE";
+        const method: string = 'DELETE';
 
-        return this._fetch(null,
-        {}, method, body, headers);
+        return this._fetch(null, {}, method, body, headers);
     }
 
     /**
@@ -430,10 +439,9 @@ export default class ActiveRecord extends Core {
         // Attributes
         const body: any = attributes || this.attributes;
         const headers: any = this.headers;
-        const method: string = "POST";
+        const method: string = 'POST';
 
-        return this._fetch(null,
-        {}, method, body, headers);
+        return this._fetch(null, {}, method, body, headers);
     }
 
     /**
@@ -450,10 +458,9 @@ export default class ActiveRecord extends Core {
         // Attributes
         const body: any = attributes || this.attributes;
         const headers: any = this.headers;
-        const method: string = "PUT";
+        const method: string = 'PUT';
 
-        return this._fetch(null,
-        {}, method, body, headers);
+        return this._fetch(null, {}, method, body, headers);
     }
 
     /**
@@ -472,10 +479,9 @@ export default class ActiveRecord extends Core {
         // Attributes
         const body: any = attributes || this.attributes;
         const headers: any = this.headers;
-        const method: string = this.id ? "PUT" : "POST";
+        const method: string = this.id ? 'PUT' : 'POST';
 
-        return this._fetch(null,
-        {}, method, body, headers);
+        return this._fetch(null, {}, method, body, headers);
     }
 
     /**
@@ -506,7 +512,8 @@ export default class ActiveRecord extends Core {
     public async find(
         id: string | number,
         queryParams: IModelRequestQueryParams = {}
-    ): Promise<any> { // Promise<void | Request | Response>
+    ): Promise<any> {
+        // Promise<void | Request | Response>
         return await this.fetch({ id }, queryParams).then((request) => {
             return this;
         });
@@ -519,7 +526,10 @@ export default class ActiveRecord extends Core {
      * @param  {any} file
      * @return {any}
      */
-    public file(name: string, file: HTMLInputElement | FileList | File): Promise<void | Request | Response> {
+    public file(
+        name: string,
+        file: HTMLInputElement | FileList | File
+    ): Promise<void | Request | Response> {
         // Query params
         const url: string = this.builder.identifier(this.id).url;
 
@@ -533,20 +543,19 @@ export default class ActiveRecord extends Core {
             file = file[0];
         } else if (file instanceof File) {
             // Good
-        }
-        else {
-            console.warn("File provided unacceptable type.");
+        } else {
+            console.warn('File provided unacceptable type.');
         }
 
         // Set header
-        this.unsetHeader("Content-Type");
+        this.unsetHeader('Content-Type');
 
         // Add files
         formData.append(name, file);
 
         // Set fetch
-        return this._fetch(null, {}, "POST", formData).then((request: any) => {
-            this.dispatch("file:complete", this);
+        return this._fetch(null, {}, 'POST', formData).then((request: any) => {
+            this.dispatch('file:complete', this);
 
             // @note This was duplicating our images
             // this.add(request.data);
@@ -578,7 +587,10 @@ export default class ActiveRecord extends Core {
      * @param  {HTMLInputElement | FileList | File} file
      * @return {Promise}
      */
-    public upload(name: string, file: HTMLInputElement | FileList | File): Promise<void | Request | Response> {
+    public upload(
+        name: string,
+        file: HTMLInputElement | FileList | File
+    ): Promise<void | Request | Response> {
         return this.file(name, file);
     }
 
@@ -602,7 +614,7 @@ export default class ActiveRecord extends Core {
             this.lastRequest.queryParams,
             this.lastRequest.method,
             this.lastRequest.body,
-            this.lastRequest.headers,
+            this.lastRequest.headers
         );
     }
 
@@ -616,25 +628,19 @@ export default class ActiveRecord extends Core {
         let originalEndpoint: string = this.endpoint;
 
         // Use a modified endpoint, if one exists
-        if (method === 'delete' && this.delete_endpoint)
-        {
+        if (method === 'delete' && this.delete_endpoint) {
             originalEndpoint = this.endpoint;
             this.endpoint = this.delete_endpoint;
-        }
-        else if (method === 'put' && this.put_endpoint)
-        {
+        } else if (method === 'put' && this.put_endpoint) {
             originalEndpoint = this.endpoint;
             this.endpoint = this.put_endpoint;
-        }
-        else if (method === 'post' && this.post_endpoint)
-        {
+        } else if (method === 'post' && this.post_endpoint) {
             originalEndpoint = this.endpoint;
             this.endpoint = this.post_endpoint;
         }
 
         // Check if we're using modified
-        if (this.referenceForModifiedEndpoint && this.modifiedEndpoint)
-        {
+        if (this.referenceForModifiedEndpoint && this.modifiedEndpoint) {
             this.useModifiedEndpoint(this.referenceForModifiedEndpoint);
         }
 
@@ -659,8 +665,7 @@ export default class ActiveRecord extends Core {
      *
      * @return {any}
      */
-    public cancelModifiedEndpoint(): any
-    {
+    public cancelModifiedEndpoint(): any {
         this.referenceForModifiedEndpoint = undefined;
         this.modifiedEndpoint = null;
 
@@ -683,10 +688,9 @@ export default class ActiveRecord extends Core {
         this.referenceForModifiedEndpoint = activeRecord;
 
         // Warnings
-        if (activeRecord.id == null)
-        {
+        if (activeRecord.id == null) {
             console.warn(
-                'Modified endpoints usually have an ID signature. Are you sure this is right?',
+                'Modified endpoints usually have an ID signature. Are you sure this is right?'
             );
         }
 
@@ -719,8 +723,7 @@ export default class ActiveRecord extends Core {
      * @param  {string} endpoint
      * @return {any}
      */
-    public setEndpoint(endpoint: string): any
-    {
+    public setEndpoint(endpoint: string): any {
         this.referenceForModifiedEndpoint = undefined;
         this.modifiedEndpoint = null;
         this.endpoint = endpoint;
@@ -774,7 +777,7 @@ export default class ActiveRecord extends Core {
      * @return {any}
      */
     public unsetId(): any {
-        this.id = "";
+        this.id = '';
 
         return this;
     }
@@ -838,7 +841,7 @@ export default class ActiveRecord extends Core {
      * @return {any}
      */
     public setToken(token: string): any {
-        this.setHeader("Authorization", "Bearer " + token);
+        this.setHeader('Authorization', 'Bearer ' + token);
 
         return this;
     }
@@ -848,32 +851,29 @@ export default class ActiveRecord extends Core {
      *
      * This is useful if we're doing callbacks from cached promises
      */
-    public setAfterResponse(request: Request, options: any = {})
-    {
+    public setAfterResponse(request: Request, options: any = {}) {
         var method: string = request.method || 'get';
 
         // Add model
-        if (method.toLowerCase() === 'post')
-        {
+        if (method.toLowerCase() === 'post') {
             this.add(request.data);
-        }
-        else if (method.toLowerCase() === 'delete')
-        {
+        } else if (method.toLowerCase() === 'delete') {
             // Intentionally empty
-        }
-        else
-        {
-            var data = this.dataKey !== undefined ?
-                request.data[this.dataKey] :
-                request.data;
+        } else {
+            var data =
+                this.dataKey !== undefined
+                    ? request.data[this.dataKey]
+                    : request.data;
 
             this.set(data, options);
         }
 
         // Set options
-        this.options(Object.assign({}, options, {
-            meta: request.data.meta,
-        }));
+        this.options(
+            Object.assign({}, options, {
+                meta: request.data.meta,
+            })
+        );
 
         // Events
         this.dispatch('parse:after', this);
@@ -907,18 +907,16 @@ export default class ActiveRecord extends Core {
 
         // Check cacheable
         if (!this.cacheable) {
-            this.builder.qp("cb", Date.now());
+            this.builder.qp('cb', Date.now());
         }
 
         // Check for query params
-        for (let key in queryParams)
-        {
+        for (let key in queryParams) {
             this.builder.qp(key, queryParams[key]);
         }
 
         // Check for ID
-        if (options && options.id)
-        {
+        if (options && options.id) {
             this.builder.identifier(options.id);
         }
 
@@ -926,7 +924,7 @@ export default class ActiveRecord extends Core {
         const url: string = this.getUrlByMethod(method);
 
         // Events
-        this.dispatch("requesting", this);
+        this.dispatch('requesting', this);
 
         // Has fetched
         this.hasFetched = true;
@@ -944,48 +942,57 @@ export default class ActiveRecord extends Core {
         this.request.method = method;
 
         // After parse
-        request.on("parse:after", (e) => {
-            method = method || "get";
+        request.on('parse:after', (e) => {
+            method = method || 'get';
 
             // Add model
-            if (method.toLowerCase() === "post") {
+            if (method.toLowerCase() === 'post') {
                 this.add(request.data);
-            } else if (method.toLowerCase() === "delete") {
+            } else if (method.toLowerCase() === 'delete') {
                 // Intentionally empty
-            }
-            else {
-                this.set(this.dataKey !== undefined ? request.data[this.dataKey] : request.data);
+            } else {
+                this.set(
+                    this.dataKey !== undefined
+                        ? request.data[this.dataKey]
+                        : request.data
+                );
             }
 
             // Events
-            this.dispatch("fetched", this);
+            this.dispatch('fetched', this);
         });
 
         // Bubble `progress` event
-        request.on("progress", (e) => {
-            this.dispatch("progress", e.data);
+        request.on('progress', (e) => {
+            this.dispatch('progress', e.data);
         });
 
         // Bubble `complete` event
-        request.on("complete", (e) => {
+        request.on('complete', (e) => {
             // Set loading
             this.loading = false;
 
             // Bubble
-            this.dispatch("complete");
+            this.dispatch('complete');
         });
 
         // After parse
-        request.on('parse:after', e => this.FetchParseAfter(request, e, options));
-        request.on('progress', e => this.FetchProgress(request, e, options));
-        request.on('complete', e => this.FetchComplete(request, e, options));
-        request.on('complete:get', e => this.dispatch('complete:get'));
-        request.on('complete:put', e => this.dispatch('complete:put'));
-        request.on('complete:post', e => this.dispatch('complete:post'));
-        request.on('complete:delete', e => this.dispatch('complete:delete'));
+        request.on('parse:after', (e) =>
+            this.FetchParseAfter(request, e, options)
+        );
+        request.on('progress', (e) => this.FetchProgress(request, e, options));
+        request.on('complete', (e) => this.FetchComplete(request, e, options));
+        request.on('complete:get', (e) => this.dispatch('complete:get'));
+        request.on('complete:put', (e) => this.dispatch('complete:put'));
+        request.on('complete:post', (e) => this.dispatch('complete:post'));
+        request.on('complete:delete', (e) => this.dispatch('complete:delete'));
 
         // Request (method, body headers)
-        return request.fetch(method, body || this.body, headers || this.headers);
+        return request.fetch(
+            method,
+            body || this.body,
+            headers || this.headers
+        );
     }
 
     //#region Cache
@@ -1013,14 +1020,18 @@ export default class ActiveRecord extends Core {
      *
      * @return void
      */
-    protected cache(key: string, value: any, isComplete: boolean = false, ttl: number = 5000): void {
+    protected cache(
+        key: string,
+        value: any,
+        isComplete: boolean = false,
+        ttl: number = 5000
+    ): void {
         // If exists, save only value as to not overwrite subscribers
         if (ActiveRecord.cachedResponses[key]) {
             ActiveRecord.cachedResponses[key].complete = isComplete;
             ActiveRecord.cachedResponses[key].time = Date.now();
             ActiveRecord.cachedResponses[key].value = value;
-        }
-        else {
+        } else {
             ActiveRecord.cachedResponses[key] = {
                 complete: false,
                 subscribers: [],
@@ -1054,7 +1065,10 @@ export default class ActiveRecord extends Core {
      * @return boolean
      */
     protected isCachePending(key: string): boolean {
-        return this.isCached(key) && (!this.getCache(key).complete || this.getCache(key).failed);
+        return (
+            this.isCached(key) &&
+            (!this.getCache(key).complete || this.getCache(key).failed)
+        );
     }
 
     /**
@@ -1076,7 +1090,12 @@ export default class ActiveRecord extends Core {
      * @param {any} reject
      * @param {any} collection
      */
-    protected addCacheSubscriber(key: string, resolve: any, reject: any, collection: any) {
+    protected addCacheSubscriber(
+        key: string,
+        resolve: any,
+        reject: any,
+        collection: any
+    ) {
         const cache: any = this.getCache(key);
 
         cache.subscribers.push({ collection, reject, resolve });
@@ -1100,8 +1119,7 @@ export default class ActiveRecord extends Core {
      * @param {Request} request
      * @param {any} e
      */
-    protected FetchComplete(request: Request, e: any, options: any = {})
-    {
+    protected FetchComplete(request: Request, e: any, options: any = {}) {
         var method: string = request.method || 'get';
 
         // Has loaded ever
@@ -1120,8 +1138,7 @@ export default class ActiveRecord extends Core {
      * @param {Request} request
      * @param {any} e
      */
-    protected FetchProgress(request: Request, e: any, options: any = {})
-    {
+    protected FetchProgress(request: Request, e: any, options: any = {}) {
         this.dispatch('progress', e.data);
     }
 
@@ -1131,10 +1148,9 @@ export default class ActiveRecord extends Core {
      * @param {string = 'get'} method
      * @param {Request} request
      */
-    protected FetchParseAfter(request: Request, e: any, options: any = {})
-    {
-        const response: Response = <Response> request.response;
-        const code: number = <number> response.status;
+    protected FetchParseAfter(request: Request, e: any, options: any = {}) {
+        const response: Response = <Response>request.response;
+        const code: number = <number>response.status;
 
         // Only set for acceptable responses
         if (code < 400) {

@@ -1,11 +1,8 @@
-
-export interface IAttributes
-{
+export interface IAttributes {
     [key: string]: any;
 }
 
-export interface ICachedResponse
-{
+export interface ICachedResponse {
     complete?: boolean;
     time?: number;
     value?: any;
@@ -13,18 +10,15 @@ export interface ICachedResponse
     subscribers?: any[];
 }
 
-export interface ICachedResponses
-{
+export interface ICachedResponses {
     [key: string]: ICachedResponse;
 }
 
-export interface ICollectionMeta
-{
+export interface ICollectionMeta {
     pagination: IPagination;
 }
 
-export interface IDispatcher
-{
+export interface IDispatcher {
     // events: any;
     trigger: (eventName: string, data?: any) => any;
     dispatch: (eventName: string, data?: any) => any;
@@ -32,19 +26,16 @@ export interface IDispatcher
     off: (eventName: string, callback?: any) => any;
 }
 
-export interface IModelRequestOptions
-{
+export interface IModelRequestOptions {
     id?: number | string;
     includes?: string[];
 }
 
-export interface IModelRequestQueryParams
-{
+export interface IModelRequestQueryParams {
     [key: string]: any;
 }
 
-export interface IPagination
-{
+export interface IPagination {
     total: number;
     count: number;
     per_page: number;
@@ -53,8 +44,7 @@ export interface IPagination
     links?: any;
 }
 
-export interface ISortOptions
-{
+export interface ISortOptions {
     key: string;
     reverse?: boolean;
 }

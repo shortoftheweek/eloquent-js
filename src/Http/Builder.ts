@@ -3,8 +3,7 @@ import ActiveRecord from '../ActiveRecord';
 /**
  * Builder
  */
-export default class Builder
-{
+export default class Builder {
     /**
      * Base Url
      *
