@@ -17,7 +17,7 @@
         "outDir": "dist",
         "paths": {
             "*": ["types/*"],
-            "@/*": ["resources/*"]
+            "@/*": ["src/*"]
         },
         "preserveConstEnums": true,
         "pretty": true,
