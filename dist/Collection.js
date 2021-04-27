@@ -63,7 +63,7 @@ export default class Collection extends ActiveRecord {
         const models = Array.isArray(model) ? model : [model];
         models.forEach((model) => {
             if (!(model instanceof Model)) {
-                model = this.createModel(model);
+                model = new this.model(model);
             }
             if (options.prepend) {
                 this.models.unshift(model);
