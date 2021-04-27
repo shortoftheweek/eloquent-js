@@ -1,26 +1,26 @@
-import Builder from "./Http/Builder";
-import Core from "./Core";
-import Request from "./Http/Request";
+import Builder from './Http/Builder';
+import Core from './Core';
+import Request from './Http/Request';
 export default class ActiveRecord extends Core {
     constructor(options = {}) {
         super(options);
         this.attributes = new Object();
-        this.baseUrl = "/v1";
+        this.baseUrl = '/v1';
         this.body = null;
         this.cacheable = true;
-        this.cid = "";
-        this.endpoint = "";
+        this.cid = '';
+        this.endpoint = '';
         this.hasFetched = false;
         this.hasLoaded = false;
         this.headers = {};
-        this.id = "";
+        this.id = '';
         this.limit = 15;
         this.loading = false;
         this.meta = {};
         this.modifiedEndpoint = null;
         this.page = 1;
-        this.cidPrefix = "c";
-        this.dataKey = "data";
+        this.cidPrefix = 'c';
+        this.dataKey = 'data';
         this.runLastAttempts = 0;
         this.runLastAttemptsMax = 2;
         Object.assign(this, options);
@@ -42,15 +42,17 @@ export default class ActiveRecord extends Core {
         var possibleSetters = Object.getOwnPropertyDescriptors(this.__proto__);
         for (let key in hash) {
             this.attributes[key] = hash[key];
-            if (possibleSetters && possibleSetters[key] && possibleSetters[key].set) {
+            if (possibleSetters &&
+                possibleSetters[key] &&
+                possibleSetters[key].set) {
                 this[key] = hash[key];
             }
         }
-        if (hash && hash["id"]) {
+        if (hash && hash['id']) {
             this.id = hash.id;
         }
         if (trigger) {
-            this.dispatch("set");
+            this.dispatch('set');
         }
         return this;
     }
@@ -67,7 +69,8 @@ export default class ActiveRecord extends Core {
         }
         if (options.meta) {
             if (options.merge) {
-                if (options.meta.pagination.count && this.meta.pagination.count) {
+                if (options.meta.pagination.count &&
+                    this.meta.pagination.count) {
                     options.meta.pagination.count += this.meta.pagination.count;
                 }
             }
@@ -92,34 +95,34 @@ export default class ActiveRecord extends Core {
         return this.post(attributes);
     }
     delete(attributes = null) {
-        const url = this.builder.identifier(this.id || (attributes ? attributes.id : "")).url;
+        const url = this.builder.identifier(this.id || (attributes ? attributes.id : '')).url;
         if (this.builder.id) {
             var model = this.find(attributes);
             this.remove(model);
         }
         const body = null;
         const headers = this.headers;
-        const method = "DELETE";
+        const method = 'DELETE';
         return this._fetch(null, {}, method, body, headers);
     }
     post(attributes = null) {
         const url = this.builder.url;
         const body = attributes || this.attributes;
         const headers = this.headers;
-        const method = "POST";
+        const method = 'POST';
         return this._fetch(null, {}, method, body, headers);
     }
     put(attributes) {
         const url = this.builder.url;
         const body = attributes || this.attributes;
         const headers = this.headers;
-        const method = "PUT";
+        const method = 'PUT';
         return this._fetch(null, {}, method, body, headers);
     }
     save(attributes = null) {
         const body = attributes || this.attributes;
         const headers = this.headers;
-        const method = this.id ? "PUT" : "POST";
+        const method = this.id ? 'PUT' : 'POST';
         return this._fetch(null, {}, method, body, headers);
     }
     add(x) { }
@@ -144,12 +147,12 @@ export default class ActiveRecord extends Core {
         else if (file instanceof File) {
         }
         else {
-            console.warn("File provided unacceptable type.");
+            console.warn('File provided unacceptable type.');
         }
-        this.unsetHeader("Content-Type");
+        this.unsetHeader('Content-Type');
         formData.append(name, file);
-        return this._fetch(null, {}, "POST", formData).then((request) => {
-            this.dispatch("file:complete", this);
+        return this._fetch(null, {}, 'POST', formData).then((request) => {
+            this.dispatch('file:complete', this);
             return request;
         });
     }
@@ -234,7 +237,7 @@ export default class ActiveRecord extends Core {
         return this;
     }
     unsetId() {
-        this.id = "";
+        this.id = '';
         return this;
     }
     unsetHeader(header) {
@@ -257,7 +260,7 @@ export default class ActiveRecord extends Core {
         return this;
     }
     setToken(token) {
-        this.setHeader("Authorization", "Bearer " + token);
+        this.setHeader('Authorization', 'Bearer ' + token);
         return this;
     }
     setAfterResponse(request, options = {}) {
@@ -268,9 +271,9 @@ export default class ActiveRecord extends Core {
         else if (method.toLowerCase() === 'delete') {
         }
         else {
-            var data = this.dataKey !== undefined ?
-                request.data[this.dataKey] :
-                request.data;
+            var data = this.dataKey !== undefined
+                ? request.data[this.dataKey]
+                : request.data;
             this.set(data, options);
         }
         this.options(Object.assign({}, options, {
@@ -289,7 +292,7 @@ export default class ActiveRecord extends Core {
         };
         this.requestTime = Date.now();
         if (!this.cacheable) {
-            this.builder.qp("cb", Date.now());
+            this.builder.qp('cb', Date.now());
         }
         for (let key in queryParams) {
             this.builder.qp(key, queryParams[key]);
@@ -298,39 +301,41 @@ export default class ActiveRecord extends Core {
             this.builder.identifier(options.id);
         }
         const url = this.getUrlByMethod(method);
-        this.dispatch("requesting", this);
+        this.dispatch('requesting', this);
         this.hasFetched = true;
         this.loading = true;
         var request = (this.request = new Request(url, {
             dataKey: this.dataKey,
         }));
         this.request.method = method;
-        request.on("parse:after", (e) => {
-            method = method || "get";
-            if (method.toLowerCase() === "post") {
+        request.on('parse:after', (e) => {
+            method = method || 'get';
+            if (method.toLowerCase() === 'post') {
                 this.add(request.data);
             }
-            else if (method.toLowerCase() === "delete") {
+            else if (method.toLowerCase() === 'delete') {
             }
             else {
-                this.set(this.dataKey !== undefined ? request.data[this.dataKey] : request.data);
+                this.set(this.dataKey !== undefined
+                    ? request.data[this.dataKey]
+                    : request.data);
             }
-            this.dispatch("fetched", this);
+            this.dispatch('fetched', this);
         });
-        request.on("progress", (e) => {
-            this.dispatch("progress", e.data);
+        request.on('progress', (e) => {
+            this.dispatch('progress', e.data);
         });
-        request.on("complete", (e) => {
+        request.on('complete', (e) => {
             this.loading = false;
-            this.dispatch("complete");
+            this.dispatch('complete');
         });
-        request.on('parse:after', e => this.FetchParseAfter(request, e, options));
-        request.on('progress', e => this.FetchProgress(request, e, options));
-        request.on('complete', e => this.FetchComplete(request, e, options));
-        request.on('complete:get', e => this.dispatch('complete:get'));
-        request.on('complete:put', e => this.dispatch('complete:put'));
-        request.on('complete:post', e => this.dispatch('complete:post'));
-        request.on('complete:delete', e => this.dispatch('complete:delete'));
+        request.on('parse:after', (e) => this.FetchParseAfter(request, e, options));
+        request.on('progress', (e) => this.FetchProgress(request, e, options));
+        request.on('complete', (e) => this.FetchComplete(request, e, options));
+        request.on('complete:get', (e) => this.dispatch('complete:get'));
+        request.on('complete:put', (e) => this.dispatch('complete:put'));
+        request.on('complete:post', (e) => this.dispatch('complete:post'));
+        request.on('complete:delete', (e) => this.dispatch('complete:delete'));
         return request.fetch(method, body || this.body, headers || this.headers);
     }
     cache(key, value, isComplete = false, ttl = 5000) {
@@ -353,7 +358,8 @@ export default class ActiveRecord extends Core {
         return !!ActiveRecord.cachedResponses[key];
     }
     isCachePending(key) {
-        return this.isCached(key) && (!this.getCache(key).complete || this.getCache(key).failed);
+        return (this.isCached(key) &&
+            (!this.getCache(key).complete || this.getCache(key).failed));
     }
     getCache(key) {
         return ActiveRecord.cachedResponses[key];

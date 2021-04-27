@@ -18,12 +18,10 @@ export default class Collection extends ActiveRecord {
         };
         this.model = Model;
         this.models = [];
-        this.dataKey = "data";
-        this.sortKey = "id";
-        this.builder
-            .qp('limit', this.limit)
-            .qp('page', this.page);
-        this.setHeader("Content-Type", "application/json; charset=utf8");
+        this.dataKey = 'data';
+        this.sortKey = 'id';
+        this.builder.qp('limit', this.limit).qp('page', this.page);
+        this.setHeader('Content-Type', 'application/json; charset=utf8');
         this.cid = this.cidPrefix + Math.random().toString(36).substr(2, 5);
         if (options.atRelationship) {
             this.atRelationship = options.atRelationship;
@@ -72,7 +70,7 @@ export default class Collection extends ActiveRecord {
                 this.models.push(model);
             }
         });
-        this.dispatch("add");
+        this.dispatch('add');
         return this;
     }
     remove(model, options = {}) {
@@ -90,28 +88,28 @@ export default class Collection extends ActiveRecord {
                 }
             }
         }
-        this.dispatch("remove");
+        this.dispatch('remove');
         return this;
     }
     set(model, options = {}) {
         if (!options || (options && options.merge != true)) {
             this.reset();
         }
-        if (model && model.hasOwnProperty("meta")) {
+        if (model && model.hasOwnProperty('meta')) {
             this.meta = model.meta;
         }
-        if (model && model.hasOwnProperty("data")) {
+        if (model && model.hasOwnProperty('data')) {
             this.add(model.data);
         }
         else {
             this.add(model);
         }
-        this.dispatch("set");
+        this.dispatch('set');
         return this;
     }
     reset() {
         this.models = [];
-        this.dispatch("reset");
+        this.dispatch('reset');
         return this;
     }
     clear() {
@@ -166,7 +164,7 @@ export default class Collection extends ActiveRecord {
         }
         var item = this.models[index];
         if (this.atRelationship && this.atRelationship.length) {
-            this.atRelationship.forEach(key => item = item[key]);
+            this.atRelationship.forEach((key) => (item = item[key]));
         }
         return item;
     }
@@ -216,7 +214,9 @@ export default class Collection extends ActiveRecord {
             key = options.key;
         }
         this.models = this.models.sort((a, b) => {
-            return options && options.reverse ? (a.attr(key) - b.attr(key)) * -1 : (a.attr(key) - b.attr(key)) * 1;
+            return options && options.reverse
+                ? (a.attr(key) - b.attr(key)) * -1
+                : (a.attr(key) - b.attr(key)) * 1;
         });
         return this;
     }

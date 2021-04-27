@@ -5,7 +5,6 @@ module.exports = {
     },
     extends: [
         'eslint:recommended',
-        'plugin:vue/essential',
         'plugin:@typescript-eslint/recommended',
     ],
     parserOptions: {
@@ -13,7 +12,7 @@ module.exports = {
         parser: '@typescript-eslint/parser',
         sourceType: 'module',
     },
-    plugins: ['vue', '@typescript-eslint'],
+    plugins: ['@typescript-eslint'],
     rules: {
         '@typescript-eslint/no-inferrable-types': 0,
         'brace-style': ['error', 'stroustrup'],
