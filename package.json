@@ -1,12 +1,13 @@
 {
     "name": "eloquent-js",
-    "version": "0.6.6",
+    "version": "0.7.0",
     "description": "Laravel mock of Eloquet for Javascript",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "type": "module",
     "scripts": {
-        "build": "tsc --skipLibCheck",
+        "build": "tsc && babel src -d dist --extensions '.ts'",
+        "check-types": "tsc",
         "format": "npm run prettier:fix && npm run lint:fix",
         "lint": "eslint src --ext=ts",
         "lint:fix": "npm run lint -- --fix",
@@ -43,9 +44,16 @@
         "typescript": "^3.9.3"
     },
     "devDependencies": {
+        "@babel/cli": "^7.13.16",
+        "@babel/core": "^7.14.0",
+        "@babel/plugin-proposal-class-properties": "^7.13.0",
+        "@babel/plugin-proposal-object-rest-spread": "^7.13.8",
+        "@babel/preset-env": "^7.14.1",
+        "@babel/preset-typescript": "^7.13.0",
         "@types/expect": "^24.3.0",
         "@types/mocha": "^7.0.2",
         "@typescript-eslint/eslint-plugin": "^4.22.0",
+        "babel-plugin-add-import-extension": "^1.5.1",
         "eslint": "^7.25.0",
         "prettier": "^2.2.1",
         "ts-mocha": "^7.0.0",
