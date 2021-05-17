@@ -1,12 +1,19 @@
 {
     "name": "eloquent-js",
-    "version": "0.7.0",
+    "version": "0.8.0",
     "description": "Laravel mock of Eloquet for Javascript",
-    "main": "dist/index.js",
     "types": "dist/index.d.ts",
-    "type": "module",
+    "main": "dist/cjs/index.js",
+    "module": "dist/mjs/index.js",
+    "exports": {
+        ".": {
+            "import": "./dist/mjs/index.js",
+            "require": "./dist/cjs/index.js"
+        }
+    },
     "scripts": {
-        "build": "tsc && babel src -d dist --extensions '.ts'",
+        "build": "rm -fr dist/* && tsc -p tsconfig.json && tsc -p tsconfig.cjs.json && bash ./fix-packages.sh",
+        "build-v1": "tsc && babel src -d dist --extensions '.ts'",
         "check-types": "tsc",
         "format": "npm run prettier:fix && npm run lint:fix",
         "lint": "eslint src --ext=ts",
