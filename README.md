@@ -15,6 +15,11 @@
 </a>
 
 
+## NOTE
+
+This is a lazy ongoing library not meant to be consumed by others. There is likely some undesirable code that will be fixed over time as said permits.
+
+
 ## Install
 
     $ npm install eloquentjs --save
