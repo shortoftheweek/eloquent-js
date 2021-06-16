@@ -38,7 +38,7 @@ export default class ActiveRecord extends Core {
      * @type object
      */
     // public attributes: Map<string, any> = new Map();
-    public attributes: any = new Object();
+    public attributes: any = {};
 
     /**
      * Base Url for the API
