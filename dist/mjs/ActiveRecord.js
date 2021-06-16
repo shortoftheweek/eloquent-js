@@ -4,7 +4,7 @@ import Request from './Http/Request';
 export default class ActiveRecord extends Core {
     constructor(options = {}) {
         super(options);
-        this.attributes = new Object();
+        this.attributes = {};
         this.baseUrl = '/v1';
         this.body = null;
         this.cacheable = true;

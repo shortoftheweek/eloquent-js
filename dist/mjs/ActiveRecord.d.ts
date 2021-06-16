@@ -32,7 +32,7 @@ export default class ActiveRecord extends Core {
     protected lastRequest: any;
     protected runLastAttempts: number;
     protected runLastAttemptsMax: number;
-    private referenceForModifiedEndpoint;
+    protected referenceForModifiedEndpoint: ActiveRecord | null | undefined;
     constructor(options?: any);
     attr(key: string): string | number | null;
     set(hash?: IAttributes, trigger?: boolean): any;

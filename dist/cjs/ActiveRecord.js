@@ -18,7 +18,7 @@ const Request_1 = __importDefault(require("./Http/Request"));
 class ActiveRecord extends Core_1.default {
     constructor(options = {}) {
         super(options);
-        this.attributes = new Object();
+        this.attributes = {};
         this.baseUrl = '/v1';
         this.body = null;
         this.cacheable = true;

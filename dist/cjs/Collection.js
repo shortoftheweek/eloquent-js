@@ -78,6 +78,11 @@ class Collection extends ActiveRecord_1.default {
         models.forEach((model) => {
             if (!(model instanceof Model_1.default)) {
                 model = new this.model(model);
+                model.parent = this;
+                model.headers = this.headers;
+                if (this.referenceForModifiedEndpoint) {
+                    model.useModifiedEndpoint(this.referenceForModifiedEndpoint);
+                }
             }
             if (options.prepend) {
                 this.models.unshift(model);
