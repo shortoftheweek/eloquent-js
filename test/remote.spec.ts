@@ -17,14 +17,14 @@ import {
 
 // -----------------------------------------------------------------------------
 
-const items: any = [
-    new FilmModel({ name: 'Ashley', x: 1 }),
-    new FilmModel({ name: 'Briana', x: 2 }),
-    new FilmModel({ name: 'Charlotte', x: 3 }),
-    new FilmModel({ name: 'Danielle', x: 4 }),
-    new FilmModel({ name: 'Elizabeth', x: 5 }),
-    new FilmModel({ name: 'Fallon', x: 6 }),
-];
+const items: any = new FilmCollection([
+    new FilmModel({ id: 1, name: 'Ashley', x: 1 }),
+    new FilmModel({ id: 2, name: 'Briana', x: 2 }),
+    new FilmModel({ id: 3, name: 'Charlotte', x: 3 }),
+    new FilmModel({ id: 4, name: 'Danielle', x: 4 }),
+    new FilmModel({ id: 5, name: 'Elizabeth', x: 5 }),
+    new FilmModel({ id: 6, name: 'Fallon', x: 6 }),
+]);
 
 const options = {
     meta: {
@@ -54,5 +54,13 @@ describe('Remote Collection Tests', () => {
     //     // Get attribute
     //     // model.save();
     // });
+
+    it('should delete', () => {
+        // items[0].delete();
+        items.delete({ id: 1 });
+
+        // Get attribute
+        // model.save();
+    });
 
 });

@@ -243,6 +243,17 @@ export default class Collection
                 // @ts-ignore
                 model = new this.model(model);
                 // model = this.createModel(model);
+
+                // Set parent reference
+                model.parent = this;
+
+                // Set headers to match our model
+                model.headers = this.headers;
+
+                // Check the modified endpoint
+                if (this.referenceForModifiedEndpoint) {
+                    model.useModifiedEndpoint(this.referenceForModifiedEndpoint);
+                }
             }
 
             if (options.prepend) {

@@ -234,7 +234,7 @@ export default class ActiveRecord extends Core {
      *
      * @type ActiveRecord
      */
-    private referenceForModifiedEndpoint: ActiveRecord | null | undefined;
+    protected referenceForModifiedEndpoint: ActiveRecord | null | undefined;
 
     /**
      * Constructor
