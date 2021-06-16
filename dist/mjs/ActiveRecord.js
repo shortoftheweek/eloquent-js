@@ -2,47 +2,38 @@ import Builder from './Http/Builder';
 import Core from './Core';
 import Request from './Http/Request';
 export default class ActiveRecord extends Core {
-    get b() {
-        return this.builder;
-    }
-    get isModel() {
-        return this.builder.identifier !== undefined;
-    }
-    attributes = new Object();
-    baseUrl = '/v1';
-    body = null;
-    cacheable = true;
-    cid = '';
-    endpoint = '';
-    delete_endpoint;
-    post_endpoint;
-    put_endpoint;
-    hasFetched = false;
-    hasLoaded = false;
-    headers = {};
-    id = '';
-    limit = 15;
-    loading = false;
-    meta = {};
-    modifiedEndpoint = null;
-    page = 1;
-    parent;
-    request;
-    requestTime;
-    builder;
-    cidPrefix = 'c';
-    dataKey = 'data';
-    lastRequest;
-    runLastAttempts = 0;
-    runLastAttemptsMax = 2;
-    referenceForModifiedEndpoint;
     constructor(options = {}) {
         super(options);
+        this.attributes = new Object();
+        this.baseUrl = '/v1';
+        this.body = null;
+        this.cacheable = true;
+        this.cid = '';
+        this.endpoint = '';
+        this.hasFetched = false;
+        this.hasLoaded = false;
+        this.headers = {};
+        this.id = '';
+        this.limit = 15;
+        this.loading = false;
+        this.meta = {};
+        this.modifiedEndpoint = null;
+        this.page = 1;
+        this.cidPrefix = 'c';
+        this.dataKey = 'data';
+        this.runLastAttempts = 0;
+        this.runLastAttemptsMax = 2;
         Object.assign(this, options);
         this.lastRequest = {};
         this.builder = new Builder(this);
         this.options(options);
         this.requestTime = Date.now();
+    }
+    get b() {
+        return this.builder;
+    }
+    get isModel() {
+        return this.builder.identifier !== undefined;
     }
     attr(key) {
         return this.attributes[key];
@@ -347,7 +338,6 @@ export default class ActiveRecord extends Core {
         request.on('complete:delete', (e) => this.dispatch('complete:delete'));
         return request.fetch(method, body || this.body, headers || this.headers);
     }
-    static cachedResponses = {};
     cache(key, value, isComplete = false, ttl = 5000) {
         if (ActiveRecord.cachedResponses[key]) {
             ActiveRecord.cachedResponses[key].complete = isComplete;
@@ -400,4 +390,5 @@ export default class ActiveRecord extends Core {
         this.dispatch('fetched', this);
     }
 }
+ActiveRecord.cachedResponses = {};
 //# sourceMappingURL=ActiveRecord.js.map
