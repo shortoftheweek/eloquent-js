@@ -6,7 +6,7 @@
     "main": "dist/index.js",
     "scripts": {
         "build": "tsc -p tsconfig.json",
-        "test": "ts-mocha -p tsconfig.testing.json test/**/*.spec.ts",
+        "test": "ts-mocha -p tsconfig.json test/**/*.spec.ts",
         "version": "npm run format && git add -A src"
     },
     "repository": {
@@ -14,7 +14,7 @@
         "url": "git+https://github.com/mattkenefick/eloquentjs.git"
     },
     "files": [
-        "./dist",
+        "./dist/**/*",
         "README.md"
     ],
     "author": "Polymer Mallard LLC",

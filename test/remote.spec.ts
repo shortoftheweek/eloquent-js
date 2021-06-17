@@ -57,7 +57,7 @@ describe('Remote Collection Tests', () => {
 
     it('should delete', () => {
         // items[0].delete();
-        items.delete({ id: 1 });
+        // items.delete({ id: 1 });
 
         // Get attribute
         // model.save();
