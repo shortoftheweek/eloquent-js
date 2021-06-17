@@ -14,7 +14,7 @@
         "url": "git+https://github.com/mattkenefick/eloquentjs.git"
     },
     "files": [
-        "./dist/**/*",
+        "dist",
         "README.md"
     ],
     "author": "Polymer Mallard LLC",
