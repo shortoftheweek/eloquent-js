@@ -1,7 +1,18 @@
-import Builder from './Http/Builder';
-import Core from './Core';
-import Request from './Http/Request';
-export default class ActiveRecord extends Core {
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const Builder_1 = require("./Http/Builder");
+const Core_1 = require("./Core");
+const Request_1 = require("./Http/Request");
+class ActiveRecord extends Core_1.default {
     constructor(options = {}) {
         super(options);
         this.attributes = {};
@@ -25,7 +36,7 @@ export default class ActiveRecord extends Core {
         this.runLastAttemptsMax = 2;
         Object.assign(this, options);
         this.lastRequest = {};
-        this.builder = new Builder(this);
+        this.builder = new Builder_1.default(this);
         this.options(options);
         this.requestTime = Date.now();
     }
@@ -130,9 +141,11 @@ export default class ActiveRecord extends Core {
     reset() {
         this.attributes = {};
     }
-    async find(id, queryParams = {}) {
-        return await this.fetch({ id }, queryParams).then((request) => {
-            return this;
+    find(id, queryParams = {}) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.fetch({ id }, queryParams).then((request) => {
+                return this;
+            });
         });
     }
     file(name, file) {
@@ -156,8 +169,10 @@ export default class ActiveRecord extends Core {
             return request;
         });
     }
-    async fetch(options = {}, queryParams = {}) {
-        return await this._fetch(options, queryParams);
+    fetch(options = {}, queryParams = {}) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this._fetch(options, queryParams);
+        });
     }
     upload(name, file) {
         return this.file(name, file);
@@ -304,7 +319,7 @@ export default class ActiveRecord extends Core {
         this.dispatch('requesting', this);
         this.hasFetched = true;
         this.loading = true;
-        var request = (this.request = new Request(url, {
+        var request = (this.request = new Request_1.default(url, {
             dataKey: this.dataKey,
         }));
         this.request.method = method;
@@ -390,5 +405,6 @@ export default class ActiveRecord extends Core {
         this.dispatch('fetched', this);
     }
 }
+exports.default = ActiveRecord;
 ActiveRecord.cachedResponses = {};
 //# sourceMappingURL=ActiveRecord.js.map

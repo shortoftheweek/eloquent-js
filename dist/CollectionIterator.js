@@ -1,4 +1,6 @@
-export default class CollectionIterator {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class CollectionIterator {
     constructor(collection, kind = 0) {
         this.index = 0;
         this.kind = CollectionIterator.ITERATOR_VALUES;
@@ -37,6 +39,7 @@ export default class CollectionIterator {
         };
     }
 }
+exports.default = CollectionIterator;
 CollectionIterator.ITERATOR_VALUES = 0;
 CollectionIterator.ITERATOR_KEYS = 1;
 CollectionIterator.ITERATOR_KEYSVALUES = 2;

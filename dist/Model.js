@@ -1,5 +1,16 @@
-import ActiveRecord from './ActiveRecord';
-export default class Model extends ActiveRecord {
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const ActiveRecord_1 = require("./ActiveRecord");
+class Model extends ActiveRecord_1.default {
     constructor(attributes = {}, options = {}) {
         super(options);
         this.changed = {};
@@ -34,12 +45,17 @@ export default class Model extends ActiveRecord {
         this.dispatch('set');
         return this;
     }
-    async fetch(options = {}, queryParams = {}) {
-        this.builder.identifier(options && options.id ? options.id : this.id);
-        if (!(options && options.id) && !this.id) {
-            console.warn('Fetching model without ID is likely incorrect behavior.', this, this.id, this.toJSON());
-        }
-        return await super.fetch(options, queryParams);
+    fetch(options = {}, queryParams = {}) {
+        const _super = Object.create(null, {
+            fetch: { get: () => super.fetch }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            this.builder.identifier(options && options.id ? options.id : this.id);
+            if (!(options && options.id) && !this.id) {
+                console.warn('Fetching model without ID is likely incorrect behavior.', this, this.id, this.toJSON());
+            }
+            return yield _super.fetch.call(this, options, queryParams);
+        });
     }
     hasOne(relationshipName, relationshipClass) {
         if (this.relationshipCache[relationshipName]) {
@@ -68,4 +84,5 @@ export default class Model extends ActiveRecord {
         return false;
     }
 }
+exports.default = Model;
 //# sourceMappingURL=Model.js.map

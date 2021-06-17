@@ -10,7 +10,7 @@
         "experimentalDecorators": true,
         "declaration": true,
         "isolatedModules": false,
-        "module": "esnext",
+        "module": "commonjs",
         "moduleResolution": "node",
         "noImplicitAny": false,
         "noImplicitThis": false,
@@ -27,7 +27,7 @@
         "skipLibCheck": true,
         "strict": true,
         "sourceMap": true,
-        "target": "esnext"
+        "target": "es6"
     },
     "exclude": [
         "dist",
