@@ -1,8 +1,44 @@
 {
-    "extends": "./tsconfig.base.json",
+    "atom": {
+        "rewriteTsconfig": false
+    },
+    "compileOnSave": true,
     "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "baseUrl": ".",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "declaration": true,
+        "isolatedModules": false,
         "module": "esnext",
-        "outDir": "dist/mjs",
+        "moduleResolution": "node",
+        "noImplicitAny": false,
+        "noImplicitThis": false,
+        "outDir": "dist",
+        "paths": {
+            "*": ["types/*"],
+            "@/*": ["src/*"]
+        },
+        "preserveConstEnums": true,
+        "pretty": true,
+        "strictNullChecks": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "removeComments": true,
+        "skipLibCheck": true,
+        "strict": true,
+        "sourceMap": true,
         "target": "esnext"
+    },
+    "exclude": [
+        "dist",
+        "test",
+        "node_modules",
+        "**/*.spec.ts"
+    ],
+    "include": [
+        "src/**/*"
+    ],
+    "scripts": {
+        "prepublish": "tsc"
     }
 }

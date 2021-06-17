@@ -1,29 +1,11 @@
 {
     "name": "eloquent-js",
-    "version": "0.9.0",
+    "version": "2.0.0",
     "description": "Laravel mock of Eloquet for Javascript",
-    "types": "dist/mjs/index.d.ts",
-    "main": "dist/cjs/index.js",
-    "module": "dist/mjs/index.js",
-    "exports": {
-        ".": {
-            "import": "./dist/mjs/index.js",
-            "require": "./dist/cjs/index.js"
-        }
-    },
+    "types": "dist/index.d.ts",
+    "main": "dist/index.js",
     "scripts": {
-        "build": "rm -fr dist/* && tsc -p tsconfig.json && tsc -p tsconfig.cjs.json && bash ./fix-packages.sh",
-        "build-v1": "tsc && babel src -d dist --extensions '.ts'",
-        "check-types": "tsc",
-        "format": "npm run prettier:fix && npm run lint:fix",
-        "lint": "eslint src --ext=ts",
-        "lint:fix": "npm run lint -- --fix",
-        "postversion": "git push && git push --tags",
-        "prepare": "npm run build",
-        "prepublishOnly": "npm test && npm run lint",
-        "prettier": "prettier -c src/**/*.ts",
-        "prettier:fix": "npm run prettier -- --write",
-        "preversion": "npm run lint",
+        "build": "tsc -p tsconfig.json",
         "test": "ts-mocha -p tsconfig.testing.json test/**/*.spec.ts",
         "version": "npm run format && git add -A src"
     },
@@ -32,38 +14,27 @@
         "url": "git+https://github.com/mattkenefick/eloquentjs.git"
     },
     "files": [
-        "dist/**/*"
+        "./dist",
+        "README.md"
     ],
     "author": "Polymer Mallard LLC",
     "license": "ISC",
-    "dependencies": {
-        "@types/chai": "^4.2.11",
+    "devDependencies": {
+        "@types/chai": "^4.2.14",
         "@types/lodash": "^4.14.155",
+        "@types/mocha": "^8.2.0",
         "@types/node": "^13.13.9",
         "@types/node-fetch": "^2.5.7",
+        "@typescript-eslint/eslint-plugin": "^4.13.0",
+        "@typescript-eslint/parser": "^4.13.0",
         "chai": "^4.2.0",
         "dispatcher": "github:mattkenefick/dispatcher",
+        "eslint": "^7.17.0",
         "https": "^1.0.0",
-        "mocha": "^7.2.0",
+        "mocha": "^8.2.1",
         "node-fetch": "^2.6.0",
-        "ts-node": "^9.1.1",
-        "tslint": "^6.1.3",
-        "typescript": "^4.4.0-dev.20210517"
-    },
-    "devDependencies": {
-        "@babel/cli": "^7.13.16",
-        "@babel/core": "^7.14.0",
-        "@babel/plugin-proposal-class-properties": "^7.13.0",
-        "@babel/plugin-proposal-object-rest-spread": "^7.13.8",
-        "@babel/preset-env": "^7.14.1",
-        "@babel/preset-typescript": "^7.13.0",
-        "@types/expect": "^24.3.0",
-        "@types/mocha": "^7.0.2",
-        "@typescript-eslint/eslint-plugin": "^4.22.0",
-        "babel-plugin-add-import-extension": "^1.5.1",
-        "eslint": "^7.25.0",
-        "prettier": "^2.2.1",
-        "ts-mocha": "^7.0.0",
-        "tslib": "^2.2.0"
+        "nyc": "^15.1.0",
+        "ts-mocha": "^8.0.0",
+        "typescript": "^4.1.3"
     }
 }
