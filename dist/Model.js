@@ -25,6 +25,9 @@ class Model extends ActiveRecord_1.default {
         this.setHeader('Content-Type', 'application/json; charset=utf8');
         this.set(attributes);
     }
+    get isModel() {
+        return true;
+    }
     static hydrate(attributes = {}, options = {}) {
         const collection = new this(options);
         collection.set(attributes);

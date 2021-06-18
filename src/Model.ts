@@ -13,6 +13,15 @@ import {
  */
 export default class Model extends ActiveRecord {
     /**
+     * Model if we provide a specific identifier
+     *
+     * @return boolean
+     */
+     protected get isModel(): boolean {
+        return true;
+    }
+
+    /**
      * Hydrate
      *
      * @type {any}

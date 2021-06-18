@@ -44,7 +44,7 @@ export default class ActiveRecord extends Core {
     post(attributes?: any): Promise<Request>;
     put(attributes: any): Promise<Request>;
     save(attributes?: any): Promise<Request>;
-    add(x: any): void;
+    add(x: any): any;
     remove(x: any): void;
     reset(): void;
     find(id: string | number, queryParams?: IModelRequestQueryParams): Promise<any>;

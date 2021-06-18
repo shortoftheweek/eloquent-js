@@ -328,6 +328,11 @@ export default class ActiveRecord extends Core {
      * @return {ActiveRecord}
      */
     public options(options: any = {}): any {
+        // Override baseUrl
+        if (options.baseUrl) {
+            this.baseUrl = options.baseUrl;
+        }
+
         // Override endpoint
         if (options.endpoint) {
             this.setEndpoint(options.endpoint);
@@ -389,7 +394,8 @@ export default class ActiveRecord extends Core {
         return json;
     }
 
-    //#region Actions
+    // region: Actions
+    // -------------------------------------------------------------------------
 
     /**
      * Create Model
@@ -487,7 +493,9 @@ export default class ActiveRecord extends Core {
     /**
      * Interface for Collection
      */
-    public add(x: any) {}
+    public add(x: any) {
+        return this.set(x);
+    }
 
     /**
      * Interface for Collection
@@ -618,9 +626,10 @@ export default class ActiveRecord extends Core {
         );
     }
 
-    //#endregion Actions
+    // endregion: Actions
 
-    //#region Get Params
+    // region: Get Params
+    // -------------------------------------------------------------------------
 
     public getUrlByMethod(method: string): string {
         // Setup URL
@@ -654,9 +663,10 @@ export default class ActiveRecord extends Core {
         return url;
     }
 
-    //#endregion Get Params
+    // endregion: Get Params
 
-    //#region Set Params
+    // region: Set Params
+    // -------------------------------------------------------------------------
 
     /**
      * We automatically assign modified endpoints through relationships
@@ -854,12 +864,14 @@ export default class ActiveRecord extends Core {
     public setAfterResponse(request: Request, options: any = {}) {
         var method: string = request.method || 'get';
 
-        // Add model
-        if (method.toLowerCase() === 'post') {
+        // If this isn't a model, try appending to
+        if (method.toLowerCase() === 'post' && !this.isModel) {
             this.add(request.data);
-        } else if (method.toLowerCase() === 'delete') {
+        }
+        else if (method.toLowerCase() === 'delete') {
             // Intentionally empty
-        } else {
+        }
+        else {
             var data =
                 this.dataKey !== undefined
                     ? request.data[this.dataKey]
@@ -879,7 +891,7 @@ export default class ActiveRecord extends Core {
         this.dispatch('parse:after', this);
     }
 
-    //#endregion Set Params
+    // endregion: Set Params
 
     // @todo Update return
     protected _fetch(
@@ -995,7 +1007,8 @@ export default class ActiveRecord extends Core {
         );
     }
 
-    //#region Cache
+    // region: Cache
+    // -------------------------------------------------------------------------
 
     /**
      * Cached responses by URL
@@ -1111,7 +1124,7 @@ export default class ActiveRecord extends Core {
         cache.subscribers = [];
     }
 
-    //#endregion Cache
+    // endregion: Cache
 
     /*
      * Complete from fetch request

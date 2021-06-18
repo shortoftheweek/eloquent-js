@@ -72,6 +72,9 @@ class ActiveRecord extends Core_1.default {
         return this;
     }
     options(options = {}) {
+        if (options.baseUrl) {
+            this.baseUrl = options.baseUrl;
+        }
         if (options.endpoint) {
             this.setEndpoint(options.endpoint);
         }
@@ -136,7 +139,9 @@ class ActiveRecord extends Core_1.default {
         const method = this.id ? 'PUT' : 'POST';
         return this._fetch(null, {}, method, body, headers);
     }
-    add(x) { }
+    add(x) {
+        return this.set(x);
+    }
     remove(x) { }
     reset() {
         this.attributes = {};
@@ -280,7 +285,7 @@ class ActiveRecord extends Core_1.default {
     }
     setAfterResponse(request, options = {}) {
         var method = request.method || 'get';
-        if (method.toLowerCase() === 'post') {
+        if (method.toLowerCase() === 'post' && !this.isModel) {
             this.add(request.data);
         }
         else if (method.toLowerCase() === 'delete') {

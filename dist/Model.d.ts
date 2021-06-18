@@ -2,6 +2,7 @@ import ActiveRecord from './ActiveRecord';
 import Request from './Http/Request';
 import { IAttributes, IModelRequestOptions, IModelRequestQueryParams } from './Interfaces';
 export default class Model extends ActiveRecord {
+    protected get isModel(): boolean;
     static hydrate<T>(attributes?: any, options?: object): any;
     changed: object;
     fields: string[];
