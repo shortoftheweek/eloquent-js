@@ -109,21 +109,21 @@ class ActiveRecord extends Core_1.default {
         return this.post(attributes);
     }
     delete(attributes = null) {
-        const url = this.builder.identifier(this.id || (attributes ? attributes.id : '')).url;
+        const url = this.builder.identifier(this.id || (attributes ? attributes.id : '')).getUrl();
         const body = null;
         const headers = this.headers;
         const method = 'DELETE';
         return this._fetch(null, {}, method, body, headers);
     }
     post(attributes = null) {
-        const url = this.builder.url;
+        const url = this.builder.getUrl();
         const body = attributes || this.attributes;
         const headers = this.headers;
         const method = 'POST';
         return this._fetch(null, {}, method, body, headers);
     }
     put(attributes) {
-        const url = this.builder.url;
+        const url = this.builder.getUrl();
         const body = attributes || this.attributes;
         const headers = this.headers;
         const method = 'PUT';
@@ -150,7 +150,7 @@ class ActiveRecord extends Core_1.default {
         });
     }
     file(name, file) {
-        const url = this.builder.identifier(this.id).url;
+        const url = this.builder.identifier(this.id).getUrl();
         const formData = new FormData();
         if (file instanceof HTMLInputElement) {
             file = file.files[0];
@@ -206,7 +206,7 @@ class ActiveRecord extends Core_1.default {
         if (this.referenceForModifiedEndpoint && this.modifiedEndpoint) {
             this.useModifiedEndpoint(this.referenceForModifiedEndpoint);
         }
-        url = this.builder.url;
+        url = this.builder.getUrl();
         this.endpoint = originalEndpoint;
         return url;
     }
@@ -217,14 +217,14 @@ class ActiveRecord extends Core_1.default {
     }
     useModifiedEndpoint(activeRecord) {
         this.referenceForModifiedEndpoint = activeRecord;
-        if (activeRecord.id == null) {
+        if (!activeRecord.id) {
             console.warn('Modified endpoints usually have an ID signature. Are you sure this is right?');
         }
         this.modifiedEndpoint =
             activeRecord.endpoint +
                 '/' +
                 activeRecord.id +
-                (activeRecord.id ? '/' : '') +
+                '/' +
                 this.endpoint;
         return this;
     }

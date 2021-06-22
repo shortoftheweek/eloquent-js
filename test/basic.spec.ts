@@ -186,7 +186,7 @@ describe('Basic Tests', () => {
         });
 
         // Get query param
-        const resultA: string = <string> model.b.queryParamsAsString;
+        const resultA: string = <string> model.b.getQueryParamsAsString();
 
         expect(resultA).to.equal('&foo=bar');
     });

@@ -384,7 +384,7 @@ export default class Collection
         // Query params
         const url: string = this.builder.identifier(
             this.id || (attributes ? attributes.id : '')
-        ).url;
+        ).getUrl();
 
         // Check for identifier
         if (this.builder.id) {

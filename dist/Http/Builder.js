@@ -7,13 +7,13 @@ class Builder {
         this.queryParams = {};
         this.activeRecord = activeRecord;
     }
-    get baseUrl() {
+    getBaseUrl() {
         return this.activeRecord.baseUrl;
     }
-    get endpoint() {
+    getEndpoint() {
         return this.activeRecord.modifiedEndpoint || this.activeRecord.endpoint;
     }
-    get queryParamsAsString() {
+    getQueryParamsAsString() {
         let str = '';
         for (let key in this.queryParams) {
             let value = this.queryParams[key];
@@ -30,10 +30,10 @@ class Builder {
         }
         return str;
     }
-    get url() {
-        const baseUrl = this.baseUrl;
-        const endpoint = this.endpoint;
-        const queryParamStr = this.queryParamsAsString;
+    getUrl() {
+        const baseUrl = this.getBaseUrl();
+        const endpoint = this.getEndpoint();
+        const queryParamStr = this.getQueryParamsAsString();
         let urlBuilder = '';
         urlBuilder += baseUrl;
         urlBuilder += endpoint[0] === '/' ? endpoint : '/' + endpoint;

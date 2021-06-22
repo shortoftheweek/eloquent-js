@@ -9,7 +9,7 @@ export default class Builder {
      *
      * @type string
      */
-    public get baseUrl(): string {
+    public getBaseUrl(): string {
         return this.activeRecord.baseUrl;
     }
 
@@ -18,7 +18,7 @@ export default class Builder {
      *
      * @type string
      */
-    public get endpoint(): string {
+    public getEndpoint(): string {
         return this.activeRecord.modifiedEndpoint || this.activeRecord.endpoint;
     }
 
@@ -64,7 +64,7 @@ export default class Builder {
      *
      * @type string
      */
-    public get queryParamsAsString(): string {
+    public getQueryParamsAsString(): string {
         let str: string = '';
 
         // Combine query params
@@ -94,10 +94,10 @@ export default class Builder {
      *
      * @return string
      */
-    public get url(): string {
-        const baseUrl: string = this.baseUrl;
-        const endpoint: string = this.endpoint;
-        const queryParamStr: string = this.queryParamsAsString;
+    public getUrl(): string {
+        const baseUrl: string = this.getBaseUrl();
+        const endpoint: string = this.getEndpoint();
+        const queryParamStr: string = this.getQueryParamsAsString();
 
         let urlBuilder = '';
 

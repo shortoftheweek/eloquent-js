@@ -137,7 +137,7 @@ class Collection extends ActiveRecord_1.default {
         return this.length;
     }
     delete(attributes = null) {
-        const url = this.builder.identifier(this.id || (attributes ? attributes.id : '')).url;
+        const url = this.builder.identifier(this.id || (attributes ? attributes.id : '')).getUrl();
         if (this.builder.id) {
             var model = this.findWhere(attributes);
             this.remove(model);

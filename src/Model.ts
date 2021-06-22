@@ -247,7 +247,8 @@ export default class Model extends ActiveRecord {
     // ------------------------------------------------------------------------
 
     /**
-     * Return singular instance of related contnet
+     * Return singular instance of related content
+     * e.g. return this.hasOne('review', ModelContent);
      *
      * @param  {string} relationshipName
      * @param  {any} relationshipClass
@@ -258,10 +259,12 @@ export default class Model extends ActiveRecord {
             return this.relationshipCache[relationshipName];
         }
 
+        // Create new model using data from this object
+        // e.g. new ModelContent(this.attr('review'))
         var content = this.attr(relationshipName) || {};
         var model = new relationshipClass(content);
 
-        // Reference relationship parent
+        // Reference this model as parent
         model.parent = this;
         model.useModifiedEndpoint(this);
 

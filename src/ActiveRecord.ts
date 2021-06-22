@@ -415,11 +415,11 @@ export default class ActiveRecord extends Core {
         // Query params
         const url: string = this.builder.identifier(
             this.id || (attributes ? attributes.id : '')
-        ).url;
+        ).getUrl();
 
         // const url: string = this.builder.identifier(
         //     this.id || (attributes ? attributes.id : ''),
-        // ).url;
+        // ).getUrl();
 
         // Attributes
         const body: any = null;
@@ -434,7 +434,7 @@ export default class ActiveRecord extends Core {
      */
     public post(attributes: any = null): Promise<Request> {
         // Query params
-        const url: string = this.builder.url;
+        const url: string = this.builder.getUrl();
 
         // Attributes
         const body: any = attributes || this.attributes;
@@ -453,7 +453,7 @@ export default class ActiveRecord extends Core {
      */
     public put(attributes: any): Promise<Request> {
         // Query params
-        const url: string = this.builder.url;
+        const url: string = this.builder.getUrl();
 
         // Attributes
         const body: any = attributes || this.attributes;
@@ -474,7 +474,7 @@ export default class ActiveRecord extends Core {
      */
     public save(attributes: any = null): Promise<Request> {
         // Query params
-        // const url: string = this.builder.identifier(this.id || (attributes ? attributes.id : "")).url;
+        // const url: string = this.builder.identifier(this.id || (attributes ? attributes.id : "")).getUrl();
 
         // Attributes
         const body: any = attributes || this.attributes;
@@ -533,7 +533,7 @@ export default class ActiveRecord extends Core {
         file: HTMLInputElement | FileList | File
     ): Promise<void | Request | Response> {
         // Query params
-        const url: string = this.builder.identifier(this.id).url;
+        const url: string = this.builder.identifier(this.id).getUrl();
 
         // const files = event.target.files
         const formData = new FormData();
@@ -648,7 +648,7 @@ export default class ActiveRecord extends Core {
         }
 
         // Mark url
-        url = this.builder.url;
+        url = this.builder.getUrl();
 
         // Reset endpoint
         this.endpoint = originalEndpoint;
@@ -693,18 +693,19 @@ export default class ActiveRecord extends Core {
         this.referenceForModifiedEndpoint = activeRecord;
 
         // Warnings
-        if (activeRecord.id == null) {
+        if (!activeRecord.id) {
             console.warn(
                 'Modified endpoints usually have an ID signature. Are you sure this is right?'
             );
         }
 
         // Set modified endpoint
+        // e.g. content / 1 / test
         this.modifiedEndpoint =
             activeRecord.endpoint +
             '/' +
             activeRecord.id +
-            (activeRecord.id ? '/' : '') +
+            '/' +
             this.endpoint;
 
         return this;
