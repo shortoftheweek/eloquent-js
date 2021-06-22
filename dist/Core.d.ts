@@ -1,6 +1,7 @@
 import { Dispatcher } from 'dispatcher';
 import { IDispatcher } from './Interfaces';
 export default class Core extends Dispatcher implements IDispatcher {
+    static eloquentjsversion: string;
     constructor(options?: object);
     trigger(eventName: string, data?: any): void;
     dispatch(eventName: string, data?: any): void;

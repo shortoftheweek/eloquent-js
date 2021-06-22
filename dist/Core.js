@@ -20,4 +20,5 @@ class Core extends dispatcher_1.Dispatcher {
     }
 }
 exports.default = Core;
+Core.eloquentjsversion = '2.1.2';
 //# sourceMappingURL=Core.js.map

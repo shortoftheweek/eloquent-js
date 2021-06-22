@@ -9,6 +9,14 @@ import { IDispatcher } from './Interfaces';
  */
 export default class Core extends Dispatcher implements IDispatcher {
     /**
+     * To help us determine which version we really are using
+     * considering all the problems we have with npm
+     *
+     * @type string
+     */
+    public static eloquentjsversion: string = '2.1.2';
+
+    /**
      * [constructor description]
      * @param {object = {}} options
      */
