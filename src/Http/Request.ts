@@ -174,6 +174,11 @@ export default class Request extends Core {
             ? this.xhrFetch(this.url, params)
             : fetch(this.url, params);
 
+        // Catch errors
+        response.catch((e: Error) => {
+            this.dispatch('error', e);
+        });
+
         return response
             .then(this.beforeParse.bind(this))
             .then(this.parse.bind(this))

@@ -345,6 +345,7 @@ class ActiveRecord extends Core_1.default {
             this.loading = false;
             this.dispatch('complete');
         });
+        request.on('error', (e) => this.dispatch('error', e));
         request.on('parse:after', (e) => this.FetchParseAfter(request, e, options));
         request.on('progress', (e) => this.FetchProgress(request, e, options));
         request.on('complete', (e) => this.FetchComplete(request, e, options));

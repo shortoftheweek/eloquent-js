@@ -63,4 +63,16 @@ describe('Remote Collection Tests', () => {
         // model.save();
     });
 
+    it('should receive error', () => {
+        var model = new FilmModel(null, {
+            baseUrl: 'http://localhost:3333',
+            endpoint: 'auth/basic/login',
+        });
+
+        model.post({
+            email: 'john@example.com',
+            password: 'supsupsup',
+        });
+    });
+
 });

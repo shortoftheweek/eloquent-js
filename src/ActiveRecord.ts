@@ -985,6 +985,7 @@ export default class ActiveRecord extends Core {
         });
 
         // After parse
+        request.on('error', (e) => this.dispatch('error', e));
         request.on('parse:after', (e) =>
             this.FetchParseAfter(request, e, options)
         );
