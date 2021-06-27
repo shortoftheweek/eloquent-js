@@ -218,7 +218,7 @@ class ActiveRecord extends Core_1.default {
     useModifiedEndpoint(activeRecord) {
         this.referenceForModifiedEndpoint = activeRecord;
         if (!activeRecord.id) {
-            console.warn('Modified endpoints [through ' + activeRecord.endpoint + '] usually have an ID signature. [ar/this]', activeRecord, this);
+            console.warn('Modified ActiveRecord [`' + activeRecord.endpoint + '.' + this.endpoint + '`] usually has an ID signature. [ar/this]', activeRecord, this);
         }
         this.modifiedEndpoint =
             activeRecord.endpoint +
