@@ -695,7 +695,7 @@ export default class ActiveRecord extends Core {
         // Warnings
         if (!activeRecord.id) {
             console.warn(
-                'Modified ActiveRecord [`' + activeRecord.endpoint + '.' + this.endpoint + '`] usually has an ID signature. [ar/this]', activeRecord, this
+                'Modified ActiveRecord [`' + activeRecord.endpoint + '.' + this.endpoint + '` / ' + activeRecord.id + '/' + this.id + '] usually has an ID signature. [ar/this]', activeRecord, this
             );
         }
 
