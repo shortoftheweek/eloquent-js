@@ -44,7 +44,7 @@ class ActiveRecord extends Core_1.default {
         return this.builder;
     }
     get isModel() {
-        return this.builder.identifier !== undefined;
+        return this.builder.id != '';
     }
     attr(key) {
         return this.attributes[key];
@@ -324,20 +324,6 @@ class ActiveRecord extends Core_1.default {
             dataKey: this.dataKey,
         }));
         this.request.method = method;
-        request.on('parse:after', (e) => {
-            method = method || 'get';
-            if (method.toLowerCase() === 'post') {
-                this.add(request.data);
-            }
-            else if (method.toLowerCase() === 'delete') {
-            }
-            else {
-                this.set(this.dataKey !== undefined
-                    ? request.data[this.dataKey]
-                    : request.data);
-            }
-            this.dispatch('fetched', this);
-        });
         request.on('progress', (e) => {
             this.dispatch('progress', e.data);
         });

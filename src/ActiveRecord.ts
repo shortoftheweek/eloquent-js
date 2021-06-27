@@ -29,7 +29,7 @@ export default class ActiveRecord extends Core {
      * @return boolean
      */
     protected get isModel(): boolean {
-        return this.builder.identifier !== undefined;
+        return this.builder.id != '';
     }
 
     /**
@@ -948,27 +948,6 @@ export default class ActiveRecord extends Core {
         // note: this *should* be set by fetch as well, but
         // we have an issue right now we're working out
         this.request.method = method;
-
-        // After parse
-        request.on('parse:after', (e) => {
-            method = method || 'get';
-
-            // Add model
-            if (method.toLowerCase() === 'post') {
-                this.add(request.data);
-            } else if (method.toLowerCase() === 'delete') {
-                // Intentionally empty
-            } else {
-                this.set(
-                    this.dataKey !== undefined
-                        ? request.data[this.dataKey]
-                        : request.data
-                );
-            }
-
-            // Events
-            this.dispatch('fetched', this);
-        });
 
         // Bubble `progress` event
         request.on('progress', (e) => {
