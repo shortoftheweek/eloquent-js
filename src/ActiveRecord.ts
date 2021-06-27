@@ -973,7 +973,12 @@ export default class ActiveRecord extends Core {
         request.on('complete:get', (e) => this.dispatch('complete:get'));
         request.on('complete:put', (e) => this.dispatch('complete:put'));
         request.on('complete:post', (e) => this.dispatch('complete:post'));
-        request.on('complete:delete', (e) => this.dispatch('complete:delete'));
+        request.on('complete:delete', (e) => {
+            this.dispatch('complete:delete');
+
+            // Remove possible identifiers if we deleted something
+            this.builder.identifier('');
+        });
 
         // Request (method, body headers)
         return request.fetch(

@@ -338,7 +338,10 @@ class ActiveRecord extends Core_1.default {
         request.on('complete:get', (e) => this.dispatch('complete:get'));
         request.on('complete:put', (e) => this.dispatch('complete:put'));
         request.on('complete:post', (e) => this.dispatch('complete:post'));
-        request.on('complete:delete', (e) => this.dispatch('complete:delete'));
+        request.on('complete:delete', (e) => {
+            this.dispatch('complete:delete');
+            this.builder.identifier('');
+        });
         return request.fetch(method, body || this.body, headers || this.headers);
     }
     cache(key, value, isComplete = false, ttl = 5000) {
