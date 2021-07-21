@@ -965,6 +965,10 @@ export default class ActiveRecord extends Core {
 
         // After parse
         request.on('error', (e) => this.dispatch('error', e));
+        request.on('error:get', (e) => this.dispatch('error:get'));
+        request.on('error:put', (e) => this.dispatch('error:put'));
+        request.on('error:post', (e) => this.dispatch('error:post'));
+        request.on('error:delete', (e) => this.dispatch('error:delete'));
         request.on('parse:after', (e) =>
             this.FetchParseAfter(request, e, options)
         );
