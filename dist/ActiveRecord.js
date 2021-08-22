@@ -142,6 +142,14 @@ class ActiveRecord extends Core_1.default {
     reset() {
         this.attributes = {};
     }
+    addLoadingHooks(view, preHook = null, postHook = null) {
+        preHook = preHook || view.loading.bind(view);
+        postHook = postHook || view.notloading.bind(view);
+        this.on('complete', () => postHook());
+        this.on('error', () => postHook());
+        this.on('requesting', () => preHook());
+        return this;
+    }
     find(id, queryParams = {}) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.fetch({ id }, queryParams).then((request) => {

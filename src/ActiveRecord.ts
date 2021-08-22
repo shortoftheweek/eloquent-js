@@ -504,6 +504,28 @@ export default class ActiveRecord extends Core {
     }
 
     /**
+     * Add loading hooks on a collection for a view
+     *
+     * @param ViewBase view
+     * @param Function preHook
+     * @param Function postHook
+     * @return this
+     */
+    public addLoadingHooks(view: any, preHook: any = null, postHook: any = null)
+    {
+        // @ts-ignore
+        preHook = preHook || view.loading.bind(view);
+        // @ts-ignore
+        postHook = postHook || view.notloading.bind(view);
+
+        this.on('complete', () => postHook());
+        this.on('error', () => postHook());
+        this.on('requesting', () => preHook());
+
+        return this;
+    }
+
+    /**
      * Used to get an individual item in a model
      *
      * Can pass either an ID #XX or a slug

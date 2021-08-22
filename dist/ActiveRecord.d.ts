@@ -47,6 +47,7 @@ export default class ActiveRecord extends Core {
     add(x: any): any;
     remove(x: any): void;
     reset(): void;
+    addLoadingHooks(view: any, preHook?: any, postHook?: any): this;
     find(id: string | number, queryParams?: IModelRequestQueryParams): Promise<any>;
     file(name: string, file: HTMLInputElement | FileList | File): Promise<void | Request | Response>;
     fetch(options?: IModelRequestOptions | null, queryParams?: IModelRequestQueryParams): Promise<void | Request | Response>;
