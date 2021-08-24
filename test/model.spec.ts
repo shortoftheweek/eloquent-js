@@ -2,6 +2,7 @@
 
 import { expect } from 'chai';
 import FilmModel from './models/FilmModel';
+import UserModel from './models/UserModel';
 import FilmCollection from './collections/FilmCollection';
 import {
     ActiveRecord,
@@ -39,23 +40,13 @@ describe('Specific Model Tests', () => {
                 { id: 2 },
                 { id: 3 },
             ],
-            firstUser: {
+            firstUser: new UserModel({
                 id: 10,
                 name: 'bob',
-            },
+            }),
         });
 
-        // Get attribute
-        // console.log(model.user.parent);
-        // console.log(model.user.post_endpoint);
-        // console.log(model.user.b.getUrl());
-            // console.log(model.getUrlByMethod('post'));
-            console.log(model.user.getUrlByMethod('post'));
-        // console.log(model.user.at(0).b.getUrl());
-        // console.log(model.firstUser.b.getUrl());
-
-        // expect(resultA).to.equal('bar');
-        // expect(resultB).to.equal(5);
+        expect(model.firstUser.b.getUrl()).to.contain('film/5/user');
     });
 
 });

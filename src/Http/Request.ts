@@ -130,6 +130,11 @@ export default class Request extends Core {
         params.method = method || 'GET';
         params.redirect = 'follow';
 
+        if (typeof FormData == 'undefined') {
+            console.log('FormData is not compatible with nodejs yet');
+            return;
+        }
+
         body instanceof FormData
             ? body
             : typeof body == 'object'

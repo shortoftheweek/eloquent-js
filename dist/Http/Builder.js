@@ -11,7 +11,9 @@ class Builder {
         return this.activeRecord.baseUrl;
     }
     getEndpoint() {
-        return this.activeRecord.modifiedEndpoint || this.activeRecord.endpoint;
+        return this.activeRecord.isUsingModifiedEndpoint()
+            ? this.activeRecord.getModifiedEndpoint()
+            : this.activeRecord.endpoint;
     }
     getQueryParamsAsString() {
         let str = '';

@@ -152,13 +152,6 @@ export default class ActiveRecord extends Core {
     public meta: any = {};
 
     /**
-     * Modified endpoint takes precedence
-     *
-     * @type {string}
-     */
-    public modifiedEndpoint: string | null = null;
-
-    /**
      * Page
      *
      * @type number
@@ -665,7 +658,7 @@ export default class ActiveRecord extends Core {
         }
 
         // Check if we're using modified
-        if (this.referenceForModifiedEndpoint && this.modifiedEndpoint) {
+        if (this.referenceForModifiedEndpoint) {
             this.useModifiedEndpoint(this.referenceForModifiedEndpoint);
         }
 
@@ -694,9 +687,45 @@ export default class ActiveRecord extends Core {
      */
     public cancelModifiedEndpoint(): any {
         this.referenceForModifiedEndpoint = undefined;
-        this.modifiedEndpoint = null;
 
         return this;
+    }
+
+    /**
+     * Determines if we should be using the modified endpoint
+     *
+     * @return bool
+     */
+    public isUsingModifiedEndpoint(): boolean {
+        return !!this.referenceForModifiedEndpoint;
+    }
+
+    /**
+     * Build modified endpoint each time so we can use the ID
+     * as a reference. If we set it too early, the scalar value
+     * for `id` will be wrong
+     *
+     * @return string
+     */
+    public getModifiedEndpoint(): string {
+        const activeRecord: any = this.referenceForModifiedEndpoint;
+
+        // Warnings
+        if (!activeRecord || !activeRecord.id) {
+            console.warn(
+                'Modified ActiveRecord [`' + activeRecord.endpoint + '.' + this.endpoint + '] usually has an ID signature. [ar/this]', this
+            );
+
+            return this.endpoint;
+        }
+
+        // Set modified endpoint
+        // e.g. content / 1 / test
+        return [
+            activeRecord.endpoint,
+            activeRecord.id,
+            this.endpoint,
+        ].join('/');
     }
 
     /**
@@ -713,22 +742,6 @@ export default class ActiveRecord extends Core {
 
         // Object we reference for modified
         this.referenceForModifiedEndpoint = activeRecord;
-
-        // Warnings
-        if (!activeRecord.id) {
-            console.warn(
-                'Modified ActiveRecord [`' + activeRecord.endpoint + '.' + this.endpoint + '` / ' + activeRecord.id + '/' + this.id + '] usually has an ID signature. [ar/this]', activeRecord, this
-            );
-        }
-
-        // Set modified endpoint
-        // e.g. content / 1 / test
-        this.modifiedEndpoint =
-            activeRecord.endpoint +
-            '/' +
-            activeRecord.id +
-            '/' +
-            this.endpoint;
 
         return this;
     }
@@ -753,7 +766,6 @@ export default class ActiveRecord extends Core {
      */
     public setEndpoint(endpoint: string): any {
         this.referenceForModifiedEndpoint = undefined;
-        this.modifiedEndpoint = null;
         this.endpoint = endpoint;
 
         return this;

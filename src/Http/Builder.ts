@@ -19,7 +19,9 @@ export default class Builder {
      * @type string
      */
     public getEndpoint(): string {
-        return this.activeRecord.modifiedEndpoint || this.activeRecord.endpoint;
+        return this.activeRecord.isUsingModifiedEndpoint()
+            ? this.activeRecord.getModifiedEndpoint()
+            : this.activeRecord.endpoint;
     }
 
     /**

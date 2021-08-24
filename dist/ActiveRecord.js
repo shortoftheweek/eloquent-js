@@ -28,7 +28,6 @@ class ActiveRecord extends Core_1.default {
         this.limit = 15;
         this.loading = false;
         this.meta = {};
-        this.modifiedEndpoint = null;
         this.page = 1;
         this.cidPrefix = 'c';
         this.dataKey = 'data';
@@ -211,7 +210,7 @@ class ActiveRecord extends Core_1.default {
             originalEndpoint = this.endpoint;
             this.endpoint = this.post_endpoint;
         }
-        if (this.referenceForModifiedEndpoint && this.modifiedEndpoint) {
+        if (this.referenceForModifiedEndpoint) {
             this.useModifiedEndpoint(this.referenceForModifiedEndpoint);
         }
         url = this.builder.getUrl();
@@ -220,20 +219,25 @@ class ActiveRecord extends Core_1.default {
     }
     cancelModifiedEndpoint() {
         this.referenceForModifiedEndpoint = undefined;
-        this.modifiedEndpoint = null;
         return this;
+    }
+    isUsingModifiedEndpoint() {
+        return !!this.referenceForModifiedEndpoint;
+    }
+    getModifiedEndpoint() {
+        const activeRecord = this.referenceForModifiedEndpoint;
+        if (!activeRecord || !activeRecord.id) {
+            console.warn('Modified ActiveRecord [`' + activeRecord.endpoint + '.' + this.endpoint + '] usually has an ID signature. [ar/this]', this);
+            return this.endpoint;
+        }
+        return [
+            activeRecord.endpoint,
+            activeRecord.id,
+            this.endpoint,
+        ].join('/');
     }
     useModifiedEndpoint(activeRecord) {
         this.referenceForModifiedEndpoint = activeRecord;
-        if (!activeRecord.id) {
-            console.warn('Modified ActiveRecord [`' + activeRecord.endpoint + '.' + this.endpoint + '` / ' + activeRecord.id + '/' + this.id + '] usually has an ID signature. [ar/this]', activeRecord, this);
-        }
-        this.modifiedEndpoint =
-            activeRecord.endpoint +
-                '/' +
-                activeRecord.id +
-                '/' +
-                this.endpoint;
         return this;
     }
     setBody(value) {
@@ -242,7 +246,6 @@ class ActiveRecord extends Core_1.default {
     }
     setEndpoint(endpoint) {
         this.referenceForModifiedEndpoint = undefined;
-        this.modifiedEndpoint = null;
         this.endpoint = endpoint;
         return this;
     }
