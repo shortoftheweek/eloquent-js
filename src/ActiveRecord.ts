@@ -211,6 +211,20 @@ export default class ActiveRecord extends Core {
     protected lastRequest: any;
 
     /**
+     * Reference to loading hook that fires before
+     *
+     * @type function
+     */
+    protected loadingHookPre: any;
+
+    /**
+     * Reference to loading hook that fires after
+     *
+     * @type function
+     */
+    protected loadingHookPost: any;
+
+    /**
      * Prevent overflow of runLastAttempts
      * @type {number}
      */
@@ -503,14 +517,43 @@ export default class ActiveRecord extends Core {
      */
     public addLoadingHooks(view: any, preHook: any = null, postHook: any = null)
     {
-        // @ts-ignore
-        preHook = preHook || view.loading.bind(view);
-        // @ts-ignore
-        postHook = postHook || view.notloading.bind(view);
+        // Remove existing hooks
+        this.removeLoadingHooks();
 
-        this.on('complete', () => postHook());
-        this.on('error', () => postHook());
-        this.on('requesting', () => preHook());
+        // @ts-ignore
+        this.loadingHookPre = () => preHook || view.loading.bind(view);
+        // @ts-ignore
+        this.loadingHookPost = () => postHook || view.notloading.bind(view);
+
+        // Set events
+        this.on('complete', this.loadingHookPost);
+        this.on('error', this.loadingHookPost);
+        this.on('requesting', this.loadingHookPre);
+
+        return this;
+    }
+
+    /**
+     * Remove loading hooks if we have them set
+     *
+     * @return this
+     */
+    public removeLoadingHooks()
+    {
+        // Remove posthook
+        if (this.loadingHookPost) {
+            this.off('complete', this.loadingHookPost);
+            this.off('error', this.loadingHookPost);
+        }
+
+        // Remove prehook
+        if (this.loadingHookPre) {
+            this.off('requesting', this.loadingHookPre);
+        }
+
+        // Unset
+        this.loadingHookPost = null;
+        this.loadingHookPre = null;
 
         return this;
     }

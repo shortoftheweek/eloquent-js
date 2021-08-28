@@ -142,11 +142,24 @@ class ActiveRecord extends Core_1.default {
         this.attributes = {};
     }
     addLoadingHooks(view, preHook = null, postHook = null) {
-        preHook = preHook || view.loading.bind(view);
-        postHook = postHook || view.notloading.bind(view);
-        this.on('complete', () => postHook());
-        this.on('error', () => postHook());
-        this.on('requesting', () => preHook());
+        this.removeLoadingHooks();
+        this.loadingHookPre = () => preHook || view.loading.bind(view);
+        this.loadingHookPost = () => postHook || view.notloading.bind(view);
+        this.on('complete', this.loadingHookPost);
+        this.on('error', this.loadingHookPost);
+        this.on('requesting', this.loadingHookPre);
+        return this;
+    }
+    removeLoadingHooks() {
+        if (this.loadingHookPost) {
+            this.off('complete', this.loadingHookPost);
+            this.off('error', this.loadingHookPost);
+        }
+        if (this.loadingHookPre) {
+            this.off('requesting', this.loadingHookPre);
+        }
+        this.loadingHookPost = null;
+        this.loadingHookPre = null;
         return this;
     }
     find(id, queryParams = {}) {

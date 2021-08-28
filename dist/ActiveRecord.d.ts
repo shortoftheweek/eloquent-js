@@ -29,6 +29,8 @@ export default class ActiveRecord extends Core {
     protected cidPrefix: string;
     protected dataKey: string | undefined;
     protected lastRequest: any;
+    protected loadingHookPre: any;
+    protected loadingHookPost: any;
     protected runLastAttempts: number;
     protected runLastAttemptsMax: number;
     protected referenceForModifiedEndpoint: ActiveRecord | null | undefined;
@@ -47,6 +49,7 @@ export default class ActiveRecord extends Core {
     remove(x: any): void;
     reset(): void;
     addLoadingHooks(view: any, preHook?: any, postHook?: any): this;
+    removeLoadingHooks(): this;
     find(id: string | number, queryParams?: IModelRequestQueryParams): Promise<any>;
     file(name: string, file: HTMLInputElement | FileList | File): Promise<void | Request | Response>;
     fetch(options?: IModelRequestOptions | null, queryParams?: IModelRequestQueryParams): Promise<void | Request | Response>;
