@@ -42,6 +42,9 @@ class Builder {
         if (this.id !== '') {
             urlBuilder += '/' + this.id;
         }
+        else if (this.activeRecord.id != '') {
+            urlBuilder += '/' + this.activeRecord.id;
+        }
         urlBuilder += '?' + queryParamStr;
         urlBuilder = urlBuilder.replace(/([a-zA-Z0-9])\/\//g, '$1/');
         return urlBuilder;
