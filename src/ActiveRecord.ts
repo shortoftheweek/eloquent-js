@@ -521,9 +521,9 @@ export default class ActiveRecord extends Core {
         this.removeLoadingHooks();
 
         // @ts-ignore
-        this.loadingHookPre = () => preHook || view.loading.bind(view);
+        this.loadingHookPre = () => { return (preHook || view.loading.bind(view))(); };
         // @ts-ignore
-        this.loadingHookPost = () => postHook || view.notloading.bind(view);
+        this.loadingHookPost = () => { return (postHook || view.notloading.bind(view))(); };
 
         // Set events
         this.on('complete', this.loadingHookPost);

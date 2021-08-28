@@ -143,8 +143,8 @@ class ActiveRecord extends Core_1.default {
     }
     addLoadingHooks(view, preHook = null, postHook = null) {
         this.removeLoadingHooks();
-        this.loadingHookPre = () => preHook || view.loading.bind(view);
-        this.loadingHookPost = () => postHook || view.notloading.bind(view);
+        this.loadingHookPre = () => { return (preHook || view.loading.bind(view))(); };
+        this.loadingHookPost = () => { return (postHook || view.notloading.bind(view))(); };
         this.on('complete', this.loadingHookPost);
         this.on('error', this.loadingHookPost);
         this.on('requesting', this.loadingHookPre);
