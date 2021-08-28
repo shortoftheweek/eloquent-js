@@ -466,9 +466,6 @@ export default class ActiveRecord extends Core {
      * @return {any}
      */
     public save(attributes: any = null): Promise<Request> {
-        // Query params
-        // const url: string = this.builder.identifier(this.id || (attributes ? attributes.id : "")).getUrl();
-
         // Attributes
         const body: any = attributes || this.attributes;
         const headers: any = this.headers;

@@ -46,6 +46,8 @@ describe('Specific Model Tests', () => {
             }),
         });
 
+        model.firstUser.save({ name : 'whatever' });
+
         expect(model.firstUser.b.getUrl()).to.contain('film/5/user');
     });
 

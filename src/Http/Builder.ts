@@ -111,6 +111,9 @@ export default class Builder {
         if (this.id !== '') {
             urlBuilder += '/' + this.id;
         }
+        else if (this.activeRecord.id != '') {
+            urlBuilder += '/' + this.activeRecord.id;
+        }
 
         // Separate query string
         urlBuilder += '?' + queryParamStr;
