@@ -90,4 +90,18 @@ describe('Specific Model Tests', () => {
         expect(endpoint).to.contain('film/5/user');
     });
 
+    it('should use relationship endpoint for user', () =>
+    {
+        const model: FilmModel = new FilmModel({
+            id: 15,
+            user: new UserModel({
+                name: 'matt'
+            }),
+        });
+
+        const endpoint: string = model.user.b.getUrl();
+
+        expect(endpoint).to.contain('film/15/user');
+    });
+
 });
