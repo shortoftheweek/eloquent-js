@@ -46,9 +46,48 @@ describe('Specific Model Tests', () => {
             }),
         });
 
-        model.firstUser.save({ name : 'whatever' });
-
         expect(model.firstUser.b.getUrl()).to.contain('film/5/user');
+    });
+
+    it('should use modified endpoint before', () =>
+    {
+        const model: FilmModel = new FilmModel({
+            id: 5,
+        });
+
+        const modifiedEndpoint = new UserModel({
+            id: 100
+        });
+
+        const endpoint: string = model.useModifiedEndpoint(modifiedEndpoint).b.getUrl();
+
+        expect(endpoint).to.contain('user/100/film/5');
+    });
+
+    it('should use modified endpoint after', () =>
+    {
+        const model: FilmModel = new FilmModel({
+            id: 5,
+        });
+
+        const modifiedEndpoint = new UserModel({
+            id: 100
+        });
+
+        const endpoint: string = model.useModifiedEndpoint(modifiedEndpoint, 'after').b.getUrl();
+
+        expect(endpoint).to.contain('film/5/user/100');
+    });
+
+    it('should use modified endpoint after without id', () =>
+    {
+        const model: FilmModel = new FilmModel({
+            id: 5,
+        });
+        const modifiedEndpoint = new UserModel();
+        const endpoint: string = model.useModifiedEndpoint(modifiedEndpoint, 'after').b.getUrl();
+
+        expect(endpoint).to.contain('film/5/user');
     });
 
 });

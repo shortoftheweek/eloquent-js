@@ -152,6 +152,13 @@ export default class ActiveRecord extends Core {
     public meta: any = {};
 
     /**
+     * Where to position our modified endpoint
+     *
+     * @type string
+     */
+    public modifiedEndpointPosition: string = 'before';
+
+    /**
      * Page
      *
      * @type number
@@ -699,7 +706,7 @@ export default class ActiveRecord extends Core {
 
         // Check if we're using modified
         if (this.referenceForModifiedEndpoint) {
-            this.useModifiedEndpoint(this.referenceForModifiedEndpoint);
+            this.useModifiedEndpoint(this.referenceForModifiedEndpoint, this.modifiedEndpointPosition);
         }
 
         // Mark url
@@ -741,6 +748,15 @@ export default class ActiveRecord extends Core {
     }
 
     /**
+     * The endpoint we are referencing for modified endpoints
+     *
+     * @return ActiveRecord
+     */
+    public getReferencedEndpoint(): any {
+        return this.referenceForModifiedEndpoint;
+    }
+
+    /**
      * Build modified endpoint each time so we can use the ID
      * as a reference. If we set it too early, the scalar value
      * for `id` will be wrong
@@ -751,7 +767,7 @@ export default class ActiveRecord extends Core {
         const activeRecord: any = this.referenceForModifiedEndpoint;
 
         // Warnings
-        if (!activeRecord || !activeRecord.id) {
+        if (!activeRecord || !activeRecord.id && this.modifiedEndpointPosition == 'before') {
             console.warn(
                 'Modified ActiveRecord [`' + activeRecord.endpoint + '.' + this.endpoint + '] usually has an ID signature. [ar/this]', this
             );
@@ -761,11 +777,10 @@ export default class ActiveRecord extends Core {
 
         // Set modified endpoint
         // e.g. content / 1 / test
-        return [
-            activeRecord.endpoint,
-            activeRecord.id,
-            this.endpoint,
-        ].join('/');
+        // e.g. test / x / content
+        return this.modifiedEndpointPosition == 'before'
+            ? [activeRecord.endpoint, activeRecord.id, this.endpoint].join('/')
+            : [this.endpoint, this.id, activeRecord.endpoint].join('/');
     }
 
     /**
@@ -774,7 +789,7 @@ export default class ActiveRecord extends Core {
      * @param  {string} endpoint
      * @return {any}
      */
-    public useModifiedEndpoint(activeRecord: ActiveRecord): any {
+    public useModifiedEndpoint(activeRecord: ActiveRecord, position: string = 'before'): any {
         // @todo, we shouldn't actually mutate this
         // we should turn the endpoint that we actually use into a getter
         // then have a way of modifying that so we maintain the original class endpoint
@@ -782,6 +797,7 @@ export default class ActiveRecord extends Core {
 
         // Object we reference for modified
         this.referenceForModifiedEndpoint = activeRecord;
+        this.modifiedEndpointPosition = position;
 
         return this;
     }

@@ -100,18 +100,33 @@ export default class Builder {
         const baseUrl: string = this.getBaseUrl();
         const endpoint: string = this.getEndpoint();
         const queryParamStr: string = this.getQueryParamsAsString();
+        const isModified: boolean = this.activeRecord.isUsingModifiedEndpoint();
+        const modifiedBefore: boolean = isModified && this.activeRecord.modifiedEndpointPosition == 'before';
+        const modifiedAfter: boolean = isModified && this.activeRecord.modifiedEndpointPosition == 'after';
 
         let urlBuilder = '';
 
         // Root API URI
         urlBuilder += baseUrl;
+
+        // Enforce a preceded slash
         urlBuilder += endpoint[0] === '/' ? endpoint : '/' + endpoint;
 
-        // Check for ID
-        if (this.id !== '') {
+        // If we are modifying after (base / x / modified), then use active record id at the end
+        if (isModified
+            && modifiedAfter
+            && this.activeRecord.getReferencedEndpoint().id != '') {
+            urlBuilder += '/' + this.activeRecord.getReferencedEndpoint().id;
+        }
+
+        // Use the explicit ID set in this builder
+        else if (this.id !== '') {
             urlBuilder += '/' + this.id;
         }
-        else if (this.activeRecord.id != '') {
+
+        // Use the ID from the Model/Collection host as long as
+        // we don't want the modified endpoint last
+        else if (!modifiedAfter && this.activeRecord.id !== '') {
             urlBuilder += '/' + this.activeRecord.id;
         }
 
