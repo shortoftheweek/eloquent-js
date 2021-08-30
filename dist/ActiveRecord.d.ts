@@ -21,6 +21,7 @@ export default class ActiveRecord extends Core {
     limit: number;
     loading: boolean;
     meta: any;
+    modifiedEndpointPosition: string;
     page: number;
     parent: any;
     request?: Request;
@@ -58,8 +59,9 @@ export default class ActiveRecord extends Core {
     getUrlByMethod(method: string): string;
     cancelModifiedEndpoint(): any;
     isUsingModifiedEndpoint(): boolean;
+    getReferencedEndpoint(): any;
     getModifiedEndpoint(): string;
-    useModifiedEndpoint(activeRecord: ActiveRecord): any;
+    useModifiedEndpoint(activeRecord: ActiveRecord, position?: string): any;
     setBody(value: any): any;
     setEndpoint(endpoint: string): any;
     setHeader(header: string, value: string | null): any;

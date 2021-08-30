@@ -28,6 +28,7 @@ class ActiveRecord extends Core_1.default {
         this.limit = 15;
         this.loading = false;
         this.meta = {};
+        this.modifiedEndpointPosition = 'before';
         this.page = 1;
         this.cidPrefix = 'c';
         this.dataKey = 'data';
@@ -224,7 +225,7 @@ class ActiveRecord extends Core_1.default {
             this.endpoint = this.post_endpoint;
         }
         if (this.referenceForModifiedEndpoint) {
-            this.useModifiedEndpoint(this.referenceForModifiedEndpoint);
+            this.useModifiedEndpoint(this.referenceForModifiedEndpoint, this.modifiedEndpointPosition);
         }
         url = this.builder.getUrl();
         this.endpoint = originalEndpoint;
@@ -237,20 +238,22 @@ class ActiveRecord extends Core_1.default {
     isUsingModifiedEndpoint() {
         return !!this.referenceForModifiedEndpoint;
     }
+    getReferencedEndpoint() {
+        return this.referenceForModifiedEndpoint;
+    }
     getModifiedEndpoint() {
         const activeRecord = this.referenceForModifiedEndpoint;
-        if (!activeRecord || !activeRecord.id) {
+        if (!activeRecord || !activeRecord.id && this.modifiedEndpointPosition == 'before') {
             console.warn('Modified ActiveRecord [`' + activeRecord.endpoint + '.' + this.endpoint + '] usually has an ID signature. [ar/this]', this);
             return this.endpoint;
         }
-        return [
-            activeRecord.endpoint,
-            activeRecord.id,
-            this.endpoint,
-        ].join('/');
+        return this.modifiedEndpointPosition == 'before'
+            ? [activeRecord.endpoint, activeRecord.id, this.endpoint].join('/')
+            : [this.endpoint, this.id, activeRecord.endpoint].join('/');
     }
-    useModifiedEndpoint(activeRecord) {
+    useModifiedEndpoint(activeRecord, position = 'before') {
         this.referenceForModifiedEndpoint = activeRecord;
+        this.modifiedEndpointPosition = position;
         return this;
     }
     setBody(value) {

@@ -36,13 +36,21 @@ class Builder {
         const baseUrl = this.getBaseUrl();
         const endpoint = this.getEndpoint();
         const queryParamStr = this.getQueryParamsAsString();
+        const isModified = this.activeRecord.isUsingModifiedEndpoint();
+        const modifiedBefore = isModified && this.activeRecord.modifiedEndpointPosition == 'before';
+        const modifiedAfter = isModified && this.activeRecord.modifiedEndpointPosition == 'after';
         let urlBuilder = '';
         urlBuilder += baseUrl;
         urlBuilder += endpoint[0] === '/' ? endpoint : '/' + endpoint;
-        if (this.id !== '') {
+        if (isModified
+            && modifiedAfter
+            && this.activeRecord.getReferencedEndpoint().id != '') {
+            urlBuilder += '/' + this.activeRecord.getReferencedEndpoint().id;
+        }
+        else if (this.id !== '') {
             urlBuilder += '/' + this.id;
         }
-        else if (this.activeRecord.id != '') {
+        else if (!modifiedAfter && this.activeRecord.id !== '') {
             urlBuilder += '/' + this.activeRecord.id;
         }
         urlBuilder += '?' + queryParamStr;
