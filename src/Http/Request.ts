@@ -132,7 +132,7 @@ export default class Request extends Core {
 
         if (typeof FormData == 'undefined') {
             console.log('FormData is not compatible with nodejs yet');
-            // return;
+            return;
         }
 
         body instanceof FormData
@@ -439,7 +439,9 @@ export default class Request extends Core {
             this.dispatch('complete:' + this.method, this);
         }
         else {
-            this.dispatch('error', request.data);
+            // mk: Apparently, throw Error does same as dispatch 'error' which
+            // causes duplicates when listening on('error' ...)
+            // this.dispatch('error', request.data);
             this.dispatch('error:' + this.method, request.data);
             throw new Error(
                 request && request.data

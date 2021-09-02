@@ -174,7 +174,6 @@ class Request extends Core_1.default {
             this.dispatch('complete:' + this.method, this);
         }
         else {
-            this.dispatch('error', request.data);
             this.dispatch('error:' + this.method, request.data);
             throw new Error(request && request.data
                 ? request.data.error || request.data.message
