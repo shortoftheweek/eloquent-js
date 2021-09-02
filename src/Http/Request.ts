@@ -132,7 +132,7 @@ export default class Request extends Core {
 
         if (typeof FormData == 'undefined') {
             console.log('FormData is not compatible with nodejs yet');
-            return;
+            // return;
         }
 
         body instanceof FormData
@@ -181,7 +181,7 @@ export default class Request extends Core {
 
         // Catch errors
         response.catch((e: Error) => {
-            this.dispatch('error', e);
+            this.dispatch('error:catch', e);
         });
 
         return response

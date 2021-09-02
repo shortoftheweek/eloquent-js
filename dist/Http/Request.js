@@ -71,7 +71,7 @@ class Request extends Core_1.default {
             ? this.xhrFetch(this.url, params)
             : node_fetch_1.default(this.url, params);
         response.catch((e) => {
-            this.dispatch('error', e);
+            this.dispatch('error:catch', e);
         });
         return response
             .then(this.beforeParse.bind(this))
