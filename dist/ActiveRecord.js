@@ -354,10 +354,6 @@ class ActiveRecord extends Core_1.default {
         request.on('progress', (e) => {
             this.dispatch('progress', e.data);
         });
-        request.on('complete', (e) => {
-            this.loading = false;
-            this.dispatch('complete');
-        });
         request.on('error', (e) => this.dispatch('error', e));
         request.on('error:get', (e) => this.dispatch('error:get'));
         request.on('error:put', (e) => this.dispatch('error:put'));

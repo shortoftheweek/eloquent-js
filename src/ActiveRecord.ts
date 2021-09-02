@@ -1044,15 +1044,6 @@ export default class ActiveRecord extends Core {
             this.dispatch('progress', e.data);
         });
 
-        // Bubble `complete` event
-        request.on('complete', (e) => {
-            // Set loading
-            this.loading = false;
-
-            // Bubble
-            this.dispatch('complete');
-        });
-
         // After parse
         request.on('error', (e) => this.dispatch('error', e));
         request.on('error:get', (e) => this.dispatch('error:get'));
