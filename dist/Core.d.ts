@@ -1,4 +1,4 @@
-import { Dispatcher } from 'dispatcher';
+import Dispatcher from './Dispatcher/Dispatcher';
 import { IDispatcher } from './Interfaces';
 export default class Core extends Dispatcher implements IDispatcher {
     static eloquentjsversion: string;

@@ -69,7 +69,7 @@ class Request extends Core_1.default {
         this.dispatch('requesting', this);
         var response = isFile
             ? this.xhrFetch(this.url, params)
-            : node_fetch_1.default(this.url, params);
+            : (0, node_fetch_1.default)(this.url, params);
         response.catch((e) => {
             this.dispatch('error:catch', e);
         });
