@@ -35,7 +35,6 @@
     },
     "dependencies": {
         "@types/node-fetch": "^2.5.7",
-        "dispatcher": "github:mattkenefick/dispatcher",
         "https": "^1.0.0",
         "node-fetch": "^2.6.0"
     }
