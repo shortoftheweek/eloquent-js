@@ -126,6 +126,7 @@ export default class Request extends Core {
         // Fetch params
         var params: any = {};
 
+        params.credentials = 'include';
         params.headers = headers;
         params.method = method || 'GET';
         params.redirect = 'follow';
@@ -318,6 +319,9 @@ export default class Request extends Core {
                 xhrSend.apply(xhr, xhrArguments);
             });
         };
+
+        // Send cookies
+        xhr.withCredentials = true;
 
         return xhr.send(params.body);
     }

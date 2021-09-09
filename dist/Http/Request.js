@@ -37,6 +37,7 @@ class Request extends Core_1.default {
         this.dispatch('fetch:before');
         var headers = Object.assign(this.headers, headers);
         var params = {};
+        params.credentials = 'include';
         params.headers = headers;
         params.method = method || 'GET';
         params.redirect = 'follow';
@@ -126,6 +127,7 @@ class Request extends Core_1.default {
                 xhrSend.apply(xhr, xhrArguments);
             });
         };
+        xhr.withCredentials = true;
         return xhr.send(params.body);
     }
     setHeader(header, value) {
