@@ -1,3 +1,4 @@
+import { AxiosResponse } from 'axios';
 import Core from '../Core';
 import { IAttributes } from '../Interfaces';
 export default class Request extends Core {
@@ -7,11 +8,11 @@ export default class Request extends Core {
     loading: boolean;
     method: string;
     mode: string;
-    request?: Promise<Request | Response>;
-    response?: Response;
+    request?: Promise<Request | Response | AxiosResponse<any>>;
+    response?: Response | AxiosResponse<any>;
     url: string;
-    constructor(url: string, params?: any);
-    fetch(method?: string | null, body?: any, headers?: any): Promise<Request>;
+    constructor(url?: string, params?: any);
+    fetch(method?: string | null, body?: any, headers?: any): Promise<Request | AxiosResponse<any>>;
     xhrFetch(url: string, params: any): any;
     setHeader(header: string, value: string): any;
     setHeaders(headers: any): any;
@@ -20,4 +21,5 @@ export default class Request extends Core {
     private afterParse;
     private afterFetch;
     private afterAll;
+    private log;
 }

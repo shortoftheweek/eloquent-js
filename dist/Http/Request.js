@@ -1,15 +1,6 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const node_fetch_1 = require("node-fetch");
+const axios_1 = require("axios");
 const Core_1 = require("../Core");
 class RequestError extends Error {
     constructor(status, text) {
@@ -19,7 +10,7 @@ class RequestError extends Error {
     }
 }
 class Request extends Core_1.default {
-    constructor(url, params = {}) {
+    constructor(url = '', params = {}) {
         super();
         this.data = {};
         this.dataKey = '';
@@ -33,53 +24,28 @@ class Request extends Core_1.default {
         this.url = this.url.replace(/\?&/, '?');
     }
     fetch(method = 'GET', body = null, headers = {}) {
-        this.method = method || 'GET';
+        this.method = (method || 'GET').toUpperCase();
         this.dispatch('fetch:before');
         var headers = Object.assign(this.headers, headers);
         var params = {};
-        params.credentials = 'include';
+        params.body = body;
         params.headers = headers;
-        params.method = method || 'GET';
+        params.method = this.method;
         params.redirect = 'follow';
-        if (typeof FormData == 'undefined') {
-            console.log('FormData is not compatible with nodejs yet');
-        }
-        body instanceof FormData
-            ? body
-            : typeof body == 'object'
-                ? JSON.stringify(body)
-                : body;
-        if (body) {
-            if (typeof FormData == undefined) {
-                params.body =
-                    typeof body == 'object' ? JSON.stringify(body) : body;
-            }
-            else {
-                params.body =
-                    body instanceof FormData
-                        ? body
-                        : typeof body == 'object'
-                            ? JSON.stringify(body)
-                            : body;
-            }
-        }
-        var isFile = (!params.headers['Content-Type'] ||
-            params.headers['Content-Type'].indexOf('multipart')) &&
-            params.method.toLowerCase() === 'post';
+        params.url = this.url;
+        params.withCredentials = true;
         this.loading = true;
         this.dispatch('requesting', this);
-        var response = isFile
-            ? this.xhrFetch(this.url, params)
-            : (0, node_fetch_1.default)(this.url, params);
-        response.catch((e) => {
-            this.dispatch('error:catch', e);
+        return (0, axios_1.default)(params)
+            .then(e => {
+            this.response = e;
+            this.beforeParse(e);
+            this.parse(e);
+            this.afterParse(e);
+            this.afterFetch(e);
+            this.afterAll(e);
+            return e;
         });
-        return response
-            .then(this.beforeParse.bind(this))
-            .then(this.parse.bind(this))
-            .then(this.afterParse.bind(this))
-            .then(this.afterFetch.bind(this))
-            .then(this.afterAll.bind(this));
     }
     xhrFetch(url, params) {
         var self = this;
@@ -137,51 +103,51 @@ class Request extends Core_1.default {
     setHeaders(headers) {
         this.headers = headers;
     }
-    beforeParse(response) {
+    beforeParse(e) {
+        this.log('before parse');
         this.dispatch('parse:before');
-        this.response = response;
-        return this;
+        return e;
     }
-    parse(request) {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.dispatch('parse:parsing');
-            if (request.response) {
-                if (request.response.status != 204) {
-                    this.data = yield request.response.json();
-                }
-            }
-            this.dispatch('parse', this.data);
-            return request;
-        });
+    parse(e) {
+        this.log('parse');
+        this.dispatch('parse:parsing');
+        if (e.status != 204) {
+            this.data = e.data;
+        }
+        this.dispatch('parse', this.data);
+        return e;
     }
-    afterParse(request) {
-        if (request &&
-            request.response &&
-            request.response.status >= 400 &&
-            this.data.status) {
-            throw new RequestError(request.response.status, this.data.status);
+    afterParse(e) {
+        this.log('after parse');
+        if (e.status >= 400 && this.data.status) {
+            throw new RequestError(e.status, this.data.status);
         }
         this.dispatch('parse:after');
-        return request;
+        return e;
     }
-    afterFetch(request) {
-        this.dispatch('fetch', request.data);
+    afterFetch(e) {
+        this.log('after fetch');
+        this.dispatch('fetch', e.data);
         this.dispatch('fetch:after');
         this.loading = false;
-        return request;
+        return e;
     }
-    afterAll(request) {
-        if (request && request.response && request.response.ok) {
+    afterAll(e) {
+        this.log('after all: ' + this.method + ' / ' + e.status);
+        if (e.status < 400) {
             this.dispatch('complete', this);
             this.dispatch('complete:' + this.method, this);
         }
         else {
-            this.dispatch('error:' + this.method, request.data);
-            throw new Error(request && request.data
-                ? request.data.error || request.data.message
+            this.dispatch('error:' + this.method, e.data);
+            throw new Error(e && e.data
+                ? e.data.error || e.data.message
                 : 'After All');
         }
-        return request;
+        return e;
+    }
+    log(msg = '') {
+        console.log(' > ' + msg);
     }
 }
 exports.default = Request;

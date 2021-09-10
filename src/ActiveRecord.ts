@@ -7,6 +7,7 @@ import {
     IModelRequestOptions,
     IModelRequestQueryParams,
 } from './Interfaces';
+import { AxiosResponse } from 'axios';
 
 /**
  * ActiveRecord
@@ -986,7 +987,7 @@ export default class ActiveRecord extends Core {
         method: any = null,
         body: any = null,
         headers: any = null
-    ): Promise<Request> {
+    ): any {
         // Promise<void | Request | Response>
         // Normalize method
         method = method ? method.toLowerCase() : 'get';

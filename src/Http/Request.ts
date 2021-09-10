@@ -1,6 +1,7 @@
 // The node-fetch module creates failures in things like NativeScript which
 // would use a built-in version of "fetch". Do we need this?
 import axios from 'axios';
+import { AxiosResponse } from 'axios';
 // import fetch from 'node-fetch';
 import Core from '../Core';
 import { IAttributes } from '../Interfaces';
@@ -80,14 +81,14 @@ export default class Request extends Core {
      *
      * @type {Promise<Repsonse>}
      */
-    public request?: Promise<Request | Response>;
+    public request?: Promise<Request | Response | AxiosResponse<any>>;
 
     /**
      * Response from fetch
      *
      * @type Response
      */
-    public response?: Response;
+    public response?: Response | AxiosResponse<any>;
 
     /**
      * @type {string}
@@ -116,7 +117,7 @@ export default class Request extends Core {
         method: string | null = 'GET',
         body: any = null,
         headers: any = {}
-    ): Promise<Request> {
+    ): Promise<Request | AxiosResponse<any>> {
         this.method = (method || 'GET').toUpperCase();
 
         this.dispatch('fetch:before');
@@ -128,9 +129,11 @@ export default class Request extends Core {
         var params: any = {};
 
         // mk: For XHR or Axios
+        params.body = body;
         params.headers = headers;
         params.method = this.method;
         params.redirect = 'follow';
+        params.url = this.url;
         params.withCredentials = true;
 
         // Is File?
@@ -146,7 +149,7 @@ export default class Request extends Core {
         // Events
         this.dispatch('requesting', this);
 
-        return axios(this.url, body, params)
+        return axios(params)
             .then(e => {
                 this.response = e;
 

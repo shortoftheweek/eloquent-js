@@ -25,7 +25,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
     reset(): Collection;
     clear(): Collection;
     count(): number;
-    delete(attributes?: any): Promise<Request>;
+    delete(attributes?: any): any;
     push(model: Model[] | Model | object, options?: object): Collection;
     pop(options?: object): Collection;
     unshift(model: Model[] | Model | object, options?: object): Collection;

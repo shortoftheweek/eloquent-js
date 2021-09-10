@@ -74,7 +74,7 @@ export default class ActiveRecord extends Core {
     unsetQueryParam(param: string): any;
     setToken(token: string): any;
     setAfterResponse(request: Request, options?: any): void;
-    protected _fetch(options?: IModelRequestOptions | null, queryParams?: IModelRequestQueryParams, method?: any, body?: any, headers?: any): Promise<Request>;
+    protected _fetch(options?: IModelRequestOptions | null, queryParams?: IModelRequestQueryParams, method?: any, body?: any, headers?: any): any;
     protected static cachedResponses: ICachedResponses;
     protected cache(key: string, value: any, isComplete?: boolean, ttl?: number): void;
     protected isCached(key: string): boolean;
