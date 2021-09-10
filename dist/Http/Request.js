@@ -28,7 +28,7 @@ class Request extends Core_1.default {
         this.dispatch('fetch:before');
         var headers = Object.assign(this.headers, headers);
         var params = {};
-        params.body = body;
+        params.data = body;
         params.headers = headers;
         params.method = this.method;
         params.redirect = 'follow';

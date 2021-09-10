@@ -129,7 +129,7 @@ export default class Request extends Core {
         var params: any = {};
 
         // mk: For XHR or Axios
-        params.body = body;
+        params.data = body;
         params.headers = headers;
         params.method = this.method;
         params.redirect = 'follow';
