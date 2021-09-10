@@ -136,10 +136,10 @@ class Request extends Core_1.default {
         this.log('after all: ' + this.method + ' / ' + e.status);
         if (e.status < 400) {
             this.dispatch('complete', this);
-            this.dispatch('complete:' + this.method, this);
+            this.dispatch('complete:' + this.method.toLowerCase(), this);
         }
         else {
-            this.dispatch('error:' + this.method, e.data);
+            this.dispatch('error:' + this.method.toLowerCase(), e.data);
             throw new Error(e && e.data
                 ? e.data.error || e.data.message
                 : 'After All');

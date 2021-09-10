@@ -410,13 +410,13 @@ export default class Request extends Core {
         // Check request
         if (e.status < 400) {
             this.dispatch('complete', this);
-            this.dispatch('complete:' + this.method, this);
+            this.dispatch('complete:' + this.method.toLowerCase(), this);
         }
         else {
             // mk: Apparently, throw Error does same as dispatch 'error' which
             // causes duplicates when listening on('error' ...)
             // this.dispatch('error', e.data);
-            this.dispatch('error:' + this.method, e.data);
+            this.dispatch('error:' + this.method.toLowerCase(), e.data);
 
             throw new Error(
                 e && e.data
