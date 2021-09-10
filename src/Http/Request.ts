@@ -1,6 +1,7 @@
 // The node-fetch module creates failures in things like NativeScript which
 // would use a built-in version of "fetch". Do we need this?
-import fetch from 'node-fetch';
+import axios from 'axios';
+// import fetch from 'node-fetch';
 import Core from '../Core';
 import { IAttributes } from '../Interfaces';
 
@@ -96,7 +97,7 @@ export default class Request extends Core {
     /**
      * Constructor
      */
-    constructor(url: string, params: any = {}) {
+    constructor(url: string = '', params: any = {}) {
         super();
 
         //
@@ -116,7 +117,7 @@ export default class Request extends Core {
         body: any = null,
         headers: any = {}
     ): Promise<Request> {
-        this.method = method || 'GET';
+        this.method = (method || 'GET').toUpperCase();
 
         this.dispatch('fetch:before');
 
@@ -126,45 +127,18 @@ export default class Request extends Core {
         // Fetch params
         var params: any = {};
 
-        params.credentials = 'include';
+        // mk: For XHR or Axios
         params.headers = headers;
-        params.method = method || 'GET';
+        params.method = this.method;
         params.redirect = 'follow';
-
-        if (typeof FormData == 'undefined') {
-            console.log('FormData is not compatible with nodejs yet');
-            return;
-        }
-
-        body instanceof FormData
-            ? body
-            : typeof body == 'object'
-            ? JSON.stringify(body)
-            : body;
-
-        if (body) {
-            // For node
-            if (typeof FormData == undefined) {
-                params.body =
-                    typeof body == 'object' ? JSON.stringify(body) : body;
-            }
-            // For web
-            else {
-                params.body =
-                    body instanceof FormData
-                        ? body
-                        : typeof body == 'object'
-                        ? JSON.stringify(body)
-                        : body;
-            }
-        }
+        params.withCredentials = true;
 
         // Is File?
         // @todo this is inaccurate and makes many requests (forgot password) think it's a file
-        var isFile =
-            (!params.headers['Content-Type'] ||
-                params.headers['Content-Type'].indexOf('multipart')) &&
-            params.method.toLowerCase() === 'post';
+        // var isFile =
+        //     (!params.headers['Content-Type'] ||
+        //         params.headers['Content-Type'].indexOf('multipart')) &&
+        //     params.method.toLowerCase() === 'post';
 
         // Loading
         this.loading = true;
@@ -172,25 +146,18 @@ export default class Request extends Core {
         // Events
         this.dispatch('requesting', this);
 
-        // Log
-        // console.log('Making request as follows:', params);
+        return axios(this.url, body, params)
+            .then(e => {
+                this.response = e;
 
-        // Create request
-        var response = isFile
-            ? this.xhrFetch(this.url, params)
-            : fetch(this.url, params);
+                this.beforeParse(e);
+                this.parse(e);
+                this.afterParse(e);
+                this.afterFetch(e);
+                this.afterAll(e);
 
-        // Catch errors
-        response.catch((e: Error) => {
-            this.dispatch('error:catch', e);
-        });
-
-        return response
-            .then(this.beforeParse.bind(this))
-            .then(this.parse.bind(this))
-            .then(this.afterParse.bind(this))
-            .then(this.afterFetch.bind(this))
-            .then(this.afterAll.bind(this));
+                return e;
+            });
     }
 
     /**
@@ -357,14 +324,13 @@ export default class Request extends Core {
      *
      * @param {any} x [description]
      */
-    private beforeParse(response: any): Request {
+    private beforeParse(e: any): Request {
+        this.log('before parse');
+
         // Trigger
         this.dispatch('parse:before');
 
-        // Save
-        this.response = response;
-
-        return this;
+        return e;
     }
 
     /**
@@ -372,23 +338,22 @@ export default class Request extends Core {
      *
      * @param {any} x [description]
      */
-    private async parse(request: Request) {
+    private parse(e: any) {
+        this.log('parse');
+
         // Trigger
         this.dispatch('parse:parsing');
 
         // Set data
-        if (request.response) {
-            // Data on 200 OK
-            // if (request.response.status == 200) {
-            if (request.response.status != 204) {
-                this.data = await request.response.json();
-            }
+        if (e.status != 204) {
+            this.data = e.data;
+            // this.data = await request.response.json();
         }
 
         // Trigger
         this.dispatch('parse', this.data);
 
-        return request;
+        return e;
     }
 
     /**
@@ -396,21 +361,19 @@ export default class Request extends Core {
      *
      * @param {any} x [description]
      */
-    private afterParse(request: Request): Request {
-        if (
-            request &&
-            request.response &&
-            request.response.status >= 400 &&
-            this.data.status
-        ) {
+    private afterParse(e: any): Request {
+        this.log('after parse');
+
+        if (e.status >= 400 && this.data.status) {
+        // if (e.status >= 400 && this.data.status) {
             // if (this.data && this.data.code >= 400) {
-            throw new RequestError(request.response.status, this.data.status);
+            throw new RequestError(e.status, this.data.status);
         }
 
         // Trigger
         this.dispatch('parse:after');
 
-        return request;
+        return e;
     }
 
     /**
@@ -418,9 +381,11 @@ export default class Request extends Core {
      *
      * @param {any} x [description]
      */
-    private afterFetch(request: Request): Request {
+    private afterFetch(e: any): Request {
+        this.log('after fetch');
+
         // Trigger
-        this.dispatch('fetch', request.data);
+        this.dispatch('fetch', e.data);
 
         // Trigger
         this.dispatch('fetch:after');
@@ -428,7 +393,7 @@ export default class Request extends Core {
         // Not loading
         this.loading = false;
 
-        return request;
+        return e;
     }
 
     /**
@@ -436,24 +401,36 @@ export default class Request extends Core {
      *
      * @param {any} x [description]
      */
-    private afterAll(request: Request): Request {
+    private afterAll(e: any): Request {
+        this.log('after all: ' + this.method + ' / ' + e.status);
+
         // Check request
-        if (request && request.response && request.response.ok) {
+        if (e.status < 400) {
             this.dispatch('complete', this);
             this.dispatch('complete:' + this.method, this);
         }
         else {
             // mk: Apparently, throw Error does same as dispatch 'error' which
             // causes duplicates when listening on('error' ...)
-            // this.dispatch('error', request.data);
-            this.dispatch('error:' + this.method, request.data);
+            // this.dispatch('error', e.data);
+            this.dispatch('error:' + this.method, e.data);
+
             throw new Error(
-                request && request.data
-                    ? request.data.error || request.data.message
+                e && e.data
+                    ? e.data.error || e.data.message
                     : 'After All'
             );
         }
 
-        return request;
+        return e;
+    }
+
+    /**
+     * Logging
+     *
+     * @param string msg
+     */
+    private log(msg: string = ''): void {
+        console.log(' > ' + msg);
     }
 }

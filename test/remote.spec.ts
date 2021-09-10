@@ -5,6 +5,7 @@
  * we shouldn't. We should have something mocked or local.
  */
 
+import axios from 'axios';
 import { expect } from 'chai';
 import FilmModel from './models/FilmModel';
 import FilmCollection from './collections/FilmCollection';
@@ -12,6 +13,7 @@ import {
     ActiveRecord,
     Collection,
     Model,
+    Request,
 } from '../src/index';
 
 
@@ -63,16 +65,74 @@ describe('Remote Collection Tests', () => {
         // model.save();
     });
 
-    it('should receive error', () => {
-        var model = new FilmModel(null, {
-            baseUrl: 'http://localhost:3333',
-            endpoint: 'auth/basic/login',
-        });
+    // it('should receive error', () => {
+    //     var model = new FilmModel(null, {
+    //         baseUrl: 'http://localhost:3333',
+    //         endpoint: 'auth/basic/login',
+    //     });
 
-        model.post({
-            email: 'john@example.com',
-            password: 'supsupsup',
-        });
+    //     model.post({
+    //         email: 'john@example.com',
+    //         password: 'supsupsup',
+    //     });
+    // });
+
+    it('should fetch', () => {
+        // var collection = new FilmCollection({
+        //     baseUrl: 'https://staging-api.shortoftheweek.app/v1',
+        // });
+
+        // collection
+        //     .fetch()
+        //     .then((e) => {
+        //         console.log('film model fetch', e.data);
+        //         console.log(collection.at(0).attr('source_url'));
+        //     })
+        //     .catch((e) => {
+        //         console.log('catching errorr', e.message, e.response?.status);
+        //     });
+
+
+        // const url = 'https://staging-api.shortoftheweek.app/v1/not-real';
+        // const url = 'https://staging-api.shortoftheweek.app/v1/film';
+        // const body = null;
+        // const headers = { };
+
+        // var req = new Request(url);
+
+        // req.fetch('post', body, headers)
+        //     .then(e => {
+        //         console.log('hi', e);
+        //     })
+        //     .catch(e => {
+        //         console.log('error', e.response?.status);
+        //     });
+
+        // axios.get(url)
+        // axios(url, {
+        //     method: 'get',
+        //     headers: {
+
+        //     },
+        //     redirect: 'follow',
+        //     // method: 'post',
+        //     withCredentials: false,
+        // })
+        // .then(e => {
+        //     console.log('E', e);
+        //     // console.log('Status', response.status);
+        //     // console.log('Headers', response.headers);
+        //     // console.log('Data', response.data);
+        // })
+        // .catch(error => {
+        //     console.log('catch', error.message);
+        //     console.log('catch', error.response.status);
+        //     console.log('catch', error.response.statusText);
+        //     // error.request
+        //     // error.response.status
+        //     // error.response.statusText
+        //     // error.response.headers
+        // });
     });
 
 });
