@@ -434,6 +434,6 @@ export default class Request extends Core {
      * @param string msg
      */
     private log(msg: string = ''): void {
-        console.log(' > ' + msg);
+        // console.log(' > ' + msg);
     }
 }

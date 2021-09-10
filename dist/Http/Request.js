@@ -147,7 +147,6 @@ class Request extends Core_1.default {
         return e;
     }
     log(msg = '') {
-        console.log(' > ' + msg);
     }
 }
 exports.default = Request;
