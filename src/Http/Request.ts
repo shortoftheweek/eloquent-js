@@ -160,6 +160,12 @@ export default class Request extends Core {
                 this.afterAll(e);
 
                 return e;
+            })
+            // @see https://axios-http.com/docs/handling_errors
+            .catch(error => {
+                this.afterAll(error);
+
+                return error;
             });
     }
 
@@ -405,10 +411,13 @@ export default class Request extends Core {
      * @param {any} x [description]
      */
     private afterAll(e: any): Request {
-        this.log('after all: ' + this.method + ' / ' + e.status);
+        var status = e.response?.status || e.status;
+
+        // Log
+        this.log('after all: ' + this.method + ' / ' + status);
 
         // Check request
-        if (e.status < 400) {
+        if (status < 400) {
             this.dispatch('complete', this);
             this.dispatch('complete:' + this.method.toLowerCase(), this);
         }
@@ -416,13 +425,9 @@ export default class Request extends Core {
             // mk: Apparently, throw Error does same as dispatch 'error' which
             // causes duplicates when listening on('error' ...)
             // this.dispatch('error', e.data);
-            this.dispatch('error:' + this.method.toLowerCase(), e.data);
+            this.dispatch('error:' + this.method.toLowerCase(), e.response?.data);
 
-            throw new Error(
-                e && e.data
-                    ? e.data.error || e.data.message
-                    : 'After All'
-            );
+            throw e;
         }
 
         return e;

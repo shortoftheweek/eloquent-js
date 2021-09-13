@@ -45,6 +45,10 @@ class Request extends Core_1.default {
             this.afterFetch(e);
             this.afterAll(e);
             return e;
+        })
+            .catch(error => {
+            this.afterAll(error);
+            return error;
         });
     }
     xhrFetch(url, params) {
@@ -133,16 +137,16 @@ class Request extends Core_1.default {
         return e;
     }
     afterAll(e) {
-        this.log('after all: ' + this.method + ' / ' + e.status);
-        if (e.status < 400) {
+        var _a, _b;
+        var status = ((_a = e.response) === null || _a === void 0 ? void 0 : _a.status) || e.status;
+        this.log('after all: ' + this.method + ' / ' + status);
+        if (status < 400) {
             this.dispatch('complete', this);
             this.dispatch('complete:' + this.method.toLowerCase(), this);
         }
         else {
-            this.dispatch('error:' + this.method.toLowerCase(), e.data);
-            throw new Error(e && e.data
-                ? e.data.error || e.data.message
-                : 'After All');
+            this.dispatch('error:' + this.method.toLowerCase(), (_b = e.response) === null || _b === void 0 ? void 0 : _b.data);
+            throw e;
         }
         return e;
     }
