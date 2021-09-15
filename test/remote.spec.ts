@@ -7,6 +7,7 @@
 
 import axios from 'axios';
 import { expect } from 'chai';
+import UserModel from './models/UserModel';
 import FilmModel from './models/FilmModel';
 import FilmCollection from './collections/FilmCollection';
 import {
@@ -79,21 +80,37 @@ describe('Remote Collection Tests', () => {
 
     it('should fetch', () => {
         var collection = new FilmCollection({
-            baseUrl: 'http://localhost:8000/api/v12',
+            baseUrl: 'http://localhost:8000/api/v1',
             qp: {
                 limit: 1,
             }
         });
 
-        collection
+        var model = new UserModel(null, {
+            baseUrl: 'http://localhost:8000/api/v1',
+            id: 10,
+        });
+
+        model
             .fetch()
             .then((e: EloquentRequest) => {
-                // console.log('film model fetch', e);
-                console.log('a', collection.at(0).attr('source_url'));
+                console.log('user model fetch', e);
+                console.log('a', model.attr('username'));
             })
             .catch((e: EloquentRequest) => {
-                console.log('catching errorr', e.response?.status);
+                console.log('catching user erorr', e.response?.status);
             });
+
+
+        // collection
+        //     .fetch()
+        //     .then((e: EloquentRequest) => {
+        //         // console.log('film model fetch', e);
+        //         console.log('a', collection.at(0).attr('source_url'));
+        //     })
+        //     .catch((e: EloquentRequest) => {
+        //         console.log('catching errorr', e.response?.status);
+        //     });
 
 
         // collection

@@ -308,19 +308,20 @@ class ActiveRecord extends Core_1.default {
     }
     setAfterResponse(request, options = {}) {
         var method = request.method || 'get';
+        var remoteJson = request.data;
         if (method.toLowerCase() === 'post' && !this.isModel) {
-            this.add(request.data);
+            this.add(remoteJson.data || request.data);
         }
         else if (method.toLowerCase() === 'delete') {
         }
         else {
             var data = this.dataKey !== undefined
-                ? request.data[this.dataKey]
-                : request.data;
+                ? remoteJson[this.dataKey]
+                : (remoteJson.data || request.data);
             this.set(data, options);
         }
         this.options(Object.assign({}, options, {
-            meta: request.data.meta,
+            meta: remoteJson.meta,
         }));
         this.dispatch('parse:after', this);
     }
