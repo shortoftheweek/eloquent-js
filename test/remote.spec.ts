@@ -13,7 +13,7 @@ import {
     ActiveRecord,
     Collection,
     Model,
-    Request,
+    Request as EloquentRequest,
 } from '../src/index';
 
 
@@ -78,20 +78,22 @@ describe('Remote Collection Tests', () => {
     // });
 
     it('should fetch', () => {
-        // var collection = new FilmCollection({
-        //     baseUrl: 'https://staging-api.shortoftheweek.app/v1',
-        // });
+        var collection = new FilmCollection({
+            baseUrl: 'http://localhost:8000/api/v12',
+            qp: {
+                limit: 1,
+            }
+        });
 
-        // collection
-        //     .fetch()
-        //     .then((e) => {
-        //         console.log('film model fetch', e.data);
-        //         console.log(collection.at(0).attr('source_url'));
-        //     })
-        //     .catch((e) => {
-        //         console.log('catching errorr', e.message, e.response?.status);
-        //     });
-
+        collection
+            .fetch()
+            .then((e: EloquentRequest) => {
+                // console.log('film model fetch', e);
+                // console.log(collection.at(0).attr('source_url'));
+            })
+            .catch((e: EloquentRequest) => {
+                console.log('catching errorr', e.response?.status);
+            });
 
         // const url = 'https://staging-api.shortoftheweek.app/v1/not-real';
         // const url = 'https://staging-api.shortoftheweek.app/v1/film';

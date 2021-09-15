@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios';
 import Core from '../Core';
-import { IAttributes } from '../Interfaces';
+import { IAttributes, IAxiosResponse, IAxiosSuccess } from '../Interfaces';
 export default class Request extends Core {
     data: IAttributes;
     dataKey: string;
@@ -9,7 +9,7 @@ export default class Request extends Core {
     method: string;
     mode: string;
     request?: Promise<Request | Response | AxiosResponse<any>>;
-    response?: Response | AxiosResponse<any>;
+    response?: IAxiosResponse | IAxiosSuccess;
     url: string;
     constructor(url?: string, params?: any);
     fetch(method?: string | null, body?: any, headers?: any): Promise<Request | AxiosResponse<any>>;

@@ -1,7 +1,7 @@
 import Builder from './Http/Builder';
 import Core from './Core';
-import Request from './Http/Request';
-import { IAttributes, ICachedResponses, IModelRequestOptions, IModelRequestQueryParams } from './Interfaces';
+import EloquentRequest from './Http/Request';
+import { IAttributes, ICachedResponses, IModelRequestOptions, IModelRequestQueryParams, IProgressEvent } from './Interfaces';
 export default class ActiveRecord extends Core {
     get b(): Builder;
     protected get isModel(): boolean;
@@ -24,7 +24,7 @@ export default class ActiveRecord extends Core {
     modifiedEndpointPosition: string;
     page: number;
     parent: any;
-    request?: Request;
+    request?: EloquentRequest;
     requestTime: number;
     protected builder: Builder;
     protected cidPrefix: string;
@@ -41,20 +41,20 @@ export default class ActiveRecord extends Core {
     unset(key: string): any;
     options(options?: any): any;
     toJSON(): object;
-    create(attributes: any): Promise<Request>;
-    delete(attributes?: any): Promise<Request>;
-    post(attributes?: any): Promise<Request>;
-    put(attributes: any): Promise<Request>;
-    save(attributes?: any): Promise<Request>;
+    create(attributes: any): Promise<EloquentRequest>;
+    delete(attributes?: any): Promise<EloquentRequest>;
+    post(attributes?: any): Promise<EloquentRequest>;
+    put(attributes: any): Promise<EloquentRequest>;
+    save(attributes?: any): Promise<EloquentRequest>;
     add(x: any): any;
     remove(x: any): void;
     reset(): void;
     addLoadingHooks(view: any, preHook?: any, postHook?: any): this;
     removeLoadingHooks(): this;
     find(id: string | number, queryParams?: IModelRequestQueryParams): Promise<any>;
-    file(name: string, file: HTMLInputElement | FileList | File): Promise<void | Request | Response>;
-    fetch(options?: IModelRequestOptions | null, queryParams?: IModelRequestQueryParams): Promise<void | Request | Response>;
-    upload(name: string, file: HTMLInputElement | FileList | File): Promise<void | Request | Response>;
+    file(name: string, file: HTMLInputElement | FileList | File): Promise<void | EloquentRequest | Response>;
+    fetch(options?: IModelRequestOptions | null, queryParams?: IModelRequestQueryParams): Promise<void | EloquentRequest | Response>;
+    upload(name: string, file: HTMLInputElement | FileList | File): Promise<void | EloquentRequest | Response>;
     runLast(): any;
     getUrlByMethod(method: string): string;
     cancelModifiedEndpoint(): any;
@@ -73,7 +73,7 @@ export default class ActiveRecord extends Core {
     setQueryParams(params: any): any;
     unsetQueryParam(param: string): any;
     setToken(token: string): any;
-    setAfterResponse(request: Request, options?: any): void;
+    setAfterResponse(request: EloquentRequest, options?: any): void;
     protected _fetch(options?: IModelRequestOptions | null, queryParams?: IModelRequestQueryParams, method?: any, body?: any, headers?: any): any;
     protected static cachedResponses: ICachedResponses;
     protected cache(key: string, value: any, isComplete?: boolean, ttl?: number): void;
@@ -82,7 +82,7 @@ export default class ActiveRecord extends Core {
     protected getCache(key: string): any;
     protected addCacheSubscriber(key: string, resolve: any, reject: any, collection: any): void;
     protected clearCacheSubscribers(key: string): void;
-    protected FetchComplete(request: Request, e: any, options?: any): void;
-    protected FetchProgress(request: Request, e: any, options?: any): void;
-    protected FetchParseAfter(request: Request, e: any, options?: any): void;
+    protected FetchComplete(request: EloquentRequest, options?: any): void;
+    protected FetchProgress(request: EloquentRequest, progress: IProgressEvent, options?: any): void;
+    protected FetchParseAfter(request: EloquentRequest, options?: any): void;
 }

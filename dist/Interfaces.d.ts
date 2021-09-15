@@ -1,6 +1,40 @@
 export interface IAttributes {
     [key: string]: any;
 }
+export interface IAxiosConfig {
+    adapter?: any;
+    data?: any;
+    headers?: any;
+    maxBodyLength?: number;
+    maxContentLength?: number;
+    method?: string;
+    redirect?: string;
+    timeout?: number;
+    transformRequest?: any;
+    transformResponse?: any;
+    transitional?: any;
+    url?: string;
+    validateStatus?: any;
+    withCredentials?: boolean;
+    xsrfCookieName?: string;
+    xsrfHeaderName?: string;
+}
+export interface IAxiosError {
+    config: IAxiosConfig;
+    isAxiosError: boolean;
+    request: XMLHttpRequest;
+    response: IAxiosResponse;
+}
+export interface IAxiosSuccess extends IAxiosResponse {
+}
+export interface IAxiosResponse {
+    config: IAxiosConfig;
+    data?: any;
+    headers: any;
+    request: XMLHttpRequest;
+    status: number;
+    statusText: string;
+}
 export interface ICachedResponse {
     complete?: boolean;
     time?: number;
@@ -34,6 +68,11 @@ export interface IPagination {
     current_page: number;
     total_pages: number;
     links?: any;
+}
+export interface IProgressEvent {
+    loaded: number;
+    ratio: number;
+    total: number;
 }
 export interface ISortOptions {
     key: string;

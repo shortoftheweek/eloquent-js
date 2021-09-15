@@ -36,19 +36,24 @@ class Request extends Core_1.default {
         params.withCredentials = true;
         this.loading = true;
         this.dispatch('requesting', this);
-        return (0, axios_1.default)(params)
-            .then(e => {
-            this.response = e;
-            this.beforeParse(e);
-            this.parse(e);
-            this.afterParse(e);
-            this.afterFetch(e);
-            this.afterAll(e);
-            return e;
-        })
-            .catch(error => {
-            this.afterAll(error);
-            return error;
+        return new Promise((resolve, reject) => {
+            (0, axios_1.default)(params)
+                .then((e) => {
+                this.response = e;
+                this.beforeParse(this.response);
+                this.parse(this.response);
+                this.afterParse(this.response);
+                this.afterFetch(this.response);
+                this.afterAll(this.response);
+                resolve(this);
+                return e;
+            })
+                .catch((e) => {
+                this.response = e.response;
+                this.afterAll(e);
+                reject(this);
+                return e;
+            });
         });
     }
     xhrFetch(url, params) {
@@ -106,15 +111,16 @@ class Request extends Core_1.default {
     }
     setHeaders(headers) {
         this.headers = headers;
+        return this;
     }
     beforeParse(e) {
         this.log('before parse');
-        this.dispatch('parse:before');
+        this.dispatch('parse:before', this);
         return e;
     }
     parse(e) {
         this.log('parse');
-        this.dispatch('parse:parsing');
+        this.dispatch('parse:parsing', this);
         if (e.status != 204) {
             this.data = e.data;
         }
@@ -122,31 +128,40 @@ class Request extends Core_1.default {
         return e;
     }
     afterParse(e) {
+        var _a, _b;
         this.log('after parse');
-        if (e.status >= 400 && this.data.status) {
-            throw new RequestError(e.status, this.data.status);
+        if (e.status >= 400 && ((_a = e.data) === null || _a === void 0 ? void 0 : _a.status)) {
+            const message = ((_b = e.data) === null || _b === void 0 ? void 0 : _b.message)
+                || e.data
+                || '';
+            throw new RequestError(e.status, message);
         }
-        this.dispatch('parse:after');
+        this.dispatch('parse:after', this);
         return e;
     }
     afterFetch(e) {
         this.log('after fetch');
         this.dispatch('fetch', e.data);
-        this.dispatch('fetch:after');
+        this.dispatch('fetch:after', this);
         this.loading = false;
         return e;
     }
     afterAll(e) {
-        var _a, _b;
-        var status = ((_a = e.response) === null || _a === void 0 ? void 0 : _a.status) || e.status;
-        this.log('after all: ' + this.method + ' / ' + status);
+        var _a;
+        function isError(e) {
+            return 'name' in e;
+        }
+        const data = isError(e) ? e.response.data : e.data;
+        const status = isError(e) ? (_a = e.response) === null || _a === void 0 ? void 0 : _a.status : e.status;
+        const method = (e.config.method || 'get').toLowerCase();
+        this.log('after all: ' + method + ' / ' + status);
         if (status < 400) {
             this.dispatch('complete', this);
-            this.dispatch('complete:' + this.method.toLowerCase(), this);
+            this.dispatch('complete:' + method, this);
         }
         else {
-            this.dispatch('error:' + this.method.toLowerCase(), (_b = e.response) === null || _b === void 0 ? void 0 : _b.data);
-            throw e;
+            this.data = data;
+            this.dispatch('error:' + method, this);
         }
         return e;
     }

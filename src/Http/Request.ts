@@ -2,18 +2,25 @@
 // would use a built-in version of "fetch". Do we need this?
 import axios from 'axios';
 import { AxiosResponse } from 'axios';
-// import fetch from 'node-fetch';
 import Core from '../Core';
-import { IAttributes } from '../Interfaces';
+import { IAttributes, IAxiosConfig, IAxiosError, IAxiosResponse, IAxiosSuccess } from '../Interfaces';
 
 /**
  * Request Error
  */
-class RequestError extends Error {
+class RequestError extends Error
+{
     public status: number;
     public text: string;
 
-    constructor(status: number, text: string) {
+    /**
+     * Error after request
+     *
+     * @param number status
+     * @param string text
+     */
+    constructor(status: number, text: string)
+    {
         super(text);
 
         this.status = status;
@@ -26,18 +33,22 @@ class RequestError extends Error {
  *
  * @todo
  */
-export default class Request extends Core {
+export default class Request extends Core
+{
     /**
      * Parsed data from response
      *
-     * @type {object}
+     * @type object
      */
     public data: IAttributes = {};
 
     /**
-     * Where to find the data
+     * Where to access the data on the object
+     * {
+     *     [dataKey]: [ ]
+     * }
      *
-     * @type {string}
+     * @type string
      */
     public dataKey: string = '';
 
@@ -47,39 +58,35 @@ export default class Request extends Core {
      * Do not set the 'Content-Type' here because it wont be
      * overridden; which will break file uploads.
      *
-     * @type {string}
+     * @type string
      */
     public headers: any = {};
 
     /**
      * If this request is currently loading
      *
-     * @type {boolean}
+     * @type boolean
      */
     public loading: boolean = false;
 
     /**
-     * Method
+     * Method (get, post, patch, ...)
      *
-     * Example: 'get'
-     *
-     * @type {string}
+     * @type string
      */
     public method: string = 'get';
 
     /**
-     * Mode
+     * Mode (cors, no-cors, same-origin, navigate)
      *
-     * Example: cors, no-cors, same-origin, navigate
-     *
-     * @type {string}
+     * @type string
      */
     public mode: string = '';
 
     /**
      * Last fetch
      *
-     * @type {Promise<Repsonse>}
+     * @type Promise<Repsonse>
      */
     public request?: Promise<Request | Response | AxiosResponse<any>>;
 
@@ -88,20 +95,22 @@ export default class Request extends Core {
      *
      * @type Response
      */
-    public response?: Response | AxiosResponse<any>;
+    public response?: IAxiosResponse | IAxiosSuccess
 
     /**
-     * @type {string}
+     * @type string
      */
     public url: string;
 
     /**
-     * Constructor
+     * @param string url
+     * @param object params
      */
-    constructor(url: string = '', params: any = {}) {
+    constructor(url: string = '', params: any = {})
+    {
         super();
 
-        //
+        // Set url and datakey
         this.dataKey = params.dataKey;
         this.url = url;
 
@@ -112,6 +121,10 @@ export default class Request extends Core {
 
     /**
      * Actually fetch the data
+     *
+     * @param string method
+     * @param object body
+     * @param object headers
      */
     public fetch(
         method: string | null = 'GET',
@@ -120,6 +133,7 @@ export default class Request extends Core {
     ): Promise<Request | AxiosResponse<any>> {
         this.method = (method || 'GET').toUpperCase();
 
+        // Event trigger
         this.dispatch('fetch:before');
 
         // Combine headers
@@ -149,30 +163,39 @@ export default class Request extends Core {
         // Events
         this.dispatch('requesting', this);
 
-        return axios(params)
-            .then(e => {
-                this.response = e;
+        return new Promise((resolve, reject) => {
+            axios(params)
+                .then((e: AxiosResponse<any>) => {
+                    this.response = e as IAxiosSuccess;
 
-                this.beforeParse(e);
-                this.parse(e);
-                this.afterParse(e);
-                this.afterFetch(e);
-                this.afterAll(e);
+                    this.beforeParse(this.response);
+                    this.parse(this.response);
+                    this.afterParse(this.response);
+                    this.afterFetch(this.response);
+                    this.afterAll(this.response);
 
-                return e;
-            })
-            // @see https://axios-http.com/docs/handling_errors
-            .catch(error => {
-                this.afterAll(error);
+                    resolve(this);
 
-                return error;
-            });
+                    return e;
+                })
+                // @see https://axios-http.com/docs/handling_errors
+                .catch((e: IAxiosError) => {
+                    this.response = e.response;
+
+                    this.afterAll(e);
+
+                    reject(this);
+
+                    return e;
+                });
+        });
     }
 
     /**
      * XHR Fetch
      *
      * Specifically for file uploaders
+     * I don't think we use this anymore.
      *
      * XMLHttpRequest
      *     onabort: null
@@ -211,7 +234,8 @@ export default class Request extends Core {
      * @param  {any} params
      * @return {any}
      */
-    public xhrFetch(url: string, params: any): any {
+    public xhrFetch(url: string, params: any): any
+    {
         var self = this;
         var xhr = new XMLHttpRequest();
 
@@ -303,26 +327,26 @@ export default class Request extends Core {
     }
 
     /**
-     * Set specific header
-     *
-     * @param  {string} header
-     * @param  {string} value
-     * @return {any}
+     * @param string header
+     * @param string value
+     * @return self
      */
-    public setHeader(header: string, value: string): any {
+    public setHeader(header: string, value: string): any
+    {
         this.headers[header] = value;
-
         return this;
     }
 
     /**
      * Override and set headers
      *
-     * @param  {any} headers
-     * @return {any}
+     * @param object headers
+     * @return self
      */
-    public setHeaders(headers: any): any {
+    public setHeaders(headers: any): any
+    {
         this.headers = headers;
+        return this;
     }
 
     /**
@@ -331,13 +355,14 @@ export default class Request extends Core {
      * @todo Check if we have valid JSON
      * @todo Check if the request was an error
      *
-     * @param {any} x [description]
+     * @param e IAxiosResponse
      */
-    private beforeParse(e: any): Request {
+    private beforeParse(e: IAxiosSuccess): IAxiosSuccess
+    {
         this.log('before parse');
 
         // Trigger
-        this.dispatch('parse:before');
+        this.dispatch('parse:before', this);
 
         return e;
     }
@@ -345,13 +370,14 @@ export default class Request extends Core {
     /**
      * Parse data
      *
-     * @param {any} x [description]
+     * @param IAxiosSuccess e
      */
-    private parse(e: any) {
+    private parse(e: IAxiosSuccess): IAxiosSuccess
+    {
         this.log('parse');
 
         // Trigger
-        this.dispatch('parse:parsing');
+        this.dispatch('parse:parsing', this);
 
         // Set data
         if (e.status != 204) {
@@ -368,19 +394,23 @@ export default class Request extends Core {
     /**
      * After data parsed
      *
-     * @param {any} x [description]
+     * @param IAxiosSuccess e
      */
-    private afterParse(e: any): Request {
+    private afterParse(e: IAxiosSuccess): IAxiosSuccess
+    {
         this.log('after parse');
 
-        if (e.status >= 400 && this.data.status) {
-        // if (e.status >= 400 && this.data.status) {
-            // if (this.data && this.data.code >= 400) {
-            throw new RequestError(e.status, this.data.status);
+        // Check if we have a status in the JSON as well
+        if (e.status >= 400 && e.data?.status) {
+            const message: string = e.data?.message
+                || e.data
+                || '';
+
+            throw new RequestError(e.status, message);
         }
 
         // Trigger
-        this.dispatch('parse:after');
+        this.dispatch('parse:after', this);
 
         return e;
     }
@@ -388,16 +418,17 @@ export default class Request extends Core {
     /**
      * After data fetched
      *
-     * @param {any} x [description]
+     * @param IAxiosSuccess e
      */
-    private afterFetch(e: any): Request {
+    private afterFetch(e: IAxiosSuccess): IAxiosSuccess
+    {
         this.log('after fetch');
 
         // Trigger
         this.dispatch('fetch', e.data);
 
         // Trigger
-        this.dispatch('fetch:after');
+        this.dispatch('fetch:after', this);
 
         // Not loading
         this.loading = false;
@@ -408,37 +439,42 @@ export default class Request extends Core {
     /**
      * After all
      *
-     * @param {any} x [description]
+     * @param IAxiosSuccess e
      */
-    private afterAll(e: any): Request {
-        var status = e.response?.status || e.status;
+    private afterAll(e: IAxiosSuccess | IAxiosError): IAxiosSuccess | IAxiosError
+    {
+        function isError(e: any): e is IAxiosError {
+            return 'name' in e;
+        }
+
+        const data: any = isError(e) ? e.response.data : e.data;
+        const status: number = isError(e) ? e.response?.status : e.status
+        const method: string = (e.config.method || 'get').toLowerCase();
 
         // Log
-        this.log('after all: ' + this.method + ' / ' + status);
+        this.log('after all: ' + method + ' / ' + status);
 
         // Check request
         if (status < 400) {
             this.dispatch('complete', this);
-            this.dispatch('complete:' + this.method.toLowerCase(), this);
+            this.dispatch('complete:' + method, this);
         }
         else {
             // mk: Apparently, throw Error does same as dispatch 'error' which
             // causes duplicates when listening on('error' ...)
             // this.dispatch('error', e.data);
-            this.dispatch('error:' + this.method.toLowerCase(), e.response?.data);
-
-            throw e;
+            this.data = data;
+            this.dispatch('error:' + method, this);
         }
 
         return e;
     }
 
     /**
-     * Logging
-     *
      * @param string msg
      */
-    private log(msg: string = ''): void {
+    private log(msg: string = ''): void
+    {
         // console.log(' > ' + msg);
     }
 }

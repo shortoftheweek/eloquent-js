@@ -351,24 +351,21 @@ class ActiveRecord extends Core_1.default {
             dataKey: this.dataKey,
         }));
         this.request.method = method;
-        request.on('progress', (e) => {
-            this.dispatch('progress', e.data);
-        });
-        request.on('error', (e) => this.dispatch('error', e));
-        request.on('error:get', (e) => this.dispatch('error:get'));
-        request.on('error:put', (e) => this.dispatch('error:put'));
-        request.on('error:post', (e) => this.dispatch('error:post'));
-        request.on('error:delete', (e) => this.dispatch('error:delete'));
-        request.on('parse:after', (e) => this.FetchParseAfter(request, e, options));
-        request.on('progress', (e) => this.FetchProgress(request, e, options));
-        request.on('complete', (e) => this.FetchComplete(request, e, options));
-        request.on('complete:get', (e) => this.dispatch('complete:get'));
-        request.on('complete:put', (e) => this.dispatch('complete:put'));
-        request.on('complete:post', (e) => this.dispatch('complete:post'));
         request.on('complete:delete', (e) => {
-            this.dispatch('complete:delete');
+            this.dispatch('complete:delete', e);
             this.builder.identifier('');
         });
+        request.on('complete:get', (e) => this.dispatch('complete:get', e));
+        request.on('complete:post', (e) => this.dispatch('complete:post', e));
+        request.on('complete:put', (e) => this.dispatch('complete:put', e));
+        request.on('complete', (e) => this.FetchComplete(e, options));
+        request.on('error:delete', (e) => this.dispatch('error:delete', e));
+        request.on('error:get', (e) => this.dispatch('error:get', e));
+        request.on('error:post', (e) => this.dispatch('error:post', e));
+        request.on('error:put', (e) => this.dispatch('error:put', e));
+        request.on('error', (e) => this.dispatch('error', e));
+        request.on('parse:after', (e) => this.FetchParseAfter(e, options));
+        request.on('progress', (e) => this.FetchProgress(request, e, options));
         return request.fetch(method, body || this.body, headers || this.headers);
     }
     cache(key, value, isComplete = false, ttl = 5000) {
@@ -405,18 +402,18 @@ class ActiveRecord extends Core_1.default {
         const cache = this.getCache(key);
         cache.subscribers = [];
     }
-    FetchComplete(request, e, options = {}) {
-        var method = request.method || 'get';
+    FetchComplete(request, options = {}) {
+        const method = request.method || 'get';
         this.hasLoaded = true;
         this.loading = false;
         this.dispatch('complete', request.data);
     }
-    FetchProgress(request, e, options = {}) {
-        this.dispatch('progress', e.data);
+    FetchProgress(request, progress, options = {}) {
+        this.dispatch('progress', progress);
     }
-    FetchParseAfter(request, e, options = {}) {
+    FetchParseAfter(request, options = {}) {
         const response = request.response;
-        const code = response.status;
+        const code = response ? response.status : 0;
         if (code < 400) {
             this.setAfterResponse(request, options);
         }

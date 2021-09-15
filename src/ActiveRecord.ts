@@ -1,20 +1,22 @@
 import Builder from './Http/Builder';
 import Core from './Core';
-import Request from './Http/Request';
+import EloquentRequest from './Http/Request';
 import {
     IAttributes,
+    IAxiosResponse,
+    IAxiosSuccess,
     ICachedResponses,
     IModelRequestOptions,
     IModelRequestQueryParams,
+    IProgressEvent,
 } from './Interfaces';
 import { AxiosResponse } from 'axios';
 
 /**
  * ActiveRecord
- *
- * @type {[type]}
  */
-export default class ActiveRecord extends Core {
+export default class ActiveRecord extends Core
+{
     /**
      * Get builder reference
      *
@@ -179,7 +181,7 @@ export default class ActiveRecord extends Core {
      *
      * @type Request
      */
-    public request?: Request;
+    public request?: EloquentRequest;
 
     /**
      * Last Request Time
@@ -426,7 +428,7 @@ export default class ActiveRecord extends Core {
      *
      * @todo There's a ton to do here too
      */
-    public delete(attributes: any = null): Promise<Request> {
+    public delete(attributes: any = null): Promise<EloquentRequest> {
         // Query params
         const url: string = this.builder.identifier(
             this.id || (attributes ? attributes.id : '')
@@ -447,7 +449,7 @@ export default class ActiveRecord extends Core {
     /**
      * POST Model
      */
-    public post(attributes: any = null): Promise<Request> {
+    public post(attributes: any = null): Promise<EloquentRequest> {
         // Query params
         const url: string = this.builder.getUrl();
 
@@ -466,7 +468,7 @@ export default class ActiveRecord extends Core {
      * @param  {any = {}} queryParams
      * @return {any}
      */
-    public put(attributes: any): Promise<Request> {
+    public put(attributes: any): Promise<EloquentRequest> {
         // Query params
         const url: string = this.builder.getUrl();
 
@@ -487,7 +489,7 @@ export default class ActiveRecord extends Core {
      * @param  {any = {}} queryParams
      * @return {any}
      */
-    public save(attributes: any = null): Promise<Request> {
+    public save(attributes: any = null): Promise<EloquentRequest> {
         // Attributes
         const body: any = attributes || this.attributes;
         const headers: any = this.headers;
@@ -594,7 +596,7 @@ export default class ActiveRecord extends Core {
     public file(
         name: string,
         file: HTMLInputElement | FileList | File
-    ): Promise<void | Request | Response> {
+    ): Promise<void | EloquentRequest | Response> {
         // Query params
         const url: string = this.builder.identifier(this.id).getUrl();
 
@@ -641,7 +643,7 @@ export default class ActiveRecord extends Core {
     public async fetch(
         options: IModelRequestOptions | null = {},
         queryParams: IModelRequestQueryParams = {}
-    ): Promise<void | Request | Response> {
+    ): Promise<void | EloquentRequest | Response> {
         return await this._fetch(options, queryParams);
     }
 
@@ -655,7 +657,7 @@ export default class ActiveRecord extends Core {
     public upload(
         name: string,
         file: HTMLInputElement | FileList | File
-    ): Promise<void | Request | Response> {
+    ): Promise<void | EloquentRequest | Response> {
         return this.file(name, file);
     }
 
@@ -948,7 +950,7 @@ export default class ActiveRecord extends Core {
      *
      * This is useful if we're doing callbacks from cached promises
      */
-    public setAfterResponse(request: Request, options: any = {}) {
+    public setAfterResponse(request: EloquentRequest, options: any = {}) {
         var method: string = request.method || 'get';
 
         // If this isn't a model, try appending to
@@ -1032,7 +1034,7 @@ export default class ActiveRecord extends Core {
         this.loading = true;
 
         // Setup request
-        var request = (this.request = new Request(url, {
+        var request = (this.request = new EloquentRequest(url, {
             dataKey: this.dataKey,
         }));
 
@@ -1040,31 +1042,24 @@ export default class ActiveRecord extends Core {
         // we have an issue right now we're working out
         this.request.method = method;
 
-        // Bubble `progress` event
-        request.on('progress', (e) => {
-            this.dispatch('progress', e.data);
-        });
-
         // After parse
-        request.on('error', (e) => this.dispatch('error', e));
-        request.on('error:get', (e) => this.dispatch('error:get'));
-        request.on('error:put', (e) => this.dispatch('error:put'));
-        request.on('error:post', (e) => this.dispatch('error:post'));
-        request.on('error:delete', (e) => this.dispatch('error:delete'));
-        request.on('parse:after', (e) =>
-            this.FetchParseAfter(request, e, options)
-        );
-        request.on('progress', (e) => this.FetchProgress(request, e, options));
-        request.on('complete', (e) => this.FetchComplete(request, e, options));
-        request.on('complete:get', (e) => this.dispatch('complete:get'));
-        request.on('complete:put', (e) => this.dispatch('complete:put'));
-        request.on('complete:post', (e) => this.dispatch('complete:post'));
-        request.on('complete:delete', (e) => {
-            this.dispatch('complete:delete');
+        request.on('complete:delete', (e: EloquentRequest) => {
+            this.dispatch('complete:delete', e);
 
             // Remove possible identifiers if we deleted something
             this.builder.identifier('');
         });
+        request.on('complete:get', (e: EloquentRequest) => this.dispatch('complete:get', e));
+        request.on('complete:post', (e: EloquentRequest) => this.dispatch('complete:post', e));
+        request.on('complete:put', (e: EloquentRequest) => this.dispatch('complete:put', e));
+        request.on('complete', (e: EloquentRequest) => this.FetchComplete(e, options));
+        request.on('error:delete', (e: EloquentRequest) => this.dispatch('error:delete', e));
+        request.on('error:get', (e: EloquentRequest) => this.dispatch('error:get', e));
+        request.on('error:post', (e: EloquentRequest) => this.dispatch('error:post', e));
+        request.on('error:put', (e: EloquentRequest) => this.dispatch('error:put', e));
+        request.on('error', (e: EloquentRequest) => this.dispatch('error', e));
+        request.on('parse:after', (e: EloquentRequest) => this.FetchParseAfter(e, options));
+        request.on('progress', (e: IProgressEvent) => this.FetchProgress(request, e, options));
 
         // Request (method, body headers)
         return request.fetch(
@@ -1197,10 +1192,10 @@ export default class ActiveRecord extends Core {
      * Complete from fetch request
      *
      * @param {Request} request
-     * @param {any} e
+     * @param {any} options
      */
-    protected FetchComplete(request: Request, e: any, options: any = {}) {
-        var method: string = request.method || 'get';
+    protected FetchComplete(request: EloquentRequest, options: any = {}) {
+        const method: string = request.method || 'get';
 
         // Has loaded ever
         this.hasLoaded = true;
@@ -1218,8 +1213,8 @@ export default class ActiveRecord extends Core {
      * @param {Request} request
      * @param {any} e
      */
-    protected FetchProgress(request: Request, e: any, options: any = {}) {
-        this.dispatch('progress', e.data);
+    protected FetchProgress(request: EloquentRequest, progress: IProgressEvent, options: any = {}) {
+        this.dispatch('progress', progress);
     }
 
     /**
@@ -1228,9 +1223,9 @@ export default class ActiveRecord extends Core {
      * @param {string = 'get'} method
      * @param {Request} request
      */
-    protected FetchParseAfter(request: Request, e: any, options: any = {}) {
-        const response: Response = <Response>request.response;
-        const code: number = <number>response.status;
+    protected FetchParseAfter(request: EloquentRequest, options: any = {}) {
+        const response: IAxiosResponse | IAxiosSuccess | undefined = request.response;
+        const code: number = response ? response.status : 0;
 
         // Only set for acceptable responses
         if (code < 400) {
