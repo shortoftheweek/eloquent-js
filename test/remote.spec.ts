@@ -89,11 +89,29 @@ describe('Remote Collection Tests', () => {
             .fetch()
             .then((e: EloquentRequest) => {
                 // console.log('film model fetch', e);
-                // console.log(collection.at(0).attr('source_url'));
+                console.log('a', collection.at(0).attr('source_url'));
             })
             .catch((e: EloquentRequest) => {
                 console.log('catching errorr', e.response?.status);
             });
+
+
+        // collection
+        //     .fetch()
+        //     .then((e: EloquentRequest) => {
+        //         // console.log('film model fetch', e);
+        //         console.log('b' , collection.at(0).attr('source_url'));
+        //     });
+
+        // setTimeout(() => {
+
+        //     collection
+        //     .fetch()
+        //     .then((e: EloquentRequest) => {
+        //         // console.log('film model fetch', e);
+        //         console.log('b' , collection.at(0).attr('source_url'));
+        //     });
+        // }, 2000);
 
         // const url = 'https://staging-api.shortoftheweek.app/v1/not-real';
         // const url = 'https://staging-api.shortoftheweek.app/v1/film';

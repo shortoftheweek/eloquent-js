@@ -406,7 +406,7 @@ class ActiveRecord extends Core_1.default {
         const method = request.method || 'get';
         this.hasLoaded = true;
         this.loading = false;
-        this.dispatch('complete', request.data);
+        this.dispatch('complete', request);
     }
     FetchProgress(request, progress, options = {}) {
         this.dispatch('progress', progress);

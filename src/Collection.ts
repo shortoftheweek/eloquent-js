@@ -1,10 +1,14 @@
 import ActiveRecord from './ActiveRecord';
 import CollectionIterator from './CollectionIterator';
 import Model from './Model';
-import Request from './Http/Request';
+import EloquentRequest from './Http/Request';
 import {
     IAttributes,
+    IAxiosResponse,
+    IAxiosSuccess,
     ICollectionMeta,
+    IModelRequestOptions,
+    IModelRequestQueryParams,
     IPagination,
     ISortOptions,
 } from './Interfaces';
@@ -26,13 +30,12 @@ import {
  * }
  *
  */
-export default class Collection
-    extends ActiveRecord
-    implements Iterable<Model> {
+export default class Collection extends ActiveRecord implements Iterable<Model>
+{
     /**
      * Hydrate a collection full of models
      *
-     * @type {Model[]}
+     * @type Model[]
      */
     public static hydrate<T>(models: Model[] = [], options: object = {}): any {
         // Instantiate collection
@@ -76,28 +79,38 @@ export default class Collection
     }
 
     /**
-     * Descending list, for instance:
+     * This allows us to iterate through a list of subobjects
+     * when we use our ".at(x)" command. So if on the collection,
+     * we wanted to iterate and get:
+     *
+     *     .at(0).receiver.person
+     *
+     * We could set this property to be:
      *
      *     ['receiver', 'person']
      *
-     * Translates to:
+     * Which we could then call as:
      *
-     *     at(0).receiver.person
+     *     at(0) === at(0).receiver.person
      *
-     * @type {string[]}
+     * It's sort of like a disguise for the at(x) call
+     *
+     * @type string[]
      */
     public atRelationship: string[] = [];
 
     /**
      * Get the next row
      * Adjacent to first/last
+     *
+     * @type number
      */
     public index: number = 0;
 
     /**
      * Meta data associated with collection
      *
-     * @type {ICollectionMeta}
+     * @type ICollectionMeta
      */
     public meta: ICollectionMeta = {
         pagination: {
@@ -114,7 +127,7 @@ export default class Collection
      * Model object instantiated by this collection
      * This should be replaced by subclass
      *
-     * @type {any}
+     * @type any
      */
     // @ts-ignore Because webpack attempts to autoload this
     public model: Model = Model;
@@ -122,7 +135,7 @@ export default class Collection
     /**
      * List of models
      *
-     * @type {Model[]}
+     * @type Model[]
      */
     public models: Model[] = [];
 
@@ -140,7 +153,7 @@ export default class Collection
     /**
      * Change key we sort on
      *
-     * @type {string}
+     * @type string
      */
     protected sortKey: string = 'id';
 
@@ -186,7 +199,7 @@ export default class Collection
      *
      * @return {any}
      */
-    public async fetchNext(append: boolean = false): Promise<Request> {
+    public async fetchNext(append: boolean = false): Promise<EloquentRequest> {
         var options = Object.assign({}, this.lastRequest.options);
         var qp = Object.assign(
             {},
@@ -706,6 +719,93 @@ export default class Collection
             this,
             CollectionIterator.ITERATOR_KEYSVALUES
         );
+    }
+
+    /**
+     * Override internal fetch so we can catch authorization
+     * errors and automatically attempt to refresh tokens
+     */
+    protected _fetch(
+        options: IModelRequestOptions | null = {},
+        queryParams: IModelRequestQueryParams = {},
+        method: any = null,
+        body: any = null,
+        headers: any = null
+    ): any {
+        const cacheKey: string = this.b.getUrl();
+
+        // If our response is still loading, return a promise and add a subscriber
+        if (this.isCachePending(cacheKey)) {
+            return new Promise<any>((resolve, reject) => {
+                this.addCacheSubscriber(cacheKey, resolve, reject, this);
+            });
+        }
+
+        // Start cache processing while we wait for results from server (key, value, isComplete)
+        this.cache(cacheKey, true);
+
+        /*
+        * By omitting this, we are only using short-term cache to prevent thundering herd.
+        * We could enable this to have extended cache, but we'd need to be mindful about
+        * busting said cache.
+        * else if (this.isCached(cacheKey)) {
+        *     return new Promise((resolve: any, reject: any) =>
+        *     {
+        *         this.addCacheSubscriber(cacheKey, resolve, reject);
+        *     });
+        * }
+        */
+
+        // Fetch from server
+        return super
+            ._fetch(options, queryParams, method, body, headers)
+
+            // Send response to subscribers
+            .then((e: EloquentRequest) => {
+                const data: any = e.data;
+                const method: string = e.method || 'get';
+
+                // Save actual cache response (key, value, isComplete)
+                this.cache(cacheKey, e, true);
+
+                // Send all of our subscribers the response through `resolve`
+                // Don't worry about request.data vs request.data.data
+                // Our collections should be smart enough to pick that apart
+                this.getCache(cacheKey)
+                    .subscribers
+                    .forEach((subscriber: any) => {
+                        subscriber.collection.setAfterResponse(e);
+                        subscriber.collection.dispatch('complete', e);
+                        subscriber.collection.dispatch('complete:' + method, e);
+                        subscriber.resolve(e);
+                    });
+
+                // Clear all listeners
+                this.clearCacheSubscribers(cacheKey);
+
+                return e;
+            })
+
+            // Send error to subscribers
+            .catch((e: EloquentRequest) => {
+                // Error
+                this.dispatch('error', e);
+
+                // Save actual cache response (key, value, isComplete)
+                this.cache(cacheKey, e, true);
+
+                // Send all of our subscribers the response through `resolve`
+                this.getCache(cacheKey)
+                    .subscribers
+                    .forEach((subscriber: any) =>
+                        subscriber.reject(e)
+                    );
+
+                // Clear
+                this.clearCacheSubscribers(cacheKey);
+
+                throw e;
+            });
     }
 
     /**

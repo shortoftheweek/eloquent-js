@@ -255,6 +255,41 @@ class Collection extends ActiveRecord_1.default {
     entries(attributes = {}) {
         return new CollectionIterator_1.default(this, CollectionIterator_1.default.ITERATOR_KEYSVALUES);
     }
+    _fetch(options = {}, queryParams = {}, method = null, body = null, headers = null) {
+        const cacheKey = this.b.getUrl();
+        if (this.isCachePending(cacheKey)) {
+            return new Promise((resolve, reject) => {
+                this.addCacheSubscriber(cacheKey, resolve, reject, this);
+            });
+        }
+        this.cache(cacheKey, true);
+        return super
+            ._fetch(options, queryParams, method, body, headers)
+            .then((e) => {
+            const data = e.data;
+            const method = e.method || 'get';
+            this.cache(cacheKey, e, true);
+            this.getCache(cacheKey)
+                .subscribers
+                .forEach((subscriber) => {
+                subscriber.collection.setAfterResponse(e);
+                subscriber.collection.dispatch('complete', e);
+                subscriber.collection.dispatch('complete:' + method, e);
+                subscriber.resolve(e);
+            });
+            this.clearCacheSubscribers(cacheKey);
+            return e;
+        })
+            .catch((e) => {
+            this.dispatch('error', e);
+            this.cache(cacheKey, e, true);
+            this.getCache(cacheKey)
+                .subscribers
+                .forEach((subscriber) => subscriber.reject(e));
+            this.clearCacheSubscribers(cacheKey);
+            throw e;
+        });
+    }
     _isModel(model) {
         return model instanceof Model_1.default;
     }

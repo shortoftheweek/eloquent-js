@@ -1,8 +1,8 @@
 import ActiveRecord from './ActiveRecord';
 import CollectionIterator from './CollectionIterator';
 import Model from './Model';
-import Request from './Http/Request';
-import { ICollectionMeta, IPagination, ISortOptions } from './Interfaces';
+import EloquentRequest from './Http/Request';
+import { ICollectionMeta, IModelRequestOptions, IModelRequestQueryParams, IPagination, ISortOptions } from './Interfaces';
 export default class Collection extends ActiveRecord implements Iterable<Model> {
     static hydrate<T>(models?: Model[], options?: object): any;
     get length(): number;
@@ -17,7 +17,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
     protected sortKey: string;
     constructor(options?: any);
     toJSON(): object;
-    fetchNext(append?: boolean): Promise<Request>;
+    fetchNext(append?: boolean): Promise<EloquentRequest>;
     sync(): any;
     add(model: Model[] | Model | object, options?: any): Collection;
     remove(model: Model[] | Model | object, options?: any): Collection;
@@ -50,6 +50,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model> 
     values(): CollectionIterator;
     keys(attributes?: object): CollectionIterator;
     entries(attributes?: object): CollectionIterator;
+    protected _fetch(options?: IModelRequestOptions | null, queryParams?: IModelRequestQueryParams, method?: any, body?: any, headers?: any): any;
     private _isModel;
     [Symbol.iterator](): Iterator<any>;
 }
