@@ -1052,6 +1052,8 @@ export default class ActiveRecord extends Core
             // Remove possible identifiers if we deleted something
             this.builder.identifier('');
         });
+
+        // The "e' bubbling up is an Event, where "e.target" == EloquentRequest
         request.on('complete:get', (e: EloquentRequest) => this.dispatch('complete:get', e));
         request.on('complete:post', (e: EloquentRequest) => this.dispatch('complete:post', e));
         request.on('complete:put', (e: EloquentRequest) => this.dispatch('complete:put', e));
@@ -1062,6 +1064,9 @@ export default class ActiveRecord extends Core
         request.on('error:put', (e: EloquentRequest) => this.dispatch('error:put', e));
         request.on('error', (e: EloquentRequest) => this.dispatch('error', e));
         request.on('parse:after', (e: EloquentRequest) => this.FetchParseAfter(e, options));
+
+        // This order make look wrong, but it's righ tbecause the event "e"
+        // contains progress data, not a Request object
         request.on('progress', (e: IProgressEvent) => this.FetchProgress(request, e, options));
 
         // Request (method, body headers)
@@ -1197,7 +1202,8 @@ export default class ActiveRecord extends Core
      * @param {Request} request
      * @param {any} options
      */
-    protected FetchComplete(request: EloquentRequest, options: any = {}) {
+    protected FetchComplete(e: any, options: any = {}) {
+        const request: EloquentRequest = e.target as EloquentRequest;
         const method: string = request.method || 'get';
 
         // Has loaded ever
@@ -1213,20 +1219,21 @@ export default class ActiveRecord extends Core
     /**
      * Progress from fetch request
      *
-     * @param {Request} request
-     * @param {any} e
+     * @param Event e (e.target = EloquentRequest)
      */
-    protected FetchProgress(request: EloquentRequest, progress: IProgressEvent, options: any = {}) {
+    protected FetchProgress(e: any, progress: IProgressEvent, options: any = {}) {
         this.dispatch('progress', progress);
     }
 
     /**
      * Overrideable fetch parse:after
      *
+     * @param Event e (e.target = EloquentRequest)
      * @param {string = 'get'} method
      * @param {Request} request
      */
-    protected FetchParseAfter(request: EloquentRequest, options: any = {}) {
+    protected FetchParseAfter(e: any, options: any = {}) {
+        const request: EloquentRequest = e.target as EloquentRequest;
         const response: IAxiosResponse | IAxiosSuccess | undefined = request.response;
         const code: number = response ? response.status : 0;
 
@@ -1236,6 +1243,6 @@ export default class ActiveRecord extends Core
         }
 
         // Fetched event
-        this.dispatch('fetched', this);
+        this.dispatch('fetched', request);
     }
 }

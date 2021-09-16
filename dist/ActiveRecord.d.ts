@@ -82,7 +82,7 @@ export default class ActiveRecord extends Core {
     protected getCache(key: string): any;
     protected addCacheSubscriber(key: string, resolve: any, reject: any, collection: any): void;
     protected clearCacheSubscribers(key: string): void;
-    protected FetchComplete(request: EloquentRequest, options?: any): void;
-    protected FetchProgress(request: EloquentRequest, progress: IProgressEvent, options?: any): void;
-    protected FetchParseAfter(request: EloquentRequest, options?: any): void;
+    protected FetchComplete(e: any, options?: any): void;
+    protected FetchProgress(e: any, progress: IProgressEvent, options?: any): void;
+    protected FetchParseAfter(e: any, options?: any): void;
 }

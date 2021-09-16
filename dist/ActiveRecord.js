@@ -403,22 +403,24 @@ class ActiveRecord extends Core_1.default {
         const cache = this.getCache(key);
         cache.subscribers = [];
     }
-    FetchComplete(request, options = {}) {
+    FetchComplete(e, options = {}) {
+        const request = e.target;
         const method = request.method || 'get';
         this.hasLoaded = true;
         this.loading = false;
         this.dispatch('complete', request);
     }
-    FetchProgress(request, progress, options = {}) {
+    FetchProgress(e, progress, options = {}) {
         this.dispatch('progress', progress);
     }
-    FetchParseAfter(request, options = {}) {
+    FetchParseAfter(e, options = {}) {
+        const request = e.target;
         const response = request.response;
         const code = response ? response.status : 0;
         if (code < 400) {
             this.setAfterResponse(request, options);
         }
-        this.dispatch('fetched', this);
+        this.dispatch('fetched', request);
     }
 }
 exports.default = ActiveRecord;
