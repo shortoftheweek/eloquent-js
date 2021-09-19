@@ -1,18 +1,19 @@
 /**
  *
  */
- export default class DispatcherEvent {
+ export default class DispatcherEvent 
+ {
     /**
      * Callbacks
      *
      * @type {any}
      */
-    callbacks: ((data?: Record<string, unknown>) => void)[];
+    callbacks: ((eventData?: Record<string, unknown>) => void)[];
 
     /**
      * Data passed come from constructor
      */
-    data: Record<string, unknown>;
+    eventData: Record<string, unknown>;
 
     /**
      * Event Name
@@ -24,11 +25,11 @@
     /**
      * Constructor
      */
-    constructor(eventName: string, data: Record<string, unknown> = {}) {
-        // super(eventName, data);
+    constructor(eventName: string, eventData: Record<string, unknown> = {}) {
+        // super(eventName, eventData);
 
         this.callbacks = [];
-        this.data = data;
+        this.eventData = eventData;
         this.eventName = eventName;
     }
 
@@ -44,7 +45,7 @@
      *
      * @param {any) => void} callback [description]
      */
-    registerCallback(callback: (data?: Record<string, unknown>) => void): void {
+    registerCallback(callback: (eventData?: Record<string, unknown>) => void): void {
         this.callbacks.push(callback);
     }
 
@@ -53,7 +54,7 @@
      *
      * @param {any) => void} callback [description]
      */
-    unregisterCallback(callback: (data?: Record<string, unknown>) => void): void {
+    unregisterCallback(callback: (eventData?: Record<string, unknown>) => void): void {
         const index = this.callbacks.indexOf(callback);
 
         if (index > -1) {
@@ -66,11 +67,11 @@
      *
      * @param {any} data [description]
      */
-    fire(data: Record<string, unknown>): void {
+    fire(eventData: Record<string, unknown>): void {
         const callbacks = this.callbacks.slice(0);
 
-        callbacks.forEach((callback: (data?: Record<string, unknown>) => void) => {
-            callback(Object.assign({}, this.data, data));
+        callbacks.forEach((callback: (eventData?: Record<string, unknown>) => void) => {
+            callback(Object.assign({}, this.eventData, eventData));
         });
     }
 }

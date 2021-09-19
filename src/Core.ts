@@ -27,15 +27,15 @@ export default class Core extends Dispatcher implements IDispatcher {
         Object.assign(this, options);
     }
 
-    trigger(eventName: string, data?: any) {
-        return super.trigger(eventName, data);
+    trigger(eventName: string, eventData?: any) {
+        return super.trigger(eventName, eventData);
     }
 
-    dispatch(eventName: string, data?: any) {
-        return super.dispatch(eventName, data);
+    dispatch(eventName: string, eventData?: any) {
+        return super.dispatch(eventName, eventData);
     }
 
-    on(eventName: string, callback: (data?: any) => void) {
+    on(eventName: string, callback: (eventData?: any) => void) {
         return super.on(eventName, callback);
     }
 

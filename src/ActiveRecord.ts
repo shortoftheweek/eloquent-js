@@ -9,6 +9,8 @@ import {
     IModelRequestOptions,
     IModelRequestQueryParams,
     IProgressEvent,
+    IRequest,
+    IRequestEvent,
 } from './Interfaces';
 import { AxiosResponse } from 'axios';
 
@@ -1028,7 +1030,7 @@ export default class ActiveRecord extends Core
         const url: string = this.getUrlByMethod(method);
 
         // Events
-        this.dispatch('requesting', this);
+        this.dispatch('requesting', this.lastRequest);
 
         // Has fetched
         this.hasFetched = true;
@@ -1046,24 +1048,24 @@ export default class ActiveRecord extends Core
         this.request.method = method;
 
         // After parse
-        request.on('complete:delete', (e: EloquentRequest) => {
-            this.dispatch('complete:delete', e);
+        request.on('complete:delete', (e: IRequestEvent) => {
+            this.dispatch('complete:delete', e.target);
 
             // Remove possible identifiers if we deleted something
             this.builder.identifier('');
         });
 
         // The "e' bubbling up is an Event, where "e.target" == EloquentRequest
-        request.on('complete:get', (e: EloquentRequest) => this.dispatch('complete:get', e));
-        request.on('complete:post', (e: EloquentRequest) => this.dispatch('complete:post', e));
-        request.on('complete:put', (e: EloquentRequest) => this.dispatch('complete:put', e));
-        request.on('complete', (e: EloquentRequest) => this.FetchComplete(e, options));
-        request.on('error:delete', (e: EloquentRequest) => this.dispatch('error:delete', e));
-        request.on('error:get', (e: EloquentRequest) => this.dispatch('error:get', e));
-        request.on('error:post', (e: EloquentRequest) => this.dispatch('error:post', e));
-        request.on('error:put', (e: EloquentRequest) => this.dispatch('error:put', e));
-        request.on('error', (e: EloquentRequest) => this.dispatch('error', e));
-        request.on('parse:after', (e: EloquentRequest) => this.FetchParseAfter(e, options));
+        request.on('complete:get', (e: IRequestEvent) => this.dispatch('complete:get', e.target));
+        request.on('complete:post', (e: IRequestEvent) => this.dispatch('complete:post', e.target));
+        request.on('complete:put', (e: IRequestEvent) => this.dispatch('complete:put', e.target));
+        request.on('complete', (e: IRequestEvent) => this.FetchComplete(e.target as EloquentRequest, options));
+        request.on('error:delete', (e: IRequestEvent) => this.dispatch('error:delete', e.target));
+        request.on('error:get', (e: IRequestEvent) => this.dispatch('error:get', e.target));
+        request.on('error:post', (e: IRequestEvent) => this.dispatch('error:post', e.target));
+        request.on('error:put', (e: IRequestEvent) => this.dispatch('error:put', e.target));
+        request.on('error', (e: IRequestEvent) => this.dispatch('error', e.target));
+        request.on('parse:after', (e: IRequestEvent) => this.FetchParseAfter(e.target as EloquentRequest, options));
 
         // This order make look wrong, but it's righ tbecause the event "e"
         // contains progress data, not a Request object
@@ -1202,8 +1204,7 @@ export default class ActiveRecord extends Core
      * @param {Request} request
      * @param {any} options
      */
-    protected FetchComplete(e: any, options: any = {}) {
-        const request: EloquentRequest = e.target as EloquentRequest;
+    protected FetchComplete(request: EloquentRequest, options: any = {}) {
         const method: string = request.method || 'get';
 
         // Has loaded ever
@@ -1232,8 +1233,7 @@ export default class ActiveRecord extends Core
      * @param {string = 'get'} method
      * @param {Request} request
      */
-    protected FetchParseAfter(e: any, options: any = {}) {
-        const request: EloquentRequest = e.target as EloquentRequest;
+    protected FetchParseAfter(request: EloquentRequest, options: any = {}) {
         const response: IAxiosResponse | IAxiosSuccess | undefined = request.response;
         const code: number = response ? response.status : 0;
 

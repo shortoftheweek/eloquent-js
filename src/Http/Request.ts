@@ -3,7 +3,7 @@
 import axios from 'axios';
 import { AxiosResponse } from 'axios';
 import Core from '../Core';
-import { IAttributes, IAxiosConfig, IAxiosError, IAxiosResponse, IAxiosSuccess } from '../Interfaces';
+import { IAttributes, IAxiosConfig, IAxiosError, IAxiosResponse, IAxiosSuccess, IRequest } from '../Interfaces';
 
 /**
  * Request Error
@@ -33,15 +33,8 @@ class RequestError extends Error
  *
  * @todo
  */
-export default class Request extends Core
+export default class Request extends Core implements IRequest
 {
-    /**
-     * Parsed data from response
-     *
-     * @type object
-     */
-    public data: IAttributes = {};
-
     /**
      * Where to access the data on the object
      * {
@@ -95,7 +88,15 @@ export default class Request extends Core
      *
      * @type Response
      */
-    public response?: IAxiosResponse | IAxiosSuccess
+    public response?: IAxiosResponse | IAxiosSuccess;
+    
+    /**
+     * Parsed data from response
+     *
+     * @type object
+     */
+    public responseData: IAttributes = {};
+    // public data: IAttributes = {};
 
     /**
      * @type string
@@ -104,14 +105,14 @@ export default class Request extends Core
 
     /**
      * @param string url
-     * @param object params
+     * @param object options
      */
-    constructor(url: string = '', params: any = {})
+    constructor(url: string = '', options: any = {})
     {
         super();
 
         // Set url and datakey
-        this.dataKey = params.dataKey;
+        this.dataKey = options.dataKey;
         this.url = url;
 
         // Fix URL
@@ -133,9 +134,6 @@ export default class Request extends Core
     ): Promise<Request | AxiosResponse<any>> {
         this.method = (method || 'GET').toUpperCase();
 
-        // Event trigger
-        this.dispatch('fetch:before');
-
         // Combine headers
         var headers = Object.assign(this.headers, headers);
 
@@ -150,6 +148,9 @@ export default class Request extends Core
         params.url = this.url;
         params.withCredentials = true;
 
+        // Event trigger
+        this.dispatch('fetch:before', { method, body, headers, params });
+
         // Is File?
         // @todo this is inaccurate and makes many requests (forgot password) think it's a file
         // var isFile =
@@ -161,12 +162,19 @@ export default class Request extends Core
         this.loading = true;
 
         // Events
-        this.dispatch('requesting', this);
+        this.dispatch('requesting', { method, body, headers, params });
 
         return new Promise((resolve, reject) => {
             axios(params)
-                .then((e: AxiosResponse<any>) => {
-                    this.response = e as IAxiosSuccess;
+            
+                // @see https://axios-http.com/docs/res_schema
+                // console.log(response.data);
+                // console.log(response.status);
+                // console.log(response.statusText);
+                // console.log(response.headers);
+                // console.log(response.config);
+                .then((response: AxiosResponse<any>) => {
+                    this.response = response as IAxiosSuccess;
 
                     this.beforeParse(this.response);
                     this.parse(this.response);
@@ -176,17 +184,23 @@ export default class Request extends Core
 
                     resolve(this);
 
-                    return e;
+                    return response;
                 })
-                // @see https://axios-http.com/docs/handling_errors
-                .catch((e: IAxiosError) => {
-                    this.response = e.response;
 
-                    this.afterAll(e);
+                // @see https://axios-http.com/docs/handling_errors
+                // console.log(error.response?.data);
+                // console.log(error.response?.status);
+                // console.log(error.response?.headers);
+                // console.log(error.request?);
+                // console.log(error.message?);
+                .catch((error: IAxiosError) => {
+                    this.response = error.response;
+
+                    this.afterAll(error);
 
                     reject(this);
 
-                    return e;
+                    return error;
                 });
         });
     }
@@ -357,89 +371,89 @@ export default class Request extends Core
      *
      * @param e IAxiosResponse
      */
-    private beforeParse(e: IAxiosSuccess): IAxiosSuccess
+    private beforeParse(response: IAxiosSuccess): IAxiosSuccess
     {
         this.log('before parse');
 
         // Trigger
-        this.dispatch('parse:before', this);
+        this.dispatch('parse:before', response);
 
-        return e;
+        return response;
     }
 
     /**
      * Parse data
      *
-     * @param IAxiosSuccess e
+     * @param IAxiosSuccess response
      */
-    private parse(e: IAxiosSuccess): IAxiosSuccess
+    private parse(response: IAxiosSuccess): IAxiosSuccess
     {
         this.log('parse');
 
         // Trigger
-        this.dispatch('parse:parsing', this);
+        this.dispatch('parse:parsing', response);
 
         // Set data
-        if (e.status != 204) {
-            this.data = e.data;
+        if (response.status != 204) {
+            this.responseData = response.data;
             // this.data = await request.response.json();
         }
 
         // Trigger
-        this.dispatch('parse', this.data);
+        this.dispatch('parse', this.responseData);
 
-        return e;
+        return response;
     }
 
     /**
      * After data parsed
      *
-     * @param IAxiosSuccess e
+     * @param IAxiosSuccess response
      */
-    private afterParse(e: IAxiosSuccess): IAxiosSuccess
+    private afterParse(response: IAxiosSuccess): IAxiosSuccess
     {
         this.log('after parse');
 
         // Check if we have a status in the JSON as well
-        if (e.status >= 400 && e.data?.status) {
-            const message: string = e.data?.message
-                || e.data
+        if (response.status >= 400 && response.data?.status) {
+            const message: string = response.data?.message
+                || response.data
                 || '';
 
-            throw new RequestError(e.status, message);
+            throw new RequestError(response.status, message);
         }
 
         // Trigger
-        this.dispatch('parse:after', this);
+        this.dispatch('parse:after', response);
 
-        return e;
+        return response;
     }
 
     /**
      * After data fetched
      *
-     * @param IAxiosSuccess e
+     * @param IAxiosSuccess response
      */
-    private afterFetch(e: IAxiosSuccess): IAxiosSuccess
+    private afterFetch(response: IAxiosSuccess): IAxiosSuccess
     {
         this.log('after fetch');
 
         // Trigger
-        this.dispatch('fetch', e.data);
+        this.dispatch('fetch', response);
 
         // Trigger
-        this.dispatch('fetch:after', this);
+        this.dispatch('fetch:after', response);
 
         // Not loading
         this.loading = false;
 
-        return e;
+        return response;
     }
 
     /**
      * After all
      *
-     * @param IAxiosSuccess e
+     * @param IAxiosSuccess response
      */
     private afterAll(e: IAxiosSuccess | IAxiosError): IAxiosSuccess | IAxiosError
     {
@@ -447,8 +461,12 @@ export default class Request extends Core
             return 'name' in e;
         }
 
-        const data: any = isError(e) ? e.response.data : e.data;
-        const status: number = isError(e) ? e.response?.status : e.status
+        const data: any = isError(e) 
+            ? (e.response?.data || e.message) // IAxiosError
+            : e.data; // IAxiosSuccess
+        const status: number = isError(e) 
+            ? e.response?.status // IAxiosError
+            : e.status; // IAxiosSuccess
         const method: string = (e.config.method || 'get').toLowerCase();
 
         // Log
@@ -456,15 +474,15 @@ export default class Request extends Core
 
         // Check request
         if (status < 400) {
-            this.dispatch('complete', this);
-            this.dispatch('complete:' + method, this);
+            this.dispatch('complete', e);
+            this.dispatch('complete:' + method, e);
         }
         else {
             // mk: Apparently, throw Error does same as dispatch 'error' which
             // causes duplicates when listening on('error' ...)
             // this.dispatch('error', e.data);
-            this.data = data;
-            this.dispatch('error:' + method, this);
+            this.responseData = data;
+            this.dispatch('error:' + method, e);
         }
 
         return e;

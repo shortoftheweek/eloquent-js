@@ -25,6 +25,7 @@ export interface IAxiosConfig {
 export interface IAxiosError {
 	config: IAxiosConfig;
 	isAxiosError: boolean;
+    message?: string;
 	request: XMLHttpRequest;
 	response: IAxiosResponse;
 }
@@ -40,6 +41,10 @@ export interface IAxiosResponse {
 	request: XMLHttpRequest;
 	status: number;
 	statusText: string;
+}
+
+export interface IRequestEvent extends IDispatcherEvent {
+    target: IRequest;
 }
 
 export interface ICachedResponse {
@@ -70,6 +75,16 @@ export interface IDispatcher {
     off: (eventName: string, callback?: any) => any;
 }
 
+export interface IDispatcherEventEvent {
+    name: string;
+}
+
+export interface IDispatcherEvent {
+    eventData: any; // data set by dispatch('', ...)
+    event: IDispatcherEventEvent;
+    target: any; // class executing event
+}
+
 export interface IModelRequestOptions {
     id?: number | string;
     includes?: string[];
@@ -94,10 +109,15 @@ export interface IProgressEvent {
     total: number;
 }
 
-export interface IDispatcherEvent {
-    data: any;
-    event: any;
-    target: any;
+export interface IRequest {
+    dataKey: string;
+    headers: any;
+    loading: boolean;
+    mode: string;
+    request?: Promise<any>;
+    response?: IAxiosResponse | IAxiosSuccess;
+    responseData: IAttributes;
+    url: string;
 }
 
 export interface ISortOptions {

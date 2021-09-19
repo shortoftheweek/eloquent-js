@@ -3,7 +3,8 @@ import DispatcherEvent from './DispatcherEvent';
 /**
  * Dispatcher
  */
-export default class Dispatcher {
+export default class Dispatcher 
+{
     /**
      * Events
      *
@@ -21,29 +22,33 @@ export default class Dispatcher {
     /**
      * Alias for dispatch
      *
-     * @param {string} eventName
-     * @param {any = {}} data
+     * @param string eventName
+     * @param any eventData
      */
-    trigger(eventName: string, data: Record<string, any> = {}): void {
-        return this.dispatch(eventName, data);
+    trigger(eventName: string, eventData: Record<string, any> = {}): void {
+        return this.dispatch(eventName, eventData);
     }
 
     /**
      * Dispatch
+     * 
+     * If duplicate event is passed, will attempt to bubble it.
      *
-     * @param {string} eventName [description]
-     * @param {any =         {}}        data [description]
+     * @param string eventName
+     * @param any eventData
      */
-    dispatch(eventName: string, data: Record<string, any> = {}): void {
+    dispatch(eventName: string, eventData: Record<string, any> = {}): void {
         const event: DispatcherEvent = this.events[eventName] as DispatcherEvent;
-        const d: any = eventName === data.event?.name ? data.data : data;
+        const d: any = eventName === eventData.event?.name && eventData.eventData
+            ? eventData.eventData
+            : eventData;
 
         if (event) {
             event.fire({
-                data: d,
                 event: {
                     name: eventName,
                 },
+                eventData: d,
                 target: this,
             });
         }
@@ -55,7 +60,7 @@ export default class Dispatcher {
      * @param {string}  eventName [description]
      * @param {any) => void}  callback [description]
      */
-    on(eventName: string, callback: (data?: Record<string, unknown>) => void): void {
+    on(eventName: string, callback: (eventData?: Record<string, unknown>) => void): void {
         let event = this.events[eventName];
 
         if (!event) {
@@ -69,8 +74,8 @@ export default class Dispatcher {
     /**
      * Off
      *
-     * @param {string}  eventName [description]
-     * @param {any) =>        void}        callback [description]
+     * @param string eventName
+     * @param any callback
      */
     off(eventName: string, callback?: () => void): void {
         const event: DispatcherEvent = this.events[eventName] as DispatcherEvent;
