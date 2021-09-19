@@ -37,6 +37,9 @@ class Collection extends ActiveRecord_1.default {
         if (options.atRelationship) {
             this.atRelationship = options.atRelationship;
         }
+        this.on('complete:post', (e) => {
+            console.log('data from server', e.data.data);
+        });
     }
     static hydrate(models = [], options = {}) {
         const collection = new this(options);

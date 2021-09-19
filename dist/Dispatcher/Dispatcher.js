@@ -6,7 +6,13 @@ class Dispatcher {
         this.events = {};
     }
     trigger(eventName, data = {}) {
-        return this.dispatch(eventName, data);
+        var _a;
+        if (((_a = data.event) === null || _a === void 0 ? void 0 : _a.name) === eventName && data.data) {
+            return this.dispatch(eventName, data.data);
+        }
+        else {
+            return this.dispatch(eventName, data);
+        }
     }
     dispatch(eventName, data = {}) {
         const event = this.events[eventName];

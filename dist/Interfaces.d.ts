@@ -77,6 +77,11 @@ export interface IProgressEvent {
     ratio: number;
     total: number;
 }
+export interface IDispatcherEvent {
+    data: any;
+    event: any;
+    target: any;
+}
 export interface ISortOptions {
     key: string;
     reverse?: boolean;

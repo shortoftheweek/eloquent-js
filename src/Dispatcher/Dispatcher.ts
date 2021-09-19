@@ -24,8 +24,13 @@ export default class Dispatcher {
      * @param {string} eventName
      * @param {any = {}} data
      */
-    trigger(eventName: string, data: Record<string, unknown> = {}):void {
-        return this.dispatch(eventName, data);
+    trigger(eventName: string, data: Record<string, any> = {}): void {
+        if (data.event?.name === eventName && data.data) {
+			return this.dispatch(eventName, data.data);
+		}
+		else {
+        	return this.dispatch(eventName, data);
+		}
     }
 
     /**
