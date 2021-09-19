@@ -1,8 +1,7 @@
 import { AxiosResponse } from 'axios';
 import Core from '../Core';
-import { IAttributes, IAxiosResponse, IAxiosSuccess } from '../Interfaces';
-export default class Request extends Core {
-    data: IAttributes;
+import { IAttributes, IAxiosResponse, IAxiosSuccess, IRequest } from '../Interfaces';
+export default class Request extends Core implements IRequest {
     dataKey: string;
     headers: any;
     loading: boolean;
@@ -10,8 +9,9 @@ export default class Request extends Core {
     mode: string;
     request?: Promise<Request | Response | AxiosResponse<any>>;
     response?: IAxiosResponse | IAxiosSuccess;
+    responseData: IAttributes;
     url: string;
-    constructor(url?: string, params?: any);
+    constructor(url?: string, options?: any);
     fetch(method?: string | null, body?: any, headers?: any): Promise<Request | AxiosResponse<any>>;
     xhrFetch(url: string, params: any): any;
     setHeader(header: string, value: string): any;

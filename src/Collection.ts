@@ -8,6 +8,7 @@ import {
     IAxiosSuccess,
     ICollectionMeta,
     IDispatcherEvent,
+    IRequest,
     IModelRequestOptions,
     IModelRequestQueryParams,
     IPagination,
@@ -186,8 +187,8 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
         }
 
         // Listen for POST completes to add data
-        this.on('complete:post', (e: IDispatcherEvent) => {
-            console.log('data from server', e.data.data);
+        this.on('complete:post', (e: IRequest) => {
+            console.log('data from server', e.responseData);
         });
     }
 
@@ -770,50 +771,48 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
             ._fetch(options, queryParams, method, body, headers)
 
             // Send response to subscribers
-            .then((e: EloquentRequest) => {
-                const data: any = e.data;
-                const method: string = e.method || 'get';
+            .then((request: EloquentRequest) => {
+                const data: any = request.responseData;
+                const method: string = request.method || 'get';
 
                 // Save actual cache response (key, value, isComplete)
-                this.cache(cacheKey, e, true);
+                this.cache(cacheKey, request, true);
 
                 // Send all of our subscribers the response through `resolve`
-                // Don't worry about request.data vs request.data.data
-                // Our collections should be smart enough to pick that apart
                 this.getCache(cacheKey)
                     .subscribers
                     .forEach((subscriber: any) => {
-                        subscriber.collection.setAfterResponse(e);
-                        subscriber.collection.dispatch('complete', e);
-                        subscriber.collection.dispatch('complete:' + method, e);
-                        subscriber.resolve(e);
+                        subscriber.collection.setAfterResponse(request);
+                        subscriber.collection.dispatch('complete', request);
+                        subscriber.collection.dispatch('complete:' + method, request);
+                        subscriber.resolve(request);
                     });
 
                 // Clear all listeners
                 this.clearCacheSubscribers(cacheKey);
 
-                return e;
+                return request;
             })
 
             // Send error to subscribers
-            .catch((e: EloquentRequest) => {
+            .catch((request: EloquentRequest) => {
                 // Error
-                this.dispatch('error', e);
+                this.dispatch('error', request);
 
                 // Save actual cache response (key, value, isComplete)
-                this.cache(cacheKey, e, true);
+                this.cache(cacheKey, request, true);
 
                 // Send all of our subscribers the response through `resolve`
                 this.getCache(cacheKey)
                     .subscribers
                     .forEach((subscriber: any) =>
-                        subscriber.reject(e)
+                        subscriber.reject(request)
                     );
 
                 // Clear
                 this.clearCacheSubscribers(cacheKey);
 
-                throw e;
+                throw request;
             });
     }
 

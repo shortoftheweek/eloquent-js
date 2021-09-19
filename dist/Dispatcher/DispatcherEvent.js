@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class DispatcherEvent {
-    constructor(eventName, data = {}) {
+    constructor(eventName, eventData = {}) {
         this.callbacks = [];
-        this.data = data;
+        this.eventData = eventData;
         this.eventName = eventName;
     }
     clearCallbacks() {
@@ -18,10 +18,10 @@ class DispatcherEvent {
             this.callbacks.splice(index, 1);
         }
     }
-    fire(data) {
+    fire(eventData) {
         const callbacks = this.callbacks.slice(0);
         callbacks.forEach((callback) => {
-            callback(Object.assign({}, this.data, data));
+            callback(Object.assign({}, this.eventData, eventData));
         });
     }
 }

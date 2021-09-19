@@ -5,19 +5,21 @@ class Dispatcher {
     constructor() {
         this.events = {};
     }
-    trigger(eventName, data = {}) {
-        return this.dispatch(eventName, data);
+    trigger(eventName, eventData = {}) {
+        return this.dispatch(eventName, eventData);
     }
-    dispatch(eventName, data = {}) {
+    dispatch(eventName, eventData = {}) {
         var _a;
         const event = this.events[eventName];
-        const d = eventName === ((_a = data.event) === null || _a === void 0 ? void 0 : _a.name) ? data.data : data;
+        const d = eventName === ((_a = eventData.event) === null || _a === void 0 ? void 0 : _a.name) && eventData.eventData
+            ? eventData.eventData
+            : eventData;
         if (event) {
             event.fire({
-                data: d,
                 event: {
                     name: eventName,
                 },
+                eventData: d,
                 target: this,
             });
         }

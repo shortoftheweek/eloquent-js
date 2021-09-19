@@ -308,16 +308,16 @@ class ActiveRecord extends Core_1.default {
     }
     setAfterResponse(request, options = {}) {
         var method = request.method || 'get';
-        var remoteJson = request.data;
+        var remoteJson = request.responseData;
         if (method.toLowerCase() === 'post' && !this.isModel) {
-            this.add(remoteJson.data || request.data);
+            this.add(remoteJson.data || request.responseData);
         }
         else if (method.toLowerCase() === 'delete') {
         }
         else {
             var data = this.dataKey !== undefined
                 ? remoteJson[this.dataKey]
-                : (remoteJson.data || request.data);
+                : (remoteJson.responseData || request.responseData);
             this.set(data, options);
         }
         this.options(Object.assign({}, options, {
@@ -345,7 +345,7 @@ class ActiveRecord extends Core_1.default {
             this.builder.identifier(options.id);
         }
         const url = this.getUrlByMethod(method);
-        this.dispatch('requesting', this);
+        this.dispatch('requesting', this.lastRequest);
         this.hasFetched = true;
         this.loading = true;
         var request = (this.request = new Request_1.default(url, {
@@ -353,19 +353,19 @@ class ActiveRecord extends Core_1.default {
         }));
         this.request.method = method;
         request.on('complete:delete', (e) => {
-            this.dispatch('complete:delete', e);
+            this.dispatch('complete:delete', e.target);
             this.builder.identifier('');
         });
-        request.on('complete:get', (e) => this.dispatch('complete:get', e));
-        request.on('complete:post', (e) => this.dispatch('complete:post', e));
-        request.on('complete:put', (e) => this.dispatch('complete:put', e));
-        request.on('complete', (e) => this.FetchComplete(e, options));
-        request.on('error:delete', (e) => this.dispatch('error:delete', e));
-        request.on('error:get', (e) => this.dispatch('error:get', e));
-        request.on('error:post', (e) => this.dispatch('error:post', e));
-        request.on('error:put', (e) => this.dispatch('error:put', e));
-        request.on('error', (e) => this.dispatch('error', e));
-        request.on('parse:after', (e) => this.FetchParseAfter(e, options));
+        request.on('complete:get', (e) => this.dispatch('complete:get', e.target));
+        request.on('complete:post', (e) => this.dispatch('complete:post', e.target));
+        request.on('complete:put', (e) => this.dispatch('complete:put', e.target));
+        request.on('complete', (e) => this.FetchComplete(e.target, options));
+        request.on('error:delete', (e) => this.dispatch('error:delete', e.target));
+        request.on('error:get', (e) => this.dispatch('error:get', e.target));
+        request.on('error:post', (e) => this.dispatch('error:post', e.target));
+        request.on('error:put', (e) => this.dispatch('error:put', e.target));
+        request.on('error', (e) => this.dispatch('error', e.target));
+        request.on('parse:after', (e) => this.FetchParseAfter(e.target, options));
         request.on('progress', (e) => this.FetchProgress(request, e, options));
         return request.fetch(method, body || this.body, headers || this.headers);
     }
@@ -403,8 +403,7 @@ class ActiveRecord extends Core_1.default {
         const cache = this.getCache(key);
         cache.subscribers = [];
     }
-    FetchComplete(e, options = {}) {
-        const request = e.target;
+    FetchComplete(request, options = {}) {
         const method = request.method || 'get';
         this.hasLoaded = true;
         this.loading = false;
@@ -413,8 +412,7 @@ class ActiveRecord extends Core_1.default {
     FetchProgress(e, progress, options = {}) {
         this.dispatch('progress', progress);
     }
-    FetchParseAfter(e, options = {}) {
-        const request = e.target;
+    FetchParseAfter(request, options = {}) {
         const response = request.response;
         const code = response ? response.status : 0;
         if (code < 400) {

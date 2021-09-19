@@ -6,11 +6,11 @@ class Core extends Dispatcher_1.default {
         super();
         Object.assign(this, options);
     }
-    trigger(eventName, data) {
-        return super.trigger(eventName, data);
+    trigger(eventName, eventData) {
+        return super.trigger(eventName, eventData);
     }
-    dispatch(eventName, data) {
-        return super.dispatch(eventName, data);
+    dispatch(eventName, eventData) {
+        return super.dispatch(eventName, eventData);
     }
     on(eventName, callback) {
         return super.on(eventName, callback);

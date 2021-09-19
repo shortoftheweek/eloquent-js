@@ -38,7 +38,7 @@ class Collection extends ActiveRecord_1.default {
             this.atRelationship = options.atRelationship;
         }
         this.on('complete:post', (e) => {
-            console.log('data from server', e.data.data);
+            console.log('data from server', e.responseData);
         });
     }
     static hydrate(models = [], options = {}) {
@@ -271,29 +271,29 @@ class Collection extends ActiveRecord_1.default {
         this.cache(cacheKey, true);
         return super
             ._fetch(options, queryParams, method, body, headers)
-            .then((e) => {
-            const data = e.data;
-            const method = e.method || 'get';
-            this.cache(cacheKey, e, true);
+            .then((request) => {
+            const data = request.responseData;
+            const method = request.method || 'get';
+            this.cache(cacheKey, request, true);
             this.getCache(cacheKey)
                 .subscribers
                 .forEach((subscriber) => {
-                subscriber.collection.setAfterResponse(e);
-                subscriber.collection.dispatch('complete', e);
-                subscriber.collection.dispatch('complete:' + method, e);
-                subscriber.resolve(e);
+                subscriber.collection.setAfterResponse(request);
+                subscriber.collection.dispatch('complete', request);
+                subscriber.collection.dispatch('complete:' + method, request);
+                subscriber.resolve(request);
             });
             this.clearCacheSubscribers(cacheKey);
-            return e;
+            return request;
         })
-            .catch((e) => {
-            this.dispatch('error', e);
-            this.cache(cacheKey, e, true);
+            .catch((request) => {
+            this.dispatch('error', request);
+            this.cache(cacheKey, request, true);
             this.getCache(cacheKey)
                 .subscribers
-                .forEach((subscriber) => subscriber.reject(e));
+                .forEach((subscriber) => subscriber.reject(request));
             this.clearCacheSubscribers(cacheKey);
-            throw e;
+            throw request;
         });
     }
     _isModel(model) {

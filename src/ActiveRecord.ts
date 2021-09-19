@@ -954,13 +954,13 @@ export default class ActiveRecord extends Core
      */
     public setAfterResponse(request: EloquentRequest, options: any = {}) {
         var method: string = request.method || 'get';
-        var remoteJson: any = request.data;
+        var remoteJson: any = request.responseData;
 
         // If this isn't a model, try appending to
         if (method.toLowerCase() === 'post' && !this.isModel) {
             // "data" comes from axios
             // "data.data" is our default key on the API
-            this.add(remoteJson.data || request.data);
+            this.add(remoteJson.data || request.responseData);
         }
         else if (method.toLowerCase() === 'delete') {
             // Intentionally empty
@@ -969,7 +969,7 @@ export default class ActiveRecord extends Core
             var data =
                 this.dataKey !== undefined
                     ? remoteJson[this.dataKey]
-                    : (remoteJson.data || request.data);
+                    : (remoteJson.responseData || request.responseData);
 
             this.set(data, options);
         }

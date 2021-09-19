@@ -10,22 +10,21 @@ class RequestError extends Error {
     }
 }
 class Request extends Core_1.default {
-    constructor(url = '', params = {}) {
+    constructor(url = '', options = {}) {
         super();
-        this.data = {};
         this.dataKey = '';
         this.headers = {};
         this.loading = false;
         this.method = 'get';
         this.mode = '';
-        this.dataKey = params.dataKey;
+        this.responseData = {};
+        this.dataKey = options.dataKey;
         this.url = url;
         this.url = this.url.replace(/\?$/, '');
         this.url = this.url.replace(/\?&/, '?');
     }
     fetch(method = 'GET', body = null, headers = {}) {
         this.method = (method || 'GET').toUpperCase();
-        this.dispatch('fetch:before');
         var headers = Object.assign(this.headers, headers);
         var params = {};
         params.data = body;
@@ -34,25 +33,26 @@ class Request extends Core_1.default {
         params.redirect = 'follow';
         params.url = this.url;
         params.withCredentials = true;
+        this.dispatch('fetch:before', { method, body, headers, params });
         this.loading = true;
-        this.dispatch('requesting', this);
+        this.dispatch('requesting', { method, body, headers, params });
         return new Promise((resolve, reject) => {
             (0, axios_1.default)(params)
-                .then((e) => {
-                this.response = e;
+                .then((response) => {
+                this.response = response;
                 this.beforeParse(this.response);
                 this.parse(this.response);
                 this.afterParse(this.response);
                 this.afterFetch(this.response);
                 this.afterAll(this.response);
                 resolve(this);
-                return e;
+                return response;
             })
-                .catch((e) => {
-                this.response = e.response;
-                this.afterAll(e);
+                .catch((error) => {
+                this.response = error.response;
+                this.afterAll(error);
                 reject(this);
-                return e;
+                return error;
             });
         });
     }
@@ -113,55 +113,59 @@ class Request extends Core_1.default {
         this.headers = headers;
         return this;
     }
-    beforeParse(e) {
+    beforeParse(response) {
         this.log('before parse');
-        this.dispatch('parse:before', this);
-        return e;
+        this.dispatch('parse:before', response);
+        return response;
     }
-    parse(e) {
+    parse(response) {
         this.log('parse');
-        this.dispatch('parse:parsing', this);
-        if (e.status != 204) {
-            this.data = e.data;
+        this.dispatch('parse:parsing', response);
+        if (response.status != 204) {
+            this.responseData = response.data;
         }
-        this.dispatch('parse', this.data);
-        return e;
+        this.dispatch('parse', this.responseData);
+        return response;
     }
-    afterParse(e) {
+    afterParse(response) {
         var _a, _b;
         this.log('after parse');
-        if (e.status >= 400 && ((_a = e.data) === null || _a === void 0 ? void 0 : _a.status)) {
-            const message = ((_b = e.data) === null || _b === void 0 ? void 0 : _b.message)
-                || e.data
+        if (response.status >= 400 && ((_a = response.data) === null || _a === void 0 ? void 0 : _a.status)) {
+            const message = ((_b = response.data) === null || _b === void 0 ? void 0 : _b.message)
+                || response.data
                 || '';
-            throw new RequestError(e.status, message);
+            throw new RequestError(response.status, message);
         }
-        this.dispatch('parse:after', this);
-        return e;
+        this.dispatch('parse:after', response);
+        return response;
     }
-    afterFetch(e) {
+    afterFetch(response) {
         this.log('after fetch');
-        this.dispatch('fetch', e.data);
-        this.dispatch('fetch:after', this);
+        this.dispatch('fetch', response);
+        this.dispatch('fetch:after', response);
         this.loading = false;
-        return e;
+        return response;
     }
     afterAll(e) {
-        var _a;
+        var _a, _b;
         function isError(e) {
             return 'name' in e;
         }
-        const data = isError(e) ? e.response.data : e.data;
-        const status = isError(e) ? (_a = e.response) === null || _a === void 0 ? void 0 : _a.status : e.status;
+        const data = isError(e)
+            ? (((_a = e.response) === null || _a === void 0 ? void 0 : _a.data) || e.message)
+            : e.data;
+        const status = isError(e)
+            ? (_b = e.response) === null || _b === void 0 ? void 0 : _b.status
+            : e.status;
         const method = (e.config.method || 'get').toLowerCase();
         this.log('after all: ' + method + ' / ' + status);
         if (status < 400) {
-            this.dispatch('complete', this);
-            this.dispatch('complete:' + method, this);
+            this.dispatch('complete', e);
+            this.dispatch('complete:' + method, e);
         }
         else {
-            this.data = data;
-            this.dispatch('error:' + method, this);
+            this.responseData = data;
+            this.dispatch('error:' + method, e);
         }
         return e;
     }

@@ -91,16 +91,20 @@ describe('Remote Collection Tests', () => {
             id: 10,
         });
 
-        model
-            .fetch()
-            .then((e: EloquentRequest) => {
-                console.log('user model fetch', e);
-                console.log('a', model.attr('username'));
-            })
-            .catch((e: EloquentRequest) => {
-                console.log('catching user erorr', e.response?.status);
-            });
-
+        // try {
+        //     model
+        //         .fetch()
+        //         .then((e: EloquentRequest) => {
+        //             console.log('user model fetch', e);
+        //             console.log('a', model.attr('username'));
+        //         })
+        //         .catch((e: EloquentRequest) => {
+        //             console.log('catching user erorr', e.response?.status);
+        //         });
+        // }
+        // catch (e) {
+        //     console.log('error occurred', e);
+        // }
 
         // collection
         //     .fetch()
