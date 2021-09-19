@@ -45,6 +45,9 @@ export interface ICachedResponse {
 export interface ICachedResponses {
     [key: string]: ICachedResponse;
 }
+export interface ICollectionChange {
+    from: string;
+}
 export interface ICollectionMeta {
     pagination: IPagination;
 }
