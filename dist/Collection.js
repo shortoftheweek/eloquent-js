@@ -88,6 +88,7 @@ class Collection extends ActiveRecord_1.default {
                 this.models.push(model);
             }
         });
+        this.dispatch('change', { from: 'add' });
         this.dispatch('add');
         return this;
     }
@@ -106,6 +107,7 @@ class Collection extends ActiveRecord_1.default {
                 }
             }
         }
+        this.dispatch('change', { from: 'remove' });
         this.dispatch('remove');
         return this;
     }
@@ -127,6 +129,7 @@ class Collection extends ActiveRecord_1.default {
     }
     reset() {
         this.models = [];
+        this.dispatch('change', { from: 'reset' });
         this.dispatch('reset');
         return this;
     }

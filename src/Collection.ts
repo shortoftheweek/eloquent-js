@@ -277,6 +277,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
         });
 
         // Event for add
+        this.dispatch('change', { from: 'add' });
         this.dispatch('add');
 
         return this;
@@ -311,6 +312,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
         }
 
         // Event for add
+        this.dispatch('change', { from: 'remove' });
         this.dispatch('remove');
 
         return this;
@@ -365,6 +367,7 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
         this.models = [];
 
         // Event for add
+        this.dispatch('change', { from: 'reset' });
         this.dispatch('reset');
 
         return this;
