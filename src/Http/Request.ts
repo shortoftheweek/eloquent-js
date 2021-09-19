@@ -489,6 +489,7 @@ export default class Request extends Core implements IRequest
             // causes duplicates when listening on('error' ...)
             // this.dispatch('error', e.data);
             this.responseData = data;
+            this.dispatch('error', e);
             this.dispatch('error:' + method, e);
         }
 

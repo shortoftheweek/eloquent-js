@@ -166,6 +166,7 @@ class Request extends Core_1.default {
         }
         else {
             this.responseData = data;
+            this.dispatch('error', e);
             this.dispatch('error:' + method, e);
         }
         return e;
