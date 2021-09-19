@@ -87,24 +87,20 @@ describe('Remote Collection Tests', () => {
         });
 
         var model = new UserModel(null, {
-            baseUrl: 'http://localhost:8000/api/v1',
+            baseUrl: 'http://localhost:8000/api/v2',
             id: 10,
         });
 
-        // try {
-        //     model
-        //         .fetch()
-        //         .then((e: EloquentRequest) => {
-        //             console.log('user model fetch', e);
-        //             console.log('a', model.attr('username'));
-        //         })
-        //         .catch((e: EloquentRequest) => {
-        //             console.log('catching user erorr', e.response?.status);
-        //         });
-        // }
-        // catch (e) {
-        //     console.log('error occurred', e);
-        // }
+        model
+            .fetch()
+            .then((e: EloquentRequest) => {
+                console.log('user model fetch', e.responseData);
+                // console.log('a', model.attr('username'));
+            })
+            .catch((e: EloquentRequest) => {
+                console.log('catching user erorr', e.response?.status);
+                console.log(e.name);
+            });
 
         // collection
         //     .fetch()

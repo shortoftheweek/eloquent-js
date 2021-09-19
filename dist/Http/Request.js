@@ -17,6 +17,7 @@ class Request extends Core_1.default {
         this.loading = false;
         this.method = 'get';
         this.mode = '';
+        this.name = 'EloquentRequest';
         this.responseData = {};
         this.dataKey = options.dataKey;
         this.url = url;

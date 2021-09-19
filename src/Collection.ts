@@ -185,11 +185,6 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
         if (options.atRelationship) {
             this.atRelationship = options.atRelationship;
         }
-
-        // Listen for POST completes to add data
-        this.on('complete:post', (e: IRequest) => {
-            console.log('data from server', e.responseData);
-        });
     }
 
     /**

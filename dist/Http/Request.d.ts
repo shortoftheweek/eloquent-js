@@ -7,6 +7,7 @@ export default class Request extends Core implements IRequest {
     loading: boolean;
     method: string;
     mode: string;
+    name: string;
     request?: Promise<Request | Response | AxiosResponse<any>>;
     response?: IAxiosResponse | IAxiosSuccess;
     responseData: IAttributes;

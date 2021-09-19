@@ -77,6 +77,13 @@ export default class Request extends Core implements IRequest
     public mode: string = '';
 
     /**
+     * Sanity check name
+     *
+     * @type string
+     */
+    public name: string = 'EloquentRequest';
+
+    /**
      * Last fetch
      *
      * @type Promise<Repsonse>
@@ -89,7 +96,7 @@ export default class Request extends Core implements IRequest
      * @type Response
      */
     public response?: IAxiosResponse | IAxiosSuccess;
-    
+
     /**
      * Parsed data from response
      *
@@ -166,7 +173,7 @@ export default class Request extends Core implements IRequest
 
         return new Promise((resolve, reject) => {
             axios(params)
-            
+
                 // @see https://axios-http.com/docs/res_schema
                 // console.log(response.data);
                 // console.log(response.status);
@@ -461,10 +468,10 @@ export default class Request extends Core implements IRequest
             return 'name' in e;
         }
 
-        const data: any = isError(e) 
+        const data: any = isError(e)
             ? (e.response?.data || e.message) // IAxiosError
             : e.data; // IAxiosSuccess
-        const status: number = isError(e) 
+        const status: number = isError(e)
             ? e.response?.status // IAxiosError
             : e.status; // IAxiosSuccess
         const method: string = (e.config.method || 'get').toLowerCase();
