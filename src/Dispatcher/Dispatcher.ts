@@ -25,12 +25,7 @@ export default class Dispatcher {
      * @param {any = {}} data
      */
     trigger(eventName: string, data: Record<string, any> = {}): void {
-        if (data.event?.name === eventName && data.data) {
-			return this.dispatch(eventName, data.data);
-		}
-		else {
-        	return this.dispatch(eventName, data);
-		}
+        return this.dispatch(eventName, data);
     }
 
     /**
@@ -39,12 +34,13 @@ export default class Dispatcher {
      * @param {string} eventName [description]
      * @param {any =         {}}        data [description]
      */
-    dispatch(eventName: string, data: Record<string, unknown> = {}): void {
+    dispatch(eventName: string, data: Record<string, any> = {}): void {
         const event: DispatcherEvent = this.events[eventName] as DispatcherEvent;
+        const d: any = eventName === data.event?.name ? data.data : data;
 
         if (event) {
             event.fire({
-                data: data,
+                data: d,
                 event: {
                     name: eventName,
                 },
