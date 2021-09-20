@@ -366,7 +366,7 @@ class ActiveRecord extends Core_1.default {
         request.on('error:put', (e) => this.dispatch('error:put', e.target));
         request.on('error', (e) => this.dispatch('error', e.target));
         request.on('parse:after', (e) => this.FetchParseAfter(e.target, options));
-        request.on('progress', (e) => this.FetchProgress(request, e, options));
+        request.on('progress', (e) => this.FetchProgress(e, options));
         return request.fetch(method, body || this.body, headers || this.headers);
     }
     cache(key, value, isComplete = false, ttl = 5000) {
@@ -409,7 +409,7 @@ class ActiveRecord extends Core_1.default {
         this.loading = false;
         this.dispatch('complete', request);
     }
-    FetchProgress(e, progress, options = {}) {
+    FetchProgress(progress, options = {}) {
         this.dispatch('progress', progress);
     }
     FetchParseAfter(request, options = {}) {

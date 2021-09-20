@@ -154,6 +154,13 @@ export default class Request extends Core implements IRequest
         params.redirect = 'follow';
         params.url = this.url;
         params.withCredentials = true;
+        params.onUploadProgress = (progressEvent: any) => {
+            this.dispatch('progress', {
+                loaded: progressEvent.loaded,
+                ratio: progressEvent.loaded / progressEvent.total,
+                total: progressEvent.total,
+            });
+		};
 
         // Event trigger
         this.dispatch('fetch:before', { method, body, headers, params });

@@ -1069,7 +1069,7 @@ export default class ActiveRecord extends Core
 
         // This order make look wrong, but it's righ tbecause the event "e"
         // contains progress data, not a Request object
-        request.on('progress', (e: IProgressEvent) => this.FetchProgress(request, e, options));
+        request.on('progress', (e: IProgressEvent) => this.FetchProgress(e, options));
 
         // Request (method, body headers)
         return request.fetch(
@@ -1222,7 +1222,7 @@ export default class ActiveRecord extends Core
      *
      * @param Event e (e.target = EloquentRequest)
      */
-    protected FetchProgress(e: any, progress: IProgressEvent, options: any = {}) {
+    protected FetchProgress(progress: IProgressEvent, options: any = {}) {
         this.dispatch('progress', progress);
     }
 

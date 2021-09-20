@@ -34,6 +34,13 @@ class Request extends Core_1.default {
         params.redirect = 'follow';
         params.url = this.url;
         params.withCredentials = true;
+        params.onUploadProgress = (progressEvent) => {
+            this.dispatch('progress', {
+                loaded: progressEvent.loaded,
+                ratio: progressEvent.loaded / progressEvent.total,
+                total: progressEvent.total,
+            });
+        };
         this.dispatch('fetch:before', { method, body, headers, params });
         this.loading = true;
         this.dispatch('requesting', { method, body, headers, params });
