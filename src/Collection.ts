@@ -116,6 +116,8 @@ export default class Collection extends ActiveRecord implements Iterable<Model>
      */
     public meta: ICollectionMeta = {
         pagination: {
+            from: 0,
+            to: 0,
             total: 0,
             count: 15,
             per_page: 15,

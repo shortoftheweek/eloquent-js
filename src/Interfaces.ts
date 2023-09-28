@@ -95,6 +95,8 @@ export interface IModelRequestQueryParams {
 }
 
 export interface IPagination {
+    from: number;
+    to: number;
     total: number;
     count: number;
     per_page: number;
