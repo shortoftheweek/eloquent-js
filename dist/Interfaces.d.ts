@@ -77,6 +77,8 @@ export interface IModelRequestQueryParams {
     [key: string]: any;
 }
 export interface IPagination {
+    from: number;
+    to: number;
     total: number;
     count: number;
     per_page: number;

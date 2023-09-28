@@ -19,6 +19,8 @@ class Collection extends ActiveRecord_1.default {
         this.index = 0;
         this.meta = {
             pagination: {
+                from: 0,
+                to: 0,
                 total: 0,
                 count: 15,
                 per_page: 15,
